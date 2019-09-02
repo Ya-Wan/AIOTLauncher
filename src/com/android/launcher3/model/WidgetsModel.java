@@ -1,24 +1,38 @@
 
 package com.android.launcher3.model;
 
-import android.content.ComponentName;
+import static android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER;
+
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
-import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager;
+import android.os.Process;
+import android.os.UserHandle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.launcher3.AppFilter;
 import com.android.launcher3.IconCache;
+import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherAppWidgetProviderInfo;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.compat.AlphabeticIndexCompat;
 import com.android.launcher3.compat.AppWidgetManagerCompat;
-import com.android.launcher3.compat.UserHandleCompat;
+import com.android.launcher3.compat.LauncherAppsCompat;
+import com.android.launcher3.compat.ShortcutConfigActivityInfo;
+import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.util.MultiHashMap;
+import com.android.launcher3.util.PackageUserKey;
+import com.android.launcher3.util.Preconditions;
+import com.android.launcher3.widget.WidgetItemComparator;
+import com.android.launcher3.widget.WidgetListRowEntry;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Widgets data model that is used by the adapters of the widget views and controllers.
@@ -30,68 +44,75 @@ public class WidgetsModel {
     private static final String TAG = "WidgetsModel";
     private static final boolean DEBUG = false;
 
-    /* List of packages that is tracked by this model. */
-    private ArrayList<PackageItemInfo> mPackageItemInfos = new ArrayList<>();
-
     /* Map of widgets and shortcuts that are tracked per package. */
-    private HashMap<PackageItemInfo, ArrayList<Object>> mWidgetsList = new HashMap<>();
+    private final MultiHashMap<PackageItemInfo, WidgetItem> mWidgetsList = new MultiHashMap<>();
 
-    private ArrayList<Object> mRawList;
+    private AppFilter mAppFilter;
 
-    private final AppWidgetManagerCompat mAppWidgetMgr;
-    private final Comparator mWidgetAndShortcutNameComparator;
-    private final Comparator mAppNameComparator;
-    private final IconCache mIconCache;
-    private final AppFilter mAppFilter;
-    private AlphabeticIndexCompat mIndexer;
+    /**
+     * Returns a list of {@link WidgetListRowEntry}. All {@link WidgetItem} in a single row
+     * are sorted (based on label and user), but the overall list of {@link WidgetListRowEntry}s
+     * is not sorted. This list is sorted at the UI when using
+     * {@link com.android.launcher3.widget.WidgetsDiffReporter}
+     *
+     * @see com.android.launcher3.widget.WidgetsListAdapter#setWidgets(ArrayList)
+     */
+    public synchronized ArrayList<WidgetListRowEntry> getWidgetsList(Context context) {
+        ArrayList<WidgetListRowEntry> result = new ArrayList<>();
+        AlphabeticIndexCompat indexer = new AlphabeticIndexCompat(context);
 
-    public WidgetsModel(Context context,  IconCache iconCache, AppFilter appFilter) {
-        mAppWidgetMgr = AppWidgetManagerCompat.getInstance(context);
-        mWidgetAndShortcutNameComparator = new WidgetsAndShortcutNameComparator(context);
-        mAppNameComparator = (new AppNameComparator(context)).getAppInfoComparator();
-        mIconCache = iconCache;
-        mAppFilter = appFilter;
-        mIndexer = new AlphabeticIndexCompat(context);
-    }
-
-    private WidgetsModel(WidgetsModel model) {
-        mAppWidgetMgr = model.mAppWidgetMgr;
-        mPackageItemInfos = (ArrayList<PackageItemInfo>) model.mPackageItemInfos.clone();
-        mWidgetsList = (HashMap<PackageItemInfo, ArrayList<Object>>) model.mWidgetsList.clone();
-        mRawList = (ArrayList<Object>) model.mRawList.clone();
-        mWidgetAndShortcutNameComparator = model.mWidgetAndShortcutNameComparator;
-        mAppNameComparator = model.mAppNameComparator;
-        mIconCache = model.mIconCache;
-        mAppFilter = model.mAppFilter;
-    }
-
-    // Access methods that may be deleted if the private fields are made package-private.
-    public int getPackageSize() {
-        if (mPackageItemInfos == null) {
-            return 0;
+        WidgetItemComparator widgetComparator = new WidgetItemComparator();
+        for (Map.Entry<PackageItemInfo, ArrayList<WidgetItem>> entry : mWidgetsList.entrySet()) {
+            WidgetListRowEntry row = new WidgetListRowEntry(entry.getKey(), entry.getValue());
+            row.titleSectionName = indexer.computeSectionName(row.pkgItem.title);
+            Collections.sort(row.widgets, widgetComparator);
+            result.add(row);
         }
-        return mPackageItemInfos.size();
+        return result;
     }
 
-    // Access methods that may be deleted if the private fields are made package-private.
-    public PackageItemInfo getPackageItemInfo(int pos) {
-        if (pos >= mPackageItemInfos.size() || pos < 0) {
-            return null;
+    /**
+     * @param packageUser If null, all widgets and shortcuts are updated and returned, otherwise
+     *                    only widgets and shortcuts associated with the package/user are.
+     */
+    public void update(LauncherAppState app, @Nullable PackageUserKey packageUser) {
+        Preconditions.assertWorkerThread();
+
+        Context context = app.getContext();
+        final ArrayList<WidgetItem> widgetsAndShortcuts = new ArrayList<>();
+        try {
+            PackageManager pm = context.getPackageManager();
+            InvariantDeviceProfile idp = app.getInvariantDeviceProfile();
+
+            // Widgets
+            AppWidgetManagerCompat widgetManager = AppWidgetManagerCompat.getInstance(context);
+            for (AppWidgetProviderInfo widgetInfo : widgetManager.getAllProviders(packageUser)) {
+                widgetsAndShortcuts.add(new WidgetItem(LauncherAppWidgetProviderInfo
+                        .fromProviderInfo(context, widgetInfo), pm, idp));
+            }
+
+            // Shortcuts
+            for (ShortcutConfigActivityInfo info : LauncherAppsCompat.getInstance(context)
+                    .getCustomShortcutActivityList(packageUser)) {
+                widgetsAndShortcuts.add(new WidgetItem(info));
+            }
+            setWidgetsAndShortcuts(widgetsAndShortcuts, app, packageUser);
+        } catch (Exception e) {
+            if (!FeatureFlags.IS_DOGFOOD_BUILD && Utilities.isBinderSizeError(e)) {
+                // the returned value may be incomplete and will not be refreshed until the next
+                // time Launcher starts.
+                // TODO: after figuring out a repro step, introduce a dirty bit to check when
+                // onResume is called to refresh the widget provider list.
+            } else {
+                throw e;
+            }
         }
-        return mPackageItemInfos.get(pos);
+
+        app.getWidgetCache().removeObsoletePreviews(widgetsAndShortcuts, packageUser);
     }
 
-    public List<Object> getSortedWidgets(int pos) {
-        return mWidgetsList.get(mPackageItemInfos.get(pos));
-    }
-
-    public ArrayList<Object> getRawList() {
-        return mRawList;
-    }
-
-    public void setWidgetsAndShortcuts(ArrayList<Object> rawWidgetsShortcuts) {
-        Utilities.assertWorkerThread();
-        mRawList = rawWidgetsShortcuts;
+    private synchronized void setWidgetsAndShortcuts(ArrayList<WidgetItem> rawWidgetsShortcuts,
+            LauncherAppState app, @Nullable PackageUserKey packageUser) {
         if (DEBUG) {
             Log.d(TAG, "addWidgetsAndShortcuts, widgetsShortcuts#=" + rawWidgetsShortcuts.size());
         }
@@ -101,70 +122,85 @@ public class WidgetsModel {
         HashMap<String, PackageItemInfo> tmpPackageItemInfos = new HashMap<>();
 
         // clear the lists.
-        mWidgetsList.clear();
-        mPackageItemInfos.clear();
+        if (packageUser == null) {
+            mWidgetsList.clear();
+        } else {
+            // Only clear the widgets for the given package/user.
+            PackageItemInfo packageItem = null;
+            for (PackageItemInfo item : mWidgetsList.keySet()) {
+                if (item.packageName.equals(packageUser.mPackageName)) {
+                    packageItem = item;
+                    break;
+                }
+            }
+            if (packageItem != null) {
+                // We want to preserve the user that was on the packageItem previously,
+                // so add it to tmpPackageItemInfos here to avoid creating a new entry.
+                tmpPackageItemInfos.put(packageItem.packageName, packageItem);
+
+                Iterator<WidgetItem> widgetItemIterator = mWidgetsList.get(packageItem).iterator();
+                while (widgetItemIterator.hasNext()) {
+                    WidgetItem nextWidget = widgetItemIterator.next();
+                    if (nextWidget.componentName.getPackageName().equals(packageUser.mPackageName)
+                            && nextWidget.user.equals(packageUser.mUser)) {
+                        widgetItemIterator.remove();
+                    }
+                }
+            }
+        }
+
+        InvariantDeviceProfile idp = app.getInvariantDeviceProfile();
+        UserHandle myUser = Process.myUserHandle();
 
         // add and update.
-        for (Object o: rawWidgetsShortcuts) {
-            String packageName = "";
-            UserHandleCompat userHandle = null;
-            ComponentName componentName = null;
-            if (o instanceof LauncherAppWidgetProviderInfo) {
-                LauncherAppWidgetProviderInfo widgetInfo = (LauncherAppWidgetProviderInfo) o;
-                componentName = widgetInfo.provider;
-                packageName = widgetInfo.provider.getPackageName();
-                userHandle = mAppWidgetMgr.getUser(widgetInfo);
-            } else if (o instanceof ResolveInfo) {
-                ResolveInfo resolveInfo = (ResolveInfo) o;
-                componentName = new ComponentName(resolveInfo.activityInfo.packageName,
-                        resolveInfo.activityInfo.name);
-                packageName = resolveInfo.activityInfo.packageName;
-                userHandle = UserHandleCompat.myUserHandle();
+        for (WidgetItem item : rawWidgetsShortcuts) {
+            if (item.widgetInfo != null) {
+                if ((item.widgetInfo.getWidgetFeatures() & WIDGET_FEATURE_HIDE_FROM_PICKER) != 0) {
+                    // Widget is hidden from picker
+                    continue;
+                }
+
+                // Ensure that all widgets we show can be added on a workspace of this size
+                int minSpanX = Math.min(item.widgetInfo.spanX, item.widgetInfo.minSpanX);
+                int minSpanY = Math.min(item.widgetInfo.spanY, item.widgetInfo.minSpanY);
+                if (minSpanX > idp.numColumns || minSpanY > idp.numRows) {
+                    if (DEBUG) {
+                        Log.d(TAG, String.format(
+                                "Widget %s : (%d X %d) can't fit on this device",
+                                item.componentName, minSpanX, minSpanY));
+                    }
+                    continue;
+                }
             }
 
-            if (componentName == null || userHandle == null) {
-                Log.e(TAG, String.format("Widget cannot be set for %s.", o.getClass().toString()));
-                continue;
+            if (mAppFilter == null) {
+                mAppFilter = AppFilter.newInstance(app.getContext());
             }
-            if (mAppFilter != null && !mAppFilter.shouldShowApp(componentName)) {
+            if (!mAppFilter.shouldShowApp(item.componentName)) {
                 if (DEBUG) {
                     Log.d(TAG, String.format("%s is filtered and not added to the widget tray.",
-                        packageName));
+                            item.componentName));
                 }
                 continue;
             }
 
+            String packageName = item.componentName.getPackageName();
             PackageItemInfo pInfo = tmpPackageItemInfos.get(packageName);
-            ArrayList<Object> widgetsShortcutsList = mWidgetsList.get(pInfo);
-            if (widgetsShortcutsList != null) {
-                widgetsShortcutsList.add(o);
-            } else {
-                widgetsShortcutsList = new ArrayList<Object>();
-                widgetsShortcutsList.add(o);
+            if (pInfo == null) {
                 pInfo = new PackageItemInfo(packageName);
-                mIconCache.getTitleAndIconForApp(packageName, userHandle,
-                        true /* userLowResIcon */, pInfo);
-                pInfo.titleSectionName = mIndexer.computeSectionName(pInfo.title);
-                mWidgetsList.put(pInfo, widgetsShortcutsList);
+                pInfo.user = item.user;
                 tmpPackageItemInfos.put(packageName,  pInfo);
-                mPackageItemInfos.add(pInfo);
+            } else if (!myUser.equals(pInfo.user)) {
+                // Keep updating the user, until we get the primary user.
+                pInfo.user = item.user;
             }
+            mWidgetsList.addToList(pInfo, item);
         }
 
-        // sort.
-        Collections.sort(mPackageItemInfos, mAppNameComparator);
-        for (PackageItemInfo p: mPackageItemInfos) {
-            Collections.sort(mWidgetsList.get(p), mWidgetAndShortcutNameComparator);
+        // Update each package entry
+        IconCache iconCache = app.getIconCache();
+        for (PackageItemInfo p : tmpPackageItemInfos.values()) {
+            iconCache.getTitleAndIconForApp(p, true /* userLowResIcon */);
         }
-    }
-
-    /**
-     * Create a snapshot of the widgets model.
-     * <p>
-     * Usage case: view binding without being modified from package updates.
-     */
-    @Override
-    public WidgetsModel clone(){
-        return new WidgetsModel(this);
     }
 }

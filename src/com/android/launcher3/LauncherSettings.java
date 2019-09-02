@@ -16,10 +16,11 @@
 
 package com.android.launcher3;
 
+import android.content.ContentResolver;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.BaseColumns;
-
-import com.android.launcher3.config.ProviderConfig;
 
 /**
  * Settings related utilities.
@@ -34,7 +35,7 @@ public class LauncherSettings {
         public static final String MODIFIED = "modified";
     }
 
-    static interface BaseLauncherColumns extends ChangeLogColumns {
+    static public interface BaseLauncherColumns extends ChangeLogColumns {
         /**
          * Descriptive name of the gesture that can be displayed to the user.
          * <P>Type: TEXT</P>
@@ -67,35 +68,19 @@ public class LauncherSettings {
         public static final int ITEM_TYPE_SHORTCUT = 1;
 
         /**
-         * The icon type.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String ICON_TYPE = "iconType";
-
-        /**
-         * The icon is a resource identified by a package name and an integer id.
-         */
-        public static final int ICON_TYPE_RESOURCE = 0;
-
-        /**
-         * The icon is a bitmap.
-         */
-        public static final int ICON_TYPE_BITMAP = 1;
-
-        /**
-         * The icon package name, if icon type is ICON_TYPE_RESOURCE.
+         * The icon package name in Intent.ShortcutIconResource
          * <P>Type: TEXT</P>
          */
         public static final String ICON_PACKAGE = "iconPackage";
 
         /**
-         * The icon resource id, if icon type is ICON_TYPE_RESOURCE.
+         * The icon resource name in Intent.ShortcutIconResource
          * <P>Type: TEXT</P>
          */
         public static final String ICON_RESOURCE = "iconResource";
 
         /**
-         * The custom icon bitmap, if icon type is ICON_TYPE_BITMAP.
+         * The custom icon bitmap.
          * <P>Type: BLOB</P>
          */
         public static final String ICON = "icon";
@@ -113,8 +98,8 @@ public class LauncherSettings {
         /**
          * The content:// style URL for this table
          */
-        static final Uri CONTENT_URI = Uri.parse("content://" +
-                ProviderConfig.AUTHORITY + "/" + TABLE_NAME);
+        public static final Uri CONTENT_URI = Uri.parse("content://" +
+                LauncherProvider.AUTHORITY + "/" + TABLE_NAME);
 
         /**
          * The rank of this screen -- ie. how it is ordered relative to the other screens.
@@ -134,7 +119,7 @@ public class LauncherSettings {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI = Uri.parse("content://" +
-                ProviderConfig.AUTHORITY + "/" + TABLE_NAME);
+                LauncherProvider.AUTHORITY + "/" + TABLE_NAME);
 
         /**
          * The content:// style URL for a given row, identified by its id.
@@ -143,8 +128,8 @@ public class LauncherSettings {
          *
          * @return The unique content URL for the specified row.
          */
-        static Uri getContentUri(long id) {
-            return Uri.parse("content://" + ProviderConfig.AUTHORITY +
+        public static Uri getContentUri(long id) {
+            return Uri.parse("content://" + LauncherProvider.AUTHORITY +
                     "/" + TABLE_NAME + "/" + id);
         }
 
@@ -165,6 +150,18 @@ public class LauncherSettings {
                 case CONTAINER_DESKTOP: return "desktop";
                 case CONTAINER_HOTSEAT: return "hotseat";
                 default: return String.valueOf(container);
+            }
+        }
+
+        static final String itemTypeToString(int type) {
+            switch(type) {
+                case ITEM_TYPE_APPLICATION: return "APP";
+                case ITEM_TYPE_SHORTCUT: return "SHORTCUT";
+                case ITEM_TYPE_FOLDER: return "FOLDER";
+                case ITEM_TYPE_APPWIDGET: return "WIDGET";
+                case ITEM_TYPE_CUSTOM_APPWIDGET: return "CUSTOMWIDGET";
+                case ITEM_TYPE_DEEP_SHORTCUT: return "DEEPSHORTCUT";
+                default: return String.valueOf(type);
             }
         }
 
@@ -214,16 +211,6 @@ public class LauncherSettings {
         public static final int ITEM_TYPE_FOLDER = 2;
 
         /**
-        * The favorite is a live folder
-        *
-        * Note: live folders can no longer be added to Launcher, and any live folders which
-        * exist within the launcher database will be ignored when loading.  That said, these
-        * entries in the database may still exist, and are not automatically stripped.
-        */
-        @Deprecated
-        static final int ITEM_TYPE_LIVE_FOLDER = 3;
-
-        /**
          * The favorite is a widget
          */
         public static final int ITEM_TYPE_APPWIDGET = 4;
@@ -234,22 +221,9 @@ public class LauncherSettings {
         public static final int ITEM_TYPE_CUSTOM_APPWIDGET = 5;
 
         /**
-         * The favorite is a clock
+         * The gesture is an application created deep shortcut
          */
-        @Deprecated
-        static final int ITEM_TYPE_WIDGET_CLOCK = 1000;
-
-        /**
-         * The favorite is a search widget
-         */
-        @Deprecated
-        static final int ITEM_TYPE_WIDGET_SEARCH = 1001;
-
-        /**
-         * The favorite is a photo frame
-         */
-        @Deprecated
-        static final int ITEM_TYPE_WIDGET_PHOTO_FRAME = 1002;
+        public static final int ITEM_TYPE_DEEP_SHORTCUT = 6;
 
         /**
          * The appWidgetId of the widget
@@ -264,33 +238,6 @@ public class LauncherSettings {
          * <P>Type: STRING</P>
          */
         public static final String APPWIDGET_PROVIDER = "appWidgetProvider";
-        
-        /**
-         * Indicates whether this favorite is an application-created shortcut or not.
-         * If the value is 0, the favorite is not an application-created shortcut, if the
-         * value is 1, it is an application-created shortcut.
-         * <P>Type: INTEGER</P>
-         */
-        @Deprecated
-        static final String IS_SHORTCUT = "isShortcut";
-
-        /**
-         * The URI associated with the favorite. It is used, for instance, by
-         * live folders to find the content provider.
-         * <P>Type: TEXT</P>
-         */
-        @Deprecated
-        static final String URI = "uri";
-
-        /**
-         * The display mode if the item is a live folder.
-         * <P>Type: INTEGER</P>
-         *
-         * @see android.provider.LiveFolders#DISPLAY_MODE_GRID
-         * @see android.provider.LiveFolders#DISPLAY_MODE_LIST
-         */
-        @Deprecated
-        static final String DISPLAY_MODE = "displayMode";
 
         /**
          * Boolean indicating that his item was restored and not yet successfully bound.
@@ -309,6 +256,32 @@ public class LauncherSettings {
          * <p>Type: INTEGER</p>
          */
         public static final String OPTIONS = "options";
+
+        public static void addTableToDb(SQLiteDatabase db, long myProfileId, boolean optional) {
+            String ifNotExists = optional ? " IF NOT EXISTS " : "";
+            db.execSQL("CREATE TABLE " + ifNotExists + TABLE_NAME + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "title TEXT," +
+                    "intent TEXT," +
+                    "container INTEGER," +
+                    "screen INTEGER," +
+                    "cellX INTEGER," +
+                    "cellY INTEGER," +
+                    "spanX INTEGER," +
+                    "spanY INTEGER," +
+                    "itemType INTEGER," +
+                    "appWidgetId INTEGER NOT NULL DEFAULT -1," +
+                    "iconPackage TEXT," +
+                    "iconResource TEXT," +
+                    "icon BLOB," +
+                    "appWidgetProvider TEXT," +
+                    "modified INTEGER NOT NULL DEFAULT 0," +
+                    "restored INTEGER NOT NULL DEFAULT 0," +
+                    "profileId INTEGER DEFAULT " + myProfileId + "," +
+                    "rank INTEGER NOT NULL DEFAULT 0," +
+                    "options INTEGER NOT NULL DEFAULT 0" +
+                    ");");
+        }
     }
 
     /**
@@ -317,12 +290,26 @@ public class LauncherSettings {
     public static final class Settings {
 
         public static final Uri CONTENT_URI = Uri.parse("content://" +
-                ProviderConfig.AUTHORITY + "/settings");
+                LauncherProvider.AUTHORITY + "/settings");
 
-        public static final String METHOD_GET_BOOLEAN = "get_boolean_setting";
-        public static final String METHOD_SET_BOOLEAN = "set_boolean_setting";
+        public static final String METHOD_CLEAR_EMPTY_DB_FLAG = "clear_empty_db_flag";
+        public static final String METHOD_WAS_EMPTY_DB_CREATED = "get_empty_db_flag";
+
+        public static final String METHOD_DELETE_EMPTY_FOLDERS = "delete_empty_folders";
+
+        public static final String METHOD_NEW_ITEM_ID = "generate_new_item_id";
+        public static final String METHOD_NEW_SCREEN_ID = "generate_new_screen_id";
+
+        public static final String METHOD_CREATE_EMPTY_DB = "create_empty_db";
+
+        public static final String METHOD_LOAD_DEFAULT_FAVORITES = "load_default_favorites";
+
+        public static final String METHOD_REMOVE_GHOST_WIDGETS = "remove_ghost_widgets";
 
         public static final String EXTRA_VALUE = "value";
-        public static final String EXTRA_DEFAULT_VALUE = "default_value";
+
+        public static Bundle call(ContentResolver cr, String method) {
+            return cr.call(CONTENT_URI, method, null, null);
+        }
     }
 }

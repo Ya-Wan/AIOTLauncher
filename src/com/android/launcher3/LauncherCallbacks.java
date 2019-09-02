@@ -1,19 +1,27 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.launcher3;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.View;
-import android.view.ViewGroup;
-import com.android.launcher3.allapps.AllAppsSearchBarController;
-import com.android.launcher3.util.ComponentKey;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * LauncherCallbacks is an interface used to extend the Launcher activity. It includes many hooks
@@ -28,100 +36,37 @@ public interface LauncherCallbacks {
      * Activity life-cycle methods. These methods are triggered after
      * the code in the corresponding Launcher method is executed.
      */
-    public void preOnCreate();
-    public void onCreate(Bundle savedInstanceState);
-    public void preOnResume();
-    public void onResume();
-    public void onStart();
-    public void onStop();
-    public void onPause();
-    public void onDestroy();
-    public void onSaveInstanceState(Bundle outState);
-    public void onPostCreate(Bundle savedInstanceState);
-    public void onNewIntent(Intent intent);
-    public void onActivityResult(int requestCode, int resultCode, Intent data);
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+    void onCreate(Bundle savedInstanceState);
+    void onResume();
+    void onStart();
+    void onStop();
+    void onPause();
+    void onDestroy();
+    void onSaveInstanceState(Bundle outState);
+    void onActivityResult(int requestCode, int resultCode, Intent data);
+    void onRequestPermissionsResult(int requestCode, String[] permissions,
             int[] grantResults);
-    public void onWindowFocusChanged(boolean hasFocus);
-    public boolean onPrepareOptionsMenu(Menu menu);
-    public void dump(String prefix, FileDescriptor fd, PrintWriter w, String[] args);
-    public void onHomeIntent();
-    public boolean handleBackPressed();
-    public void onTrimMemory(int level);
+    void onAttachedToWindow();
+    void onDetachedFromWindow();
+    void dump(String prefix, FileDescriptor fd, PrintWriter w, String[] args);
+    void onHomeIntent(boolean internalStateHandled);
+    boolean handleBackPressed();
+    void onTrimMemory(int level);
 
     /*
      * Extension points for providing custom behavior on certain user interactions.
      */
-    public void onLauncherProviderChange();
-    public void finishBindingItems(final boolean upgradePath);
-    public void onClickAllAppsButton(View v);
-    public void bindAllApplications(ArrayList<AppInfo> apps);
-    public void onClickFolderIcon(View v);
-    public void onClickAppShortcut(View v);
-    @Deprecated
-    public void onClickPagedViewIcon(View v);
-    public void onClickWallpaperPicker(View v);
-    public void onClickSettingsButton(View v);
-    public void onClickAddWidgetButton(View v);
-    public void onPageSwitch(View newPage, int newPageIndex);
-    public void onWorkspaceLockedChanged();
-    public void onDragStarted(View view);
-    public void onInteractionBegin();
-    public void onInteractionEnd();
+    void onLauncherProviderChange();
+    void bindAllApplications(ArrayList<AppInfo> apps);
 
-    /*
-     * Extension points for replacing the search experience
+    /**
+     * Starts a search with {@param initialQuery}. Return false if search was not started.
      */
-    @Deprecated
-    public boolean forceDisableVoiceButtonProxy();
-    public boolean providesSearch();
-    public boolean startSearch(String initialQuery, boolean selectInitialQuery,
-            Bundle appSearchData, Rect sourceBounds);
-    @Deprecated
-    public void startVoice();
-    public boolean hasCustomContentToLeft();
-    public void populateCustomContentContainer();
-    public View getQsbBar();
+    boolean startSearch(
+            String initialQuery, boolean selectInitialQuery, Bundle appSearchData);
 
     /*
      * Extensions points for adding / replacing some other aspects of the Launcher experience.
      */
-    public Intent getFirstRunActivity();
-    public boolean hasFirstRunActivity();
-    public boolean hasDismissableIntroScreen();
-    public View getIntroScreen();
-    public boolean shouldMoveToDefaultScreenOnHomeIntent();
-    public boolean hasSettings();
-    @Deprecated
-    public ComponentName getWallpaperPickerComponent();
-    public boolean overrideWallpaperDimensions();
-    public boolean isLauncherPreinstalled();
-    public AllAppsSearchBarController getAllAppsSearchBarController();
-    public List<ComponentKey> getPredictedApps();
-
-    /**
-     * Returning true will immediately result in a call to {@link #setLauncherOverlayView(ViewGroup,
-     * com.android.launcher3.Launcher.LauncherOverlayCallbacks)}.
-     *
-     * @return true if this launcher extension will provide an overlay
-     */
-    public boolean hasLauncherOverlay();
-
-    /**
-     * Handshake to establish an overlay relationship
-     *
-     * @param container Full screen overlay ViewGroup into which custom views can be placed.
-     * @param callbacks A set of callbacks provided by Launcher in relation to the overlay
-     * @return an interface used to make requests and notify the Launcher in relation to the overlay
-     */
-    public Launcher.LauncherOverlay setLauncherOverlayView(InsettableFrameLayout container,
-            Launcher.LauncherOverlayCallbacks callbacks);
-
-    /**
-     * Sets the callbacks to allow reacting the actions of search overlays of the launcher.
-     *
-     * @param callbacks A set of callbacks to the Launcher, is actually a LauncherSearchCallback,
-     *                  but for implementation purposes is passed around as an object.
-     */
-    public void setLauncherSearchCallback(Object callbacks);
+    boolean hasSettings();
 }

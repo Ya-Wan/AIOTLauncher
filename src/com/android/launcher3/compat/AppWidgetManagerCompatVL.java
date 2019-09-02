@@ -16,129 +16,127 @@
 
 package com.android.launcher3.compat;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
-import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.view.View;
-import android.widget.Toast;
+import android.support.annotation.Nullable;
 
-import com.android.launcher3.IconCache;
+import com.android.launcher3.LauncherAppWidgetInfo;
 import com.android.launcher3.LauncherAppWidgetProviderInfo;
-import com.android.launcher3.R;
+import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.util.ComponentKey;
+import com.android.launcher3.util.PackageUserKey;
+import com.android.launcher3.widget.custom.CustomWidgetParser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class AppWidgetManagerCompatVL extends AppWidgetManagerCompat {
 
     private final UserManager mUserManager;
-    private final PackageManager mPm;
 
     AppWidgetManagerCompatVL(Context context) {
         super(context);
-        mPm = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     @Override
-    public List<AppWidgetProviderInfo> getAllProviders() {
-        ArrayList<AppWidgetProviderInfo> providers = new ArrayList<AppWidgetProviderInfo>();
-        for (UserHandle user : mUserManager.getUserProfiles()) {
-            providers.addAll(mAppWidgetManager.getInstalledProvidersForProfile(user));
+    public List<AppWidgetProviderInfo> getAllProviders(@Nullable PackageUserKey packageUser) {
+        if (FeatureFlags.GO_DISABLE_WIDGETS) {
+            return Collections.emptyList();
+        }
+        if (packageUser == null) {
+            ArrayList<AppWidgetProviderInfo> providers = new ArrayList<AppWidgetProviderInfo>();
+            for (UserHandle user : mUserManager.getUserProfiles()) {
+                providers.addAll(mAppWidgetManager.getInstalledProvidersForProfile(user));
+            }
+
+            if (FeatureFlags.ENABLE_CUSTOM_WIDGETS) {
+                providers.addAll(CustomWidgetParser.getCustomWidgets(mContext));
+            }
+            return providers;
+        }
+        // Only get providers for the given package/user.
+        List<AppWidgetProviderInfo> providers = new ArrayList<>(mAppWidgetManager
+                .getInstalledProvidersForProfile(packageUser.mUser));
+        Iterator<AppWidgetProviderInfo> iterator = providers.iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().provider.getPackageName().equals(packageUser.mPackageName)) {
+                iterator.remove();
+            }
+        }
+
+        if (FeatureFlags.ENABLE_CUSTOM_WIDGETS && Process.myUserHandle().equals(packageUser.mUser)
+                && mContext.getPackageName().equals(packageUser.mPackageName)) {
+            providers.addAll(CustomWidgetParser.getCustomWidgets(mContext));
         }
         return providers;
     }
 
     @Override
-    public String loadLabel(LauncherAppWidgetProviderInfo info) {
-        return info.getLabel(mPm);
-    }
-
-    @Override
     public boolean bindAppWidgetIdIfAllowed(int appWidgetId, AppWidgetProviderInfo info,
             Bundle options) {
+        if (FeatureFlags.GO_DISABLE_WIDGETS) {
+            return false;
+        }
+
+        if (FeatureFlags.ENABLE_CUSTOM_WIDGETS
+                && appWidgetId <= LauncherAppWidgetInfo.CUSTOM_WIDGET_ID) {
+            return true;
+        }
         return mAppWidgetManager.bindAppWidgetIdIfAllowed(
                 appWidgetId, info.getProfile(), info.provider, options);
     }
 
     @Override
-    public UserHandleCompat getUser(LauncherAppWidgetProviderInfo info) {
-        if (info.isCustomWidget) {
-            return UserHandleCompat.myUserHandle();
+    public LauncherAppWidgetProviderInfo findProvider(ComponentName provider, UserHandle user) {
+        if (FeatureFlags.GO_DISABLE_WIDGETS) {
+            return null;
         }
-        return UserHandleCompat.fromUser(info.getProfile());
+        for (AppWidgetProviderInfo info :
+                getAllProviders(new PackageUserKey(provider.getPackageName(), user))) {
+            if (info.provider.equals(provider)) {
+                return LauncherAppWidgetProviderInfo.fromProviderInfo(mContext, info);
+            }
+        }
+
+        if (FeatureFlags.ENABLE_CUSTOM_WIDGETS && Process.myUserHandle().equals(user)) {
+            for (LauncherAppWidgetProviderInfo info :
+                    CustomWidgetParser.getCustomWidgets(mContext)) {
+                if (info.provider.equals(provider)) {
+                    return info;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
-    public void startConfigActivity(AppWidgetProviderInfo info, int widgetId, Activity activity,
-            AppWidgetHost host, int requestCode) {
-        try {
-            host.startAppWidgetConfigureActivityForResult(activity, widgetId, 0, requestCode, null);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(activity, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-        } catch (SecurityException e) {
-            Toast.makeText(activity, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+    public HashMap<ComponentKey, AppWidgetProviderInfo> getAllProvidersMap() {
+        HashMap<ComponentKey, AppWidgetProviderInfo> result = new HashMap<>();
+        if (FeatureFlags.GO_DISABLE_WIDGETS) {
+            return result;
         }
-    }
-
-    @Override
-    public Drawable loadPreview(AppWidgetProviderInfo info) {
-        return info.loadPreviewImage(mContext, 0);
-    }
-
-    @Override
-    public Drawable loadIcon(LauncherAppWidgetProviderInfo info, IconCache cache) {
-        return info.getIcon(mContext, cache);
-    }
-
-    @Override
-    public Bitmap getBadgeBitmap(LauncherAppWidgetProviderInfo info, Bitmap bitmap,
-            int imageHeight) {
-        if (info.isCustomWidget || info.getProfile().equals(android.os.Process.myUserHandle())) {
-            return bitmap;
+        for (UserHandle user : mUserManager.getUserProfiles()) {
+            for (AppWidgetProviderInfo info :
+                    mAppWidgetManager.getInstalledProvidersForProfile(user)) {
+                result.put(new ComponentKey(info.provider, user), info);
+            }
         }
 
-        // Add a user badge in the bottom right of the image.
-        final Resources res = mContext.getResources();
-        final int badgeSize = res.getDimensionPixelSize(R.dimen.profile_badge_size);
-        final int badgeMinTop = res.getDimensionPixelSize(R.dimen.profile_badge_minimum_top);
-        final Rect badgeLocation = new Rect(0, 0, badgeSize, badgeSize);
-
-        final int top = Math.max(imageHeight - badgeSize, badgeMinTop);
-        if (res.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-            badgeLocation.offset(0, top);
-        } else {
-            badgeLocation.offset(bitmap.getWidth() - badgeSize, top);
+        if (FeatureFlags.ENABLE_CUSTOM_WIDGETS) {
+            for (LauncherAppWidgetProviderInfo info :
+                    CustomWidgetParser.getCustomWidgets(mContext)) {
+                result.put(new ComponentKey(info.provider, info.getProfile()), info);
+            }
         }
-
-        Drawable drawable = mPm.getUserBadgedDrawableForDensity(
-                new BitmapDrawable(res, bitmap), info.getProfile(), badgeLocation, 0);
-
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        bitmap.eraseColor(Color.TRANSPARENT);
-        Canvas c = new Canvas(bitmap);
-        drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        drawable.draw(c);
-        c.setBitmap(null);
-        return bitmap;
+        return result;
     }
 }

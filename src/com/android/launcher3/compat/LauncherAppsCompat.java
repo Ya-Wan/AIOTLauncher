@@ -20,68 +20,68 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.LauncherActivityInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
-
+import android.os.UserHandle;
+import android.support.annotation.Nullable;
 import com.android.launcher3.Utilities;
-
+import com.android.launcher3.shortcuts.ShortcutInfoCompat;
+import com.android.launcher3.util.PackageUserKey;
 import java.util.List;
 
 public abstract class LauncherAppsCompat {
 
-    public static final String ACTION_MANAGED_PROFILE_ADDED =
-            "android.intent.action.MANAGED_PROFILE_ADDED";
-    public static final String ACTION_MANAGED_PROFILE_REMOVED =
-            "android.intent.action.MANAGED_PROFILE_REMOVED";
-
     public interface OnAppsChangedCallbackCompat {
-        void onPackageRemoved(String packageName, UserHandleCompat user);
-        void onPackageAdded(String packageName, UserHandleCompat user);
-        void onPackageChanged(String packageName, UserHandleCompat user);
-        void onPackagesAvailable(String[] packageNames, UserHandleCompat user, boolean replacing);
-        void onPackagesUnavailable(String[] packageNames, UserHandleCompat user, boolean replacing);
+        void onPackageRemoved(String packageName, UserHandle user);
+        void onPackageAdded(String packageName, UserHandle user);
+        void onPackageChanged(String packageName, UserHandle user);
+        void onPackagesAvailable(String[] packageNames, UserHandle user, boolean replacing);
+        void onPackagesUnavailable(String[] packageNames, UserHandle user, boolean replacing);
+        void onPackagesSuspended(String[] packageNames, UserHandle user);
+        void onPackagesUnsuspended(String[] packageNames, UserHandle user);
+        void onShortcutsChanged(String packageName, List<ShortcutInfoCompat> shortcuts,
+                UserHandle user);
     }
 
     protected LauncherAppsCompat() {
     }
 
     private static LauncherAppsCompat sInstance;
-    private static Object sInstanceLock = new Object();
+    private static final Object sInstanceLock = new Object();
 
     public static LauncherAppsCompat getInstance(Context context) {
         synchronized (sInstanceLock) {
             if (sInstance == null) {
-                if (Utilities.isLmpOrAbove()) {
-                    sInstance = new LauncherAppsCompatVL(context.getApplicationContext());
+                if (Utilities.ATLEAST_OREO) {
+                    sInstance = new LauncherAppsCompatVO(context.getApplicationContext());
                 } else {
-                    sInstance = new LauncherAppsCompatV16(context.getApplicationContext());
+                    sInstance = new LauncherAppsCompatVL(context.getApplicationContext());
                 }
             }
             return sInstance;
         }
     }
 
-    public abstract List<LauncherActivityInfoCompat> getActivityList(String packageName,
-            UserHandleCompat user);
-    public abstract LauncherActivityInfoCompat resolveActivity(Intent intent,
-            UserHandleCompat user);
-    public abstract void startActivityForProfile(ComponentName component, UserHandleCompat user,
+    public abstract List<LauncherActivityInfo> getActivityList(String packageName,
+            UserHandle user);
+    public abstract LauncherActivityInfo resolveActivity(Intent intent,
+            UserHandle user);
+    public abstract void startActivityForProfile(ComponentName component, UserHandle user,
             Rect sourceBounds, Bundle opts);
-    public abstract void showAppDetailsForProfile(ComponentName component, UserHandleCompat user);
+    public abstract ApplicationInfo getApplicationInfo(
+            String packageName, int flags, UserHandle user);
+    public abstract void showAppDetailsForProfile(ComponentName component, UserHandle user,
+            Rect sourceBounds, Bundle opts);
     public abstract void addOnAppsChangedCallback(OnAppsChangedCallbackCompat listener);
     public abstract void removeOnAppsChangedCallback(OnAppsChangedCallbackCompat listener);
-    public abstract boolean isPackageEnabledForProfile(String packageName, UserHandleCompat user);
+    public abstract boolean isPackageEnabledForProfile(String packageName, UserHandle user);
     public abstract boolean isActivityEnabledForProfile(ComponentName component,
-            UserHandleCompat user);
+            UserHandle user);
+    public abstract List<ShortcutConfigActivityInfo> getCustomShortcutActivityList(
+            @Nullable PackageUserKey packageUser);
 
-    public boolean isAppEnabled(PackageManager pm, String packageName, int flags) {
-        try {
-            ApplicationInfo info = pm.getApplicationInfo(packageName, flags);
-            return info != null && info.enabled;
-        } catch (NameNotFoundException e) {
-            return false;
-        }
+    public void showAppDetailsForProfile(ComponentName component, UserHandle user) {
+        showAppDetailsForProfile(component, user, null, null);
     }
 }

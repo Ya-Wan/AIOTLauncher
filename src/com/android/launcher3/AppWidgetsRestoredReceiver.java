@@ -5,29 +5,44 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import com.android.launcher3.LauncherSettings.Favorites;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.model.LoaderTask;
+import com.android.launcher3.provider.RestoreDbTask;
+import com.android.launcher3.util.ContentWriter;
 
 public class AppWidgetsRestoredReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "AppWidgetsRestoredReceiver";
+    private static final String TAG = "AWRestoredReceiver";
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         if (AppWidgetManager.ACTION_APPWIDGET_HOST_RESTORED.equals(intent.getAction())) {
-            int[] oldIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_OLD_IDS);
-            int[] newIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+            int hostId = intent.getIntExtra(AppWidgetManager.EXTRA_HOST_ID, 0);
+            Log.d(TAG, "Widget ID map received for host:" + hostId);
+            if (hostId != LauncherAppWidgetHost.APPWIDGET_HOST_ID) {
+                return;
+            }
+
+            final int[] oldIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_OLD_IDS);
+            final int[] newIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
             if (oldIds.length == newIds.length) {
-                restoreAppWidgetIds(context, oldIds, newIds);
+                final PendingResult asyncResult = goAsync();
+                new Handler(LauncherModel.getWorkerLooper())
+                        .postAtFrontOfQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                restoreAppWidgetIds(context, oldIds, newIds);
+                                asyncResult.finish();
+                            }
+                        });
             } else {
                 Log.e(TAG, "Invalid host restored received");
             }
@@ -37,9 +52,25 @@ public class AppWidgetsRestoredReceiver extends BroadcastReceiver {
     /**
      * Updates the app widgets whose id has changed during the restore process.
      */
+    @WorkerThread
     static void restoreAppWidgetIds(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
+        AppWidgetHost appWidgetHost = new LauncherAppWidgetHost(context);
+        if (FeatureFlags.GO_DISABLE_WIDGETS) {
+            Log.e(TAG, "Skipping widget ID remap as widgets not supported");
+            appWidgetHost.deleteHost();
+            return;
+        }
+        if (!RestoreDbTask.isPending(context)) {
+            // Someone has already gone through our DB once, probably LoaderTask. Skip any further
+            // modifications of the DB.
+            Log.e(TAG, "Skipping widget ID remap as DB already in use");
+            for (int widgetId : newWidgetIds) {
+                Log.d(TAG, "Deleting widgetId: " + widgetId);
+                appWidgetHost.deleteAppWidgetId(widgetId);
+            }
+            return;
+        }
         final ContentResolver cr = context.getContentResolver();
-        final List<Integer> idsToRemove = new ArrayList<Integer>();
         final AppWidgetManager widgets = AppWidgetManager.getInstance(context);
 
         for (int i = 0; i < oldWidgetIds.length; i++) {
@@ -47,20 +78,20 @@ public class AppWidgetsRestoredReceiver extends BroadcastReceiver {
 
             final AppWidgetProviderInfo provider = widgets.getAppWidgetInfo(newWidgetIds[i]);
             final int state;
-            if (LauncherModel.isValidProvider(provider)) {
-                state = LauncherAppWidgetInfo.RESTORE_COMPLETED;
+            if (LoaderTask.isValidProvider(provider)) {
+                // This will ensure that we show 'Click to setup' UI if required.
+                state = LauncherAppWidgetInfo.FLAG_UI_NOT_READY;
             } else {
                 state = LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY;
             }
 
-            ContentValues values = new ContentValues();
-            values.put(LauncherSettings.Favorites.APPWIDGET_ID, newWidgetIds[i]);
-            values.put(LauncherSettings.Favorites.RESTORED, state);
-
             String[] widgetIdParams = new String[] { Integer.toString(oldWidgetIds[i]) };
+            int result = new ContentWriter(context, new ContentWriter.CommitParams(
+                    "appWidgetId=? and (restored & 1) = 1", widgetIdParams))
+                    .put(LauncherSettings.Favorites.APPWIDGET_ID, newWidgetIds[i])
+                    .put(LauncherSettings.Favorites.RESTORED, state)
+                    .commit();
 
-            int result = cr.update(Favorites.CONTENT_URI, values,
-                    "appWidgetId=? and (restored & 1) = 1", widgetIdParams);
             if (result == 0) {
                 Cursor cursor = cr.query(Favorites.CONTENT_URI,
                         new String[] {Favorites.APPWIDGET_ID},
@@ -68,32 +99,17 @@ public class AppWidgetsRestoredReceiver extends BroadcastReceiver {
                 try {
                     if (!cursor.moveToFirst()) {
                         // The widget no long exists.
-                        idsToRemove.add(newWidgetIds[i]);
+                        appWidgetHost.deleteAppWidgetId(newWidgetIds[i]);
                     }
                 } finally {
                     cursor.close();
                 }
             }
         }
-        // Unregister the widget IDs which are not present on the workspace. This could happen
-        // when a widget place holder is removed from workspace, before this method is called.
-        if (!idsToRemove.isEmpty()) {
-            final AppWidgetHost appWidgetHost =
-                    new AppWidgetHost(context, Launcher.APPWIDGET_HOST_ID);
-            new AsyncTask<Void, Void, Void>() {
-                public Void doInBackground(Void ... args) {
-                    for (Integer id : idsToRemove) {
-                        appWidgetHost.deleteAppWidgetId(id);
-                        Log.e(TAG, "Widget no longer present, appWidgetId=" + id);
-                    }
-                    return null;
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
-        }
 
         LauncherAppState app = LauncherAppState.getInstanceNoCreate();
         if (app != null) {
-            app.reloadWorkspace();
+            app.getModel().forceReload();
         }
     }
 }

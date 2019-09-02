@@ -18,10 +18,11 @@ package com.android.launcher3;
 
 import android.appwidget.AppWidgetHostView;
 import android.content.ComponentName;
-import android.content.ContentValues;
-import android.content.Context;
+import android.content.Intent;
+import android.os.Process;
 
-import com.android.launcher3.compat.UserHandleCompat;
+import com.android.launcher3.model.PackageItemInfo;
+import com.android.launcher3.util.ContentWriter;
 
 /**
  * Represents a widget (either instantiated or about to be) in the Launcher.
@@ -51,107 +52,113 @@ public class LauncherAppWidgetInfo extends ItemInfo {
     public static final int FLAG_RESTORE_STARTED = 8;
 
     /**
+     * Indicates that the widget has been allocated an Id. The id is still not valid, as it has
+     * not been bound yet.
+     */
+    public static final int FLAG_ID_ALLOCATED = 16;
+
+    /**
+     * Indicates that the widget does not need to show config activity, even if it has a
+     * configuration screen. It can also optionally have some extras which are sent during bind.
+     */
+    public static final int FLAG_DIRECT_CONFIG = 32;
+
+    /**
      * Indicates that the widget hasn't been instantiated yet.
      */
-    static final int NO_ID = -1;
+    public static final int NO_ID = -1;
 
     /**
      * Indicates that this is a locally defined widget and hence has no system allocated id.
      */
-    static final int CUSTOM_WIDGET_ID = -100;
+    public static final int CUSTOM_WIDGET_ID = -100;
 
     /**
      * Identifier for this widget when talking with
      * {@link android.appwidget.AppWidgetManager} for updates.
      */
-    int appWidgetId = NO_ID;
+    public int appWidgetId = NO_ID;
 
-    ComponentName providerName;
-
-    // TODO: Are these necessary here?
-    int minWidth = -1;
-    int minHeight = -1;
+    public ComponentName providerName;
 
     /**
      * Indicates the restore status of the widget.
      */
-    int restoreStatus;
+    public int restoreStatus;
 
     /**
      * Indicates the installation progress of the widget provider
      */
-    int installProgress = -1;
+    public int installProgress = -1;
+
+    /**
+     * Optional extras sent during widget bind. See {@link #FLAG_DIRECT_CONFIG}.
+     */
+    public Intent bindOptions;
+
+    /**
+     * Nonnull for pending widgets. We use this to get the icon and title for the widget.
+     */
+    public PackageItemInfo pendingItemInfo;
 
     private boolean mHasNotifiedInitialWidgetSizeChanged;
 
-    /**
-     * View that holds this widget after it's been created.  This view isn't created
-     * until Launcher knows it's needed.
-     */
-    AppWidgetHostView hostView = null;
+    public LauncherAppWidgetInfo(int appWidgetId, ComponentName providerName) {
+        this.appWidgetId = appWidgetId;
+        this.providerName = providerName;
 
-    LauncherAppWidgetInfo(int appWidgetId, ComponentName providerName) {
-        if (appWidgetId == CUSTOM_WIDGET_ID) {
+        if (isCustomWidget()) {
             itemType = LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
         } else {
             itemType = LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
         }
-
-        this.appWidgetId = appWidgetId;
-        this.providerName = providerName;
 
         // Since the widget isn't instantiated yet, we don't know these values. Set them to -1
         // to indicate that they should be calculated based on the layout and minWidth/minHeight
         spanX = -1;
         spanY = -1;
         // We only support app widgets on current user.
-        user = UserHandleCompat.myUserHandle();
+        user = Process.myUserHandle();
         restoreStatus = RESTORE_COMPLETED;
     }
 
+    /** Used for testing **/
+    public LauncherAppWidgetInfo() {
+        itemType = LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
+    }
+
     public boolean isCustomWidget() {
-        return appWidgetId == CUSTOM_WIDGET_ID;
+        return appWidgetId <= CUSTOM_WIDGET_ID;
     }
 
     @Override
-    void onAddToDatabase(Context context, ContentValues values) {
-        super.onAddToDatabase(context, values);
-        values.put(LauncherSettings.Favorites.APPWIDGET_ID, appWidgetId);
-        values.put(LauncherSettings.Favorites.APPWIDGET_PROVIDER, providerName.flattenToString());
-        values.put(LauncherSettings.Favorites.RESTORED, restoreStatus);
+    public void onAddToDatabase(ContentWriter writer) {
+        super.onAddToDatabase(writer);
+        writer.put(LauncherSettings.Favorites.APPWIDGET_ID, appWidgetId)
+                .put(LauncherSettings.Favorites.APPWIDGET_PROVIDER, providerName.flattenToString())
+                .put(LauncherSettings.Favorites.RESTORED, restoreStatus)
+                .put(LauncherSettings.Favorites.INTENT, bindOptions);
     }
 
     /**
      * When we bind the widget, we should notify the widget that the size has changed if we have not
      * done so already (only really for default workspace widgets).
      */
-    void onBindAppWidget(Launcher launcher) {
+    void onBindAppWidget(Launcher launcher, AppWidgetHostView hostView) {
         if (!mHasNotifiedInitialWidgetSizeChanged) {
-            notifyWidgetSizeChanged(launcher);
+            AppWidgetResizeFrame.updateWidgetSizeRanges(hostView, launcher, spanX, spanY);
+            mHasNotifiedInitialWidgetSizeChanged = true;
         }
     }
 
-    /**
-     * Trigger an update callback to the widget to notify it that its size has changed.
-     */
-    void notifyWidgetSizeChanged(Launcher launcher) {
-        AppWidgetResizeFrame.updateWidgetSizeRanges(hostView, launcher, spanX, spanY);
-        mHasNotifiedInitialWidgetSizeChanged = true;
-    }
-
     @Override
-    public String toString() {
-        return "AppWidget(id=" + Integer.toString(appWidgetId) + ")";
+    protected String dumpProperties() {
+        return super.dumpProperties() + " appWidgetId=" + appWidgetId;
     }
 
-    @Override
-    void unbind() {
-        super.unbind();
-        hostView = null;
-    }
-
-    public final boolean isWidgetIdValid() {
-        return (restoreStatus & FLAG_ID_NOT_VALID) == 0;
+    public final boolean isWidgetIdAllocated() {
+        return (restoreStatus & FLAG_ID_NOT_VALID) == 0 ||
+                (restoreStatus & FLAG_ID_ALLOCATED) == FLAG_ID_ALLOCATED;
     }
 
     public final boolean hasRestoreFlag(int flag) {

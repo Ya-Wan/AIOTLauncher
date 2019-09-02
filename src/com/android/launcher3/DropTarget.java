@@ -16,8 +16,11 @@
 
 package com.android.launcher3;
 
-import android.graphics.PointF;
 import android.graphics.Rect;
+
+import com.android.launcher3.accessibility.DragViewStateAnnouncer;
+import com.android.launcher3.dragndrop.DragOptions;
+import com.android.launcher3.dragndrop.DragView;
 
 /**
  * Interface defining an object that can receive a drag.
@@ -25,9 +28,7 @@ import android.graphics.Rect;
  */
 public interface DropTarget {
 
-    public static final String TAG = "DropTarget";
-
-    public static class DragObject {
+    class DragObject {
         public int x = -1;
         public int y = -1;
 
@@ -46,8 +47,11 @@ public interface DropTarget {
         /** The view that moves around while you drag.  */
         public DragView dragView = null;
 
-        /** The data associated with the object being dragged */
-        public Object dragInfo = null;
+        /** The data associated with the object, after item is dropped. */
+        public ItemInfo dragInfo = null;
+
+        /** The data associated with the object  being dragged */
+        public ItemInfo originalDragInfo = null;
 
         /** Where the drag originated */
         public DragSource dragSource = null;
@@ -55,14 +59,13 @@ public interface DropTarget {
         /** The object is part of an accessible drag operation */
         public boolean accessibleDrag;
 
-        /** Post drag animation runnable */
-        public Runnable postAnimationRunnable = null;
-
         /** Indicates that the drag operation was cancelled */
         public boolean cancelled = false;
 
         /** Defers removing the DragView from the DragLayer until after the drop animation. */
         public boolean deferDragViewCleanupPostAnimation = true;
+
+        public DragViewStateAnnouncer stateAnnouncer;
 
         public DragObject() {
         }
@@ -99,20 +102,16 @@ public interface DropTarget {
     boolean isDropEnabled();
 
     /**
-     * Handle an object being dropped on the DropTarget
+     * Handle an object being dropped on the DropTarget.
      *
-     * @param source DragSource where the drag started
-     * @param x X coordinate of the drop location
-     * @param y Y coordinate of the drop location
-     * @param xOffset Horizontal offset with the object being dragged where the original
-     *          touch happened
-     * @param yOffset Vertical offset with the object being dragged where the original
-     *          touch happened
-     * @param dragView The DragView that's being dragged around on screen.
-     * @param dragInfo Data associated with the object being dragged
+     * This will be called only if this target previously returned true for {@link #acceptDrop}. It
+     * is the responsibility of this target to exit out of the spring loaded mode (either
+     * immediately or after any pending animations).
      *
+     * If the drop was cancelled for some reason, onDrop will never get called, the UI will
+     * automatically exit out of this mode.
      */
-    void onDrop(DragObject dragObject);
+    void onDrop(DragObject dragObject, DragOptions options);
 
     void onDragEnter(DragObject dragObject);
 
@@ -121,25 +120,8 @@ public interface DropTarget {
     void onDragExit(DragObject dragObject);
 
     /**
-     * Handle an object being dropped as a result of flinging to delete and will be called in place
-     * of onDrop().  (This is only called on objects that are set as the DragController's
-     * fling-to-delete target.
-     */
-    void onFlingToDelete(DragObject dragObject, PointF vec);
-
-    /**
      * Check if a drop action can occur at, or near, the requested location.
      * This will be called just before onDrop.
-     *
-     * @param source DragSource where the drag started
-     * @param x X coordinate of the drop location
-     * @param y Y coordinate of the drop location
-     * @param xOffset Horizontal offset with the object being dragged where the
-     *            original touch happened
-     * @param yOffset Vertical offset with the object being dragged where the
-     *            original touch happened
-     * @param dragView The DragView that's being dragged around on screen.
-     * @param dragInfo Data associated with the object being dragged
      * @return True if the drop will be accepted, false otherwise.
      */
     boolean acceptDrop(DragObject dragObject);
@@ -148,7 +130,4 @@ public interface DropTarget {
 
     // These methods are implemented in Views
     void getHitRectRelativeToDragLayer(Rect outRect);
-    void getLocationInDragLayer(int[] loc);
-    int getLeft();
-    int getTop();
 }

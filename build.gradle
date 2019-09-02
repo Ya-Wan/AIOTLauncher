@@ -1,71 +1,176 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
         google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.2'
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.9'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
     }
 }
+
+final String SUPPORT_LIBS_VERSION = '28.0.0'
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 28
 
     defaultConfig {
-        applicationId "com.android.launcher3"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
-
+        debug {
+            minifyEnabled false
+        }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        aosp {
+            dimension "default"
+            applicationId 'com.android.launcher3'
+            testApplicationId 'com.android.launcher3.tests'
+        }
+
+        l3go {
+            dimension "default"
+            applicationId 'com.android.launcher3'
+            testApplicationId 'com.android.launcher3.tests'
+        }
+
+        quickstep {
+            dimension "default"
+            applicationId 'com.android.launcher3'
+            testApplicationId 'com.android.launcher3.tests'
+        }
+    }
+
+    // Disable release builds for now
+    android.variantFilter { variant ->
+        if (variant.buildType.name.endsWith('release')) {
+            variant.setIgnore(true);
+        }
+    }
+
     sourceSets {
         main {
-            res.srcDirs = ['res', 'WallpaperPicker/res']
-            main.java.srcDirs = ['src', 'WallpaperPicker/src']
-            manifest.srcFile 'AndroidManifest.xml'
-            proto.srcDirs 'protos/'
+            res.srcDirs = ['res']
+            java.srcDirs = ['src']
+            manifest.srcFile 'AndroidManifest-common.xml'
+            proto {
+                srcDir 'protos/'
+                srcDir 'proto_overrides/'
+            }
+        }
+
+        debug {
+            manifest.srcFile "AndroidManifest.xml"
+        }
+
+        androidTest {
+            res.srcDirs = ['tests/res']
+            java.srcDirs = ['tests/src']
+            manifest.srcFile "tests/AndroidManifest-common.xml"
+        }
+
+        androidTestDebug {
+            manifest.srcFile "tests/AndroidManifest.xml"
+        }
+
+        aosp {
+            java.srcDirs = ['src_flags', "src_ui_overrides"]
+        }
+
+        l3go {
+            res.srcDirs = ['go/res']
+            java.srcDirs = ['go/src_flags', "src_ui_overrides"]
+            manifest.srcFile "go/AndroidManifest.xml"
+        }
+
+        quickstep {
+            res.srcDirs = ['quickstep/res']
+            java.srcDirs = ['src_flags', 'quickstep/src']
+            manifest.srcFile "quickstep/AndroidManifest.xml"
+        }
+    }
+
+    repositories {
+        flatDir {
+            dirs 'libs'
         }
     }
 }
 
 repositories {
+    maven { url "../../../prebuilts/fullsdk-darwin/extras/android/m2repository" }
+    maven { url "../../../prebuilts/fullsdk-linux/extras/android/m2repository" }
     mavenCentral()
-    jcenter()
     google()
 }
 
 dependencies {
-    implementation 'com.android.support:support-v4:26.0.+'
-    implementation 'com.android.support:recyclerview-v7:26.0.+'
-    compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-7'
-    implementation 'com.google.android.gms:play-services:6.+'
+    implementation "com.android.support:support-v4:${SUPPORT_LIBS_VERSION}"
+    implementation "com.android.support:support-dynamic-animation:${SUPPORT_LIBS_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIBS_VERSION}"
+    implementation 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-7'
+
+    quickstepImplementation fileTree(dir: "quickstep/libs", include: 'sysui_shared.jar')
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation "org.mockito:mockito-core:1.9.5"
+    androidTestImplementation 'com.google.dexmaker:dexmaker:1.2'
+    androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.0'
+    androidTestImplementation 'com.android.support.test:rules:1.0.0'
+    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+    androidTestImplementation "com.android.support:support-annotations:${SUPPORT_LIBS_VERSION}"
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(name: 'aiotsdk-1.0.0', ext: 'aar')
+    implementation(name: 'ccos-ui-release', ext: 'aar')
+    implementation(name: 'ccos-framework-release', ext: 'aar')
+    implementation(name: 'ccos-appcore-release', ext: 'aar')
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation 'com.alibaba:fastjson:1.2.32'
+    implementation 'com.squareup.okhttp3:okhttp:3.6.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'org.ligboy.retrofit2:converter-fastjson-android:2.1.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.3-2'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    //implementation 'org.jetbrains.anko:anko:0.10.1'
 }
 
 protobuf {
     // Configure the protoc executable
     protoc {
         artifact = 'com.google.protobuf:protoc:3.0.0-alpha-3'
-    }
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                remove java
-                javanano {
-                    option "java_package=backup.proto|com.android.launcher3.userevent.nano"
-                    option "java_package=launcher_log.proto|com.android.launcher3.userevent.nano"
-                    option "java_package=launcher_dump.proto|com.android.launcher3.model.nano"
-                    option "java_package=search.proto|com.google.android.apps.nexuslauncher.search.nano"
-                    option "java_package=smartspace.proto|com.google.android.apps.nexuslauncher.smartspace.nano"
-                    option "enum_style=java"
+
+        generateProtoTasks {
+            all().each { task ->
+                task.builtins {
+                    remove java
+                    javanano {
+                        option "java_package=launcher_log_extension.proto|com.android.launcher3.userevent.nano"
+                        option "java_package=launcher_log.proto|com.android.launcher3.userevent.nano"
+                        option "java_package=launcher_dump.proto|com.android.launcher3.model.nano"
+                        option "enum_style=java"
+                    }
                 }
             }
         }

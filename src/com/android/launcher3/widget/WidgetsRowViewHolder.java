@@ -16,21 +16,21 @@
 package com.android.launcher3.widget;
 
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+
+import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.R;
 
 public class WidgetsRowViewHolder extends ViewHolder {
 
-    ViewGroup mContent;
+    public final ViewGroup cellContainer;
+    public final BubbleTextView title;
 
     public WidgetsRowViewHolder(ViewGroup v) {
         super(v);
-        mContent = v;
-    }
 
-    ViewGroup getContent() {
-        return mContent;
+        cellContainer = v.findViewById(R.id.widgets_cell_list);
+        title = v.findViewById(R.id.section);
+        title.setAccessibilityDelegate(null);
     }
 }

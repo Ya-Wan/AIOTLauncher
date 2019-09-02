@@ -17,12 +17,13 @@
 package com.android.launcher3;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import com.android.launcher3.util.Thunk;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.android.launcher3.views.RecyclerViewFastScroller;
 
 
 /**
@@ -32,36 +33,9 @@ import com.android.launcher3.util.Thunk;
  *   <li> Enable fast scroller.
  * </ul>
  */
-public abstract class BaseRecyclerView extends RecyclerView
-        implements RecyclerView.OnItemTouchListener {
+public abstract class BaseRecyclerView extends RecyclerView  {
 
-    private static final int SCROLL_DELTA_THRESHOLD_DP = 4;
-
-    /** Keeps the last known scrolling delta/velocity along y-axis. */
-    @Thunk int mDy = 0;
-    private float mDeltaThreshold;
-
-    /**
-     * The current scroll state of the recycler view.  We use this in onUpdateScrollbar()
-     * and scrollToPositionAtProgress() to determine the scroll position of the recycler view so
-     * that we can calculate what the scroll bar looks like, and where to jump to from the fast
-     * scroller.
-     */
-    public static class ScrollPositionState {
-        // The index of the first visible row
-        public int rowIndex;
-        // The offset of the first visible row
-        public int rowTopOffset;
-        // The height of a given row (they are currently all the same height)
-        public int rowHeight;
-    }
-
-    protected BaseRecyclerViewFastScrollBar mScrollbar;
-
-    private int mDownX;
-    private int mDownY;
-    private int mLastY;
-    protected Rect mBackgroundPadding = new Rect();
+    protected RecyclerViewFastScroller mScrollbar;
 
     public BaseRecyclerView(Context context) {
         this(context, null);
@@ -73,157 +47,49 @@ public abstract class BaseRecyclerView extends RecyclerView
 
     public BaseRecyclerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mDeltaThreshold = getResources().getDisplayMetrics().density * SCROLL_DELTA_THRESHOLD_DP;
-        mScrollbar = new BaseRecyclerViewFastScrollBar(this, getResources());
-
-        ScrollListener listener = new ScrollListener();
-        setOnScrollListener(listener);
-    }
-
-    private class ScrollListener extends OnScrollListener {
-        public ScrollListener() {
-            // Do nothing
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            mDy = dy;
-
-            // TODO(winsonc): If we want to animate the section heads while scrolling, we can
-            //                initiate that here if the recycler view scroll state is not
-            //                RecyclerView.SCROLL_STATE_IDLE.
-        }
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        addOnItemTouchListener(this);
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        bindFastScrollbar();
+    }
+
+    public void bindFastScrollbar() {
+        ViewGroup parent = (ViewGroup) getParent().getParent();
+        mScrollbar = parent.findViewById(R.id.fast_scroller);
+        mScrollbar.setRecyclerView(this, parent.findViewById(R.id.fast_scroller_popup));
+        onUpdateScrollbar(0);
+    }
+
+    public RecyclerViewFastScroller getScrollbar() {
+        return mScrollbar;
+    }
+
+    public int getScrollBarTop() {
+        return getPaddingTop();
     }
 
     /**
-     * We intercept the touch handling only to support fast scrolling when initiated from the
-     * scroll bar.  Otherwise, we fall back to the default RecyclerView touch handling.
+     * Returns the height of the fast scroll bar
      */
-    @Override
-    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent ev) {
-        return handleTouchEvent(ev);
-    }
-
-    @Override
-    public void onTouchEvent(RecyclerView rv, MotionEvent ev) {
-        handleTouchEvent(ev);
-    }
-
-    /**
-     * Handles the touch event and determines whether to show the fast scroller (or updates it if
-     * it is already showing).
-     */
-    private boolean handleTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        int x = (int) ev.getX();
-        int y = (int) ev.getY();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                // Keep track of the down positions
-                mDownX = x;
-                mDownY = mLastY = y;
-                if (shouldStopScroll(ev)) {
-                    stopScroll();
-                }
-                mScrollbar.handleTouchEvent(ev, mDownX, mDownY, mLastY);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                mLastY = y;
-                mScrollbar.handleTouchEvent(ev, mDownX, mDownY, mLastY);
-                break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                onFastScrollCompleted();
-                mScrollbar.handleTouchEvent(ev, mDownX, mDownY, mLastY);
-                break;
-        }
-        return mScrollbar.isDragging();
-    }
-
-    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        // DO NOT REMOVE, NEEDED IMPLEMENTATION FOR M BUILDS
-    }
-
-    /**
-     * Returns whether this {@link MotionEvent} should trigger the scroll to be stopped.
-     */
-    protected boolean shouldStopScroll(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            if ((Math.abs(mDy) < mDeltaThreshold &&
-                    getScrollState() != RecyclerView.SCROLL_STATE_IDLE)) {
-                // now the touch events are being passed to the {@link WidgetCell} until the
-                // touch sequence goes over the touch slop.
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void updateBackgroundPadding(Rect padding) {
-        mBackgroundPadding.set(padding);
-    }
-
-    public Rect getBackgroundPadding() {
-        return mBackgroundPadding;
-    }
-
-    /**
-     * Returns the scroll bar width when the user is scrolling.
-     */
-    public int getMaxScrollbarWidth() {
-        return mScrollbar.getThumbMaxWidth();
+    public int getScrollbarTrackHeight() {
+        return mScrollbar.getHeight() - getScrollBarTop() - getPaddingBottom();
     }
 
     /**
      * Returns the available scroll height:
      *   AvailableScrollHeight = Total height of the all items - last page height
-     *
-     * This assumes that all rows are the same height.
-     *
-     * @param yOffset the offset from the top of the recycler view to start tracking.
      */
-    protected int getAvailableScrollHeight(int rowCount, int rowHeight, int yOffset) {
-        int visibleHeight = getHeight() - mBackgroundPadding.top - mBackgroundPadding.bottom;
-        int scrollHeight = getPaddingTop() + yOffset + rowCount * rowHeight + getPaddingBottom();
-        int availableScrollHeight = scrollHeight - visibleHeight;
-        return availableScrollHeight;
-    }
+    protected abstract int getAvailableScrollHeight();
 
     /**
      * Returns the available scroll bar height:
      *   AvailableScrollBarHeight = Total height of the visible view - thumb height
      */
     protected int getAvailableScrollBarHeight() {
-        int visibleHeight = getHeight() - mBackgroundPadding.top - mBackgroundPadding.bottom;
-        int availableScrollBarHeight = visibleHeight - mScrollbar.getThumbHeight();
+        int availableScrollBarHeight = getScrollbarTrackHeight() - mScrollbar.getThumbHeight();
         return availableScrollBarHeight;
-    }
-
-    /**
-     * Returns the track color (ignoring alpha), can be overridden by each subclass.
-     */
-    public int getFastScrollerTrackColor(int defaultTrackColor) {
-        return defaultTrackColor;
-    }
-
-    /**
-     * Returns the inactive thumb color, can be overridden by each subclass.
-     */
-    public int getFastScrollerThumbInactiveColor(int defaultInactiveThumbColor) {
-        return defaultInactiveThumbColor;
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        onUpdateScrollbar();
-        mScrollbar.draw(canvas);
     }
 
     /**
@@ -231,40 +97,62 @@ public abstract class BaseRecyclerView extends RecyclerView
      * this by mapping the available scroll area of the recycler view to the available space for the
      * scroll bar.
      *
-     * @param scrollPosState the current scroll position
-     * @param rowCount the number of rows, used to calculate the total scroll height (assumes that
-     *                 all rows are the same height)
-     * @param yOffset the offset to start tracking in the recycler view (only used for all apps)
+     * @param scrollY the current scroll y
      */
-    protected void synchronizeScrollBarThumbOffsetToViewScroll(ScrollPositionState scrollPosState,
-            int rowCount, int yOffset) {
-        int availableScrollHeight = getAvailableScrollHeight(rowCount, scrollPosState.rowHeight,
-                yOffset);
-        int availableScrollBarHeight = getAvailableScrollBarHeight();
-
+    protected void synchronizeScrollBarThumbOffsetToViewScroll(int scrollY,
+            int availableScrollHeight) {
         // Only show the scrollbar if there is height to be scrolled
         if (availableScrollHeight <= 0) {
-            mScrollbar.setScrollbarThumbOffset(-1, -1);
+            mScrollbar.setThumbOffsetY(-1);
             return;
         }
 
         // Calculate the current scroll position, the scrollY of the recycler view accounts for the
         // view padding, while the scrollBarY is drawn right up to the background padding (ignoring
         // padding)
-        int scrollY = getPaddingTop() + yOffset +
-                (scrollPosState.rowIndex * scrollPosState.rowHeight) - scrollPosState.rowTopOffset;
-        int scrollBarY = mBackgroundPadding.top +
-                (int) (((float) scrollY / availableScrollHeight) * availableScrollBarHeight);
+        int scrollBarY =
+                (int) (((float) scrollY / availableScrollHeight) * getAvailableScrollBarHeight());
 
         // Calculate the position and size of the scroll bar
-        int scrollBarX;
-        if (Utilities.isRtl(getResources())) {
-            scrollBarX = mBackgroundPadding.left;
-        } else {
-            scrollBarX = getWidth() - mBackgroundPadding.right - mScrollbar.getWidth();
-        }
-        mScrollbar.setScrollbarThumbOffset(scrollBarX, scrollBarY);
+        mScrollbar.setThumbOffsetY(scrollBarY);
     }
+
+    /**
+     * Returns whether the view itself will handle the touch event or not.
+     * @param ev MotionEvent in {@param eventSource}
+     */
+    public boolean shouldContainerScroll(MotionEvent ev, View eventSource) {
+        int[] point = new int[2];
+        point[0] = (int) ev.getX();
+        point[1] = (int) ev.getY();
+        Utilities.mapCoordInSelfToDescendant(mScrollbar, eventSource, point);
+        // IF the MotionEvent is inside the thumb, container should not be pulled down.
+        if (mScrollbar.shouldBlockIntercept(point[0], point[1])) {
+            return false;
+        }
+
+        // IF scroller is at the very top OR there is no scroll bar because there is probably not
+        // enough items to scroll, THEN it's okay for the container to be pulled down.
+        if (getCurrentScrollY() == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return whether fast scrolling is supported in the current state.
+     */
+    public boolean supportsFastScrolling() {
+        return true;
+    }
+
+    /**
+     * Maps the touch (from 0..1) to the adapter position that should be visible.
+     * <p>Override in each subclass of this base class.
+     *
+     * @return the scroll top of this recycler view.
+     */
+    public abstract int getCurrentScrollY();
 
     /**
      * Maps the touch (from 0..1) to the adapter position that should be visible.
@@ -276,7 +164,7 @@ public abstract class BaseRecyclerView extends RecyclerView
      * Updates the bounds for the scrollbar.
      * <p>Override in each subclass of this base class.
      */
-    public abstract void onUpdateScrollbar();
+    public abstract void onUpdateScrollbar(int dy);
 
     /**
      * <p>Override in each subclass of this base class.

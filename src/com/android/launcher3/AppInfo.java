@@ -19,88 +19,55 @@ package com.android.launcher3;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.util.Log;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
+import android.os.Build;
+import android.os.Process;
+import android.os.UserHandle;
 
-import com.android.launcher3.compat.LauncherActivityInfoCompat;
-import com.android.launcher3.compat.UserHandleCompat;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.ComponentKey;
-
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.android.launcher3.util.PackageManagerHelper;
 
 /**
  * Represents an app in AllAppsView.
  */
-public class AppInfo extends ItemInfo {
-    private static final String TAG = "Launcher3.AppInfo";
+public class AppInfo extends ItemInfoWithIcon {
 
     /**
      * The intent used to start the application.
      */
     public Intent intent;
 
-    /**
-     * A bitmap version of the application icon.
-     */
-    public Bitmap iconBitmap;
-
-    /**
-     * Indicates whether we're using a low res icon
-     */
-    boolean usingLowResIcon;
-
-    /**
-     * The time at which the app was first installed.
-     */
-    long firstInstallTime;
-
     public ComponentName componentName;
 
-    static final int DOWNLOADED_FLAG = 1;
-    static final int UPDATED_SYSTEM_APP_FLAG = 2;
-
-    int flags = 0;
-
-    AppInfo() {
-        itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;
+    public AppInfo() {
+        itemType = LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
     }
 
+    @Override
     public Intent getIntent() {
         return intent;
-    }
-
-    protected Intent getRestoredIntent() {
-        return null;
     }
 
     /**
      * Must not hold the Context.
      */
-    public AppInfo(Context context, LauncherActivityInfoCompat info, UserHandleCompat user,
-            IconCache iconCache) {
-        this.componentName = info.getComponentName();
-        this.container = ItemInfo.NO_ID;
-
-        flags = initFlags(info);
-        firstInstallTime = info.getFirstInstallTime();
-        iconCache.getTitleAndIcon(this, info, true /* useLowResIcon */);
-        intent = makeLaunchIntent(context, info, user);
-        this.user = user;
+    public AppInfo(Context context, LauncherActivityInfo info, UserHandle user) {
+        this(info, user, UserManagerCompat.getInstance(context).isQuietModeEnabled(user));
     }
 
-    public static int initFlags(LauncherActivityInfoCompat info) {
-        int appFlags = info.getApplicationInfo().flags;
-        int flags = 0;
-        if ((appFlags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0) {
-            flags |= DOWNLOADED_FLAG;
+    public AppInfo(LauncherActivityInfo info, UserHandle user, boolean quietModeEnabled) {
+        this.componentName = info.getComponentName();
+        this.container = ItemInfo.NO_ID;
+        this.user = user;
+        intent = makeLaunchIntent(info);
 
-            if ((appFlags & android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-                flags |= UPDATED_SYSTEM_APP_FLAG;
-            }
+        if (quietModeEnabled) {
+            runtimeStatusFlags |= FLAG_DISABLED_QUIET_USER;
         }
-        return flags;
+        updateRuntimeFlagsForActivityTarget(this, info);
     }
 
     public AppInfo(AppInfo info) {
@@ -108,30 +75,11 @@ public class AppInfo extends ItemInfo {
         componentName = info.componentName;
         title = Utilities.trim(info.title);
         intent = new Intent(info.intent);
-        flags = info.flags;
-        firstInstallTime = info.firstInstallTime;
-        iconBitmap = info.iconBitmap;
     }
 
     @Override
-    public String toString() {
-        return "ApplicationInfo(title=" + title + " id=" + this.id
-                + " type=" + this.itemType + " container=" + this.container
-                + " screen=" + screenId + " cellX=" + cellX + " cellY=" + cellY
-                + " spanX=" + spanX + " spanY=" + spanY + " dropPos=" + Arrays.toString(dropPos)
-                + " user=" + user + ")";
-    }
-
-    /**
-     * Helper method used for debugging.
-     */
-    public static void dumpApplicationInfoList(String tag, String label, ArrayList<AppInfo> list) {
-        Log.d(tag, label + " size=" + list.size());
-        for (AppInfo info: list) {
-            Log.d(tag, "   title=\"" + info.title + "\" iconBitmap=" + info.iconBitmap 
-                    + " firstInstallTime=" + info.firstInstallTime
-                    + " componentName=" + info.componentName.getPackageName());
-        }
+    protected String dumpProperties() {
+        return super.dumpProperties() + " componentName=" + componentName;
     }
 
     public ShortcutInfo makeShortcut() {
@@ -142,13 +90,31 @@ public class AppInfo extends ItemInfo {
         return new ComponentKey(componentName, user);
     }
 
-    public static Intent makeLaunchIntent(Context context, LauncherActivityInfoCompat info,
-            UserHandleCompat user) {
-        long serialNumber = UserManagerCompat.getInstance(context).getSerialNumberForUser(user);
+    public static Intent makeLaunchIntent(LauncherActivityInfo info) {
+        return makeLaunchIntent(info.getComponentName());
+    }
+
+    public static Intent makeLaunchIntent(ComponentName cn) {
         return new Intent(Intent.ACTION_MAIN)
-            .addCategory(Intent.CATEGORY_LAUNCHER)
-            .setComponent(info.getComponentName())
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-            .putExtra(EXTRA_PROFILE, serialNumber);
+                .addCategory(Intent.CATEGORY_LAUNCHER)
+                .setComponent(cn)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+    }
+
+    public static void updateRuntimeFlagsForActivityTarget(
+            ItemInfoWithIcon info, LauncherActivityInfo lai) {
+        ApplicationInfo appInfo = lai.getApplicationInfo();
+        if (PackageManagerHelper.isAppSuspended(appInfo)) {
+            info.runtimeStatusFlags |= FLAG_DISABLED_SUSPENDED;
+        }
+        info.runtimeStatusFlags |= (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
+                ? FLAG_SYSTEM_NO : FLAG_SYSTEM_YES;
+
+        if (Utilities.ATLEAST_OREO
+                && appInfo.targetSdkVersion >= Build.VERSION_CODES.O
+                && Process.myUserHandle().equals(lai.getUser())) {
+            // The icon for a non-primary user is badged, hence it's not exactly an adaptive icon.
+            info.runtimeStatusFlags |= FLAG_ADAPTIVE_ICON;
+        }
     }
 }

@@ -23,8 +23,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
-
 import com.android.launcher3.util.Thunk;
+
+import static com.android.launcher3.Utilities.SINGLE_FRAME_MS;
 
 /*
  *  This is a helper class that listens to updates from the corresponding animation.
@@ -33,10 +34,10 @@ import com.android.launcher3.util.Thunk;
  */
 public class FirstFrameAnimatorHelper extends AnimatorListenerAdapter
     implements ValueAnimator.AnimatorUpdateListener {
+    private static final String TAG = "FirstFrameAnimatorHlpr";
     private static final boolean DEBUG = false;
     private static final int MAX_DELAY = 1000;
-    private static final int IDEAL_FRAME_DURATION = 16;
-    private View mTarget;
+    private final View mTarget;
     private long mStartFrame;
     private long mStartTime = -1;
     private boolean mHandlingOnAnimationUpdate;
@@ -71,17 +72,8 @@ public class FirstFrameAnimatorHelper extends AnimatorListenerAdapter
         if (sGlobalDrawListener != null) {
             view.getViewTreeObserver().removeOnDrawListener(sGlobalDrawListener);
         }
-        sGlobalDrawListener = new ViewTreeObserver.OnDrawListener() {
-                private long mTime = System.currentTimeMillis();
-                public void onDraw() {
-                    sGlobalFrameCounter++;
-                    if (DEBUG) {
-                        long newTime = System.currentTimeMillis();
-                        Log.d("FirstFrameAnimatorHelper", "TICK " + (newTime - mTime));
-                        mTime = newTime;
-                    }
-                }
-            };
+
+        sGlobalDrawListener = () -> sGlobalFrameCounter++;
         view.getViewTreeObserver().addOnDrawListener(sGlobalDrawListener);
         sVisible = true;
     }
@@ -117,9 +109,9 @@ public class FirstFrameAnimatorHelper extends AnimatorListenerAdapter
             // prevents a large jump in the animation due to an expensive first frame
             } else if (frameNum == 1 && currentTime < mStartTime + MAX_DELAY &&
                        !mAdjustedSecondFrameTime &&
-                       currentTime > mStartTime + IDEAL_FRAME_DURATION &&
-                       currentPlayTime > IDEAL_FRAME_DURATION) {
-                animation.setCurrentPlayTime(IDEAL_FRAME_DURATION);
+                       currentTime > mStartTime + SINGLE_FRAME_MS &&
+                       currentPlayTime > SINGLE_FRAME_MS) {
+                animation.setCurrentPlayTime(SINGLE_FRAME_MS);
                 mAdjustedSecondFrameTime = true;
             } else {
                 if (frameNum > 1) {
@@ -139,7 +131,7 @@ public class FirstFrameAnimatorHelper extends AnimatorListenerAdapter
 
     public void print(ValueAnimator animation) {
         float flatFraction = animation.getCurrentPlayTime() / (float) animation.getDuration();
-        Log.d("FirstFrameAnimatorHelper", sGlobalFrameCounter +
+        Log.d(TAG, sGlobalFrameCounter +
               "(" + (sGlobalFrameCounter - mStartFrame) + ") " + mTarget + " dirty? " +
               mTarget.isDirty() + " " + flatFraction + " " + this + " " + animation);
     }

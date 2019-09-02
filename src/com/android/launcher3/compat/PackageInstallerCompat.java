@@ -16,11 +16,13 @@
 
 package com.android.launcher3.compat;
 
+import android.content.ComponentName;
 import android.content.Context;
-
-import com.android.launcher3.Utilities;
+import android.content.pm.PackageInstaller;
+import android.support.annotation.NonNull;
 
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class PackageInstallerCompat {
 
@@ -34,11 +36,7 @@ public abstract class PackageInstallerCompat {
     public static PackageInstallerCompat getInstance(Context context) {
         synchronized (sInstanceLock) {
             if (sInstance == null) {
-                if (Utilities.isLmpOrAbove()) {
-                    sInstance = new PackageInstallerCompatVL(context);
-                } else {
-                    sInstance = new PackageInstallerCompatV16();
-                }
+                sInstance = new PackageInstallerCompatVL(context);
             }
             return sInstance;
         }
@@ -47,24 +45,39 @@ public abstract class PackageInstallerCompat {
     /**
      * @return a map of active installs to their progress
      */
-    public abstract HashMap<String, Integer> updateAndGetActiveSessionCache();
+    public abstract HashMap<String, PackageInstaller.SessionInfo> updateAndGetActiveSessionCache();
 
     public abstract void onStop();
 
     public static final class PackageInstallInfo {
+        public final ComponentName componentName;
         public final String packageName;
+        public final int state;
+        public final int progress;
 
-        public int state;
-        public int progress;
-
-        public PackageInstallInfo(String packageName) {
-            this.packageName = packageName;
+        private PackageInstallInfo(@NonNull PackageInstaller.SessionInfo info) {
+            this.state = STATUS_INSTALLING;
+            this.packageName = info.getAppPackageName();
+            this.componentName = new ComponentName(packageName, "");
+            this.progress = (int) (info.getProgress() * 100f);
         }
 
         public PackageInstallInfo(String packageName, int state, int progress) {
-            this.packageName = packageName;
             this.state = state;
+            this.packageName = packageName;
+            this.componentName = new ComponentName(packageName, "");
             this.progress = progress;
         }
+
+        public static PackageInstallInfo fromInstallingState(PackageInstaller.SessionInfo info) {
+            return new PackageInstallInfo(info);
+        }
+
+        public static PackageInstallInfo fromState(int state, String packageName) {
+            return new PackageInstallInfo(packageName, state, 0 /* progress */);
+        }
+
     }
+
+    public abstract List<PackageInstaller.SessionInfo> getAllVerifiedSessions();
 }

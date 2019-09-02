@@ -17,13 +17,10 @@ package com.android.launcher3.widget;
 
 import android.appwidget.AppWidgetHostView;
 import android.os.Bundle;
-import android.os.Parcelable;
 
-import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppWidgetProviderInfo;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.PendingAddItemInfo;
-import com.android.launcher3.compat.AppWidgetManagerCompat;
 
 /**
  * Meta data used for late binding of {@link LauncherAppWidgetProviderInfo}.
@@ -31,45 +28,31 @@ import com.android.launcher3.compat.AppWidgetManagerCompat;
  * @see {@link PendingAddItemInfo}
  */
 public class PendingAddWidgetInfo extends PendingAddItemInfo {
-    public int minWidth;
-    public int minHeight;
-    public int minResizeWidth;
-    public int minResizeHeight;
     public int previewImage;
     public int icon;
     public LauncherAppWidgetProviderInfo info;
     public AppWidgetHostView boundWidget;
     public Bundle bindOptions = null;
 
-    public PendingAddWidgetInfo(Launcher launcher, LauncherAppWidgetProviderInfo i, Parcelable data) {
-        if (i.isCustomWidget) {
+    public PendingAddWidgetInfo(LauncherAppWidgetProviderInfo i) {
+        if (i.isCustomWidget()) {
             itemType = LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
         } else {
             itemType = LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
         }
         this.info = i;
-        user = AppWidgetManagerCompat.getInstance(launcher).getUser(i);
+        user = i.getProfile();
         componentName = i.provider;
-        minWidth = i.minWidth;
-        minHeight = i.minHeight;
-        minResizeWidth = i.minResizeWidth;
-        minResizeHeight = i.minResizeHeight;
         previewImage = i.previewImage;
         icon = i.icon;
 
-        spanX = i.getSpanX(launcher);
-        spanY = i.getSpanY(launcher);
-        minSpanX = i.getMinSpanX(launcher);
-        minSpanY = i.getMinSpanY(launcher);
+        spanX = i.spanX;
+        spanY = i.spanY;
+        minSpanX = i.minSpanX;
+        minSpanY = i.minSpanY;
     }
 
-    public boolean isCustomWidget() {
-        return itemType == LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("PendingAddWidgetInfo package=%s, name=%s",
-                componentName.getPackageName(), componentName.getShortClassName());
+    public WidgetAddFlowHandler getHandler() {
+        return new WidgetAddFlowHandler(info);
     }
 }

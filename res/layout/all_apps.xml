@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2015 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -21,37 +21,18 @@
     android:id="@+id/apps_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:clipChildren="true"
+    android:clipToPadding="false"
+    android:focusable="false"
+    android:saveEnabled="false" >
 
-    <!-- Both android:focusable and android:focusableInTouchMode are needed for
-         the view to get focus change events. -->
-    <FrameLayout
-        android:id="@+id/search_box_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:visibility="gone" />
+    <include layout="@layout/all_apps_rv_layout" />
 
-    <FrameLayout
-        android:id="@+id/content"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-        <FrameLayout
-            android:id="@+id/all_apps_reveal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:focusable="false"
-            android:elevation="2dp"
-            android:visibility="invisible" />
-        <include
-            layout="@layout/all_apps_container"
-            android:id="@+id/all_apps_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-    </FrameLayout>
+    <include layout="@layout/all_apps_floating_header" />
+
+    <include
+        android:id="@id/search_container_all_apps"
+        layout="@layout/search_container_all_apps"/>
+
+    <include layout="@layout/all_apps_fast_scroller" />
 </com.android.launcher3.allapps.AllAppsContainerView>
