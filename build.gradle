@@ -1,0 +1,73 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.9'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.protobuf'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "26.0.2"
+
+    defaultConfig {
+        applicationId "com.android.launcher3"
+        minSdkVersion 21
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+
+    }
+    sourceSets {
+        main {
+            res.srcDirs = ['res', 'WallpaperPicker/res']
+            main.java.srcDirs = ['src', 'WallpaperPicker/src']
+            manifest.srcFile 'AndroidManifest.xml'
+            proto.srcDirs 'protos/'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    google()
+}
+
+dependencies {
+    implementation 'com.android.support:support-v4:26.0.+'
+    implementation 'com.android.support:recyclerview-v7:26.0.+'
+    compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-7'
+    implementation 'com.google.android.gms:play-services:6.+'
+}
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0-alpha-3'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+                javanano {
+                    option "java_package=backup.proto|com.android.launcher3.userevent.nano"
+                    option "java_package=launcher_log.proto|com.android.launcher3.userevent.nano"
+                    option "java_package=launcher_dump.proto|com.android.launcher3.model.nano"
+                    option "java_package=search.proto|com.google.android.apps.nexuslauncher.search.nano"
+                    option "java_package=smartspace.proto|com.google.android.apps.nexuslauncher.smartspace.nano"
+                    option "enum_style=java"
+                }
+            }
+        }
+    }
+}
