@@ -36,6 +36,7 @@ import android.text.Spannable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -124,9 +125,9 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
     @Thunk FolderPagedView mContent;
     @Thunk View mContentWrapper;
-    FolderEditText mFolderName;
+    TextView mFolderName;
 
-    private View mFooter;
+    private View mFooter, mFolderNameContainer;
     private int mFooterHeight;
 
     // Cell ranks used for drag and drop
@@ -196,8 +197,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mContent = (FolderPagedView) findViewById(R.id.folder_content);
         mContent.setFolder(this);
 
-        mFolderName = (FolderEditText) findViewById(R.id.folder_name);
-        mFolderName.setFolder(this);
+        mFolderName = (TextView) findViewById(R.id.folder_name);
+        //mFolderName.setFolder(this);
         mFolderName.setOnFocusChangeListener(this);
 
         // We disable action mode for now since it messes up the view on phones
@@ -208,7 +209,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
                 InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 
         mFooter = findViewById(R.id.folder_footer);
-
+        mFolderNameContainer = findViewById(R.id.folder_name_container);
         // We find out how tall footer wants to be (it is set to wrap_content), so that
         // we can allocate the appropriate amount of space for it.
         int measureSpec = MeasureSpec.UNSPECIFIED;
@@ -290,7 +291,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     }
 
     public void startEditingFolderName() {
-        mFolderName.setHint("");
+       // mFolderName.setHint("");
         mIsEditingName = true;
     }
 
@@ -300,7 +301,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     }
 
     public void doneEditingFolderName(boolean commit) {
-        mFolderName.setHint(sHintText);
+        //mFolderName.setHint(sHintText);
         // Convert to a string here to ensure that no other state associated with the text field
         // gets saved.
         String newTitle = mFolderName.getText().toString();
@@ -391,7 +392,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         if (!sDefaultFolderName.contentEquals(mInfo.title)) {
             mFolderName.setText(mInfo.title);
         } else {
-            mFolderName.setText("");
+            //mFolderName.setText("");
         }
 
         // In case any children didn't come across during loading, clean up the folder accordingly
@@ -961,7 +962,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         int centeredTop = centerY - height / 2;
 
         // We need to bound the folder to the currently visible workspace area
-        mLauncher.getWorkspace().getPageAreaRelativeToDragLayer(sTempRect);
+        //mLauncher.getWorkspace().getPageAreaRelativeToDragLayer(sTempRect);
         int left = Math.min(Math.max(sTempRect.left, centeredLeft),
                 sTempRect.left + sTempRect.width() - width);
         int top = Math.min(Math.max(sTempRect.top, centeredTop),
@@ -986,10 +987,16 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mFolderIconPivotY = (int) (mFolderIcon.getMeasuredHeight() *
                 (1.0f * folderPivotY / height));
 
+        Display defaultDisplay = mLauncher.getWindowManager().getDefaultDisplay();
+        Point point = new Point();
+        defaultDisplay.getSize(point);
+        int x = point.x;
+        int y = point.y;
+
         lp.width = width;
         lp.height = height;
         lp.x = left;
-        lp.y = top;
+        lp.y = y - height + getResources().getDimensionPixelSize(R.dimen.folder_height_offset);
     }
 
     float getPivotXForIconAnimation() {
@@ -1015,7 +1022,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     }
 
     private int getFolderHeight() {
-        return getFolderHeight(getContentAreaHeight());
+        int offset = getResources().getDimensionPixelSize(R.dimen.folder_height_offset);
+        return getFolderHeight(getContentAreaHeight()) + offset;
     }
 
     private int getFolderHeight(int contentAreaHeight) {
@@ -1040,6 +1048,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
                     mContent.getPaddingRight() + cellIconGap,
                     mFooter.getPaddingBottom());
         }
+        mFolderNameContainer.measure(widthMeasureSpec,
+                MeasureSpec.makeMeasureSpec(80, MeasureSpec.UNSPECIFIED));
         mFooter.measure(contentAreaWidthSpec,
                 MeasureSpec.makeMeasureSpec(mFooterHeight, MeasureSpec.EXACTLY));
 

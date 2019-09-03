@@ -394,7 +394,7 @@ public class DeviceProfile {
         final boolean isLayoutRtl = Utilities.isRtl(launcher.getResources());
 
         // Layout the search bar space
-        View searchBar = launcher.getSearchBar();
+        /*View searchBar = launcher.getSearchBar();
         lp = (FrameLayout.LayoutParams) searchBar.getLayoutParams();
         if (hasVerticalBarLayout) {
             // Vertical search bar space -- The search bar is fixed in the layout to be on the left
@@ -416,7 +416,7 @@ public class DeviceProfile {
             LinearLayout targets = (LinearLayout) searchBar.findViewById(R.id.drag_target_bar);
             targets.getLayoutParams().width = searchBarSpaceWidthPx;
         }
-        searchBar.setLayoutParams(lp);
+        searchBar.setLayoutParams(lp);*/
 
         // Layout the workspace
         PagedView workspace = (PagedView) launcher.findViewById(R.id.workspace);
@@ -424,7 +424,7 @@ public class DeviceProfile {
         lp.gravity = Gravity.CENTER;
         Rect padding = getWorkspacePadding(isLayoutRtl);
         workspace.setLayoutParams(lp);
-        workspace.setPadding(padding.left, padding.top, padding.right, padding.bottom);
+        //workspace.setPadding(padding.left, padding.top, padding.right, padding.bottom);
         workspace.setPageSpacing(getWorkspacePageSpacing(isLayoutRtl));
 
         // Layout the hotseat

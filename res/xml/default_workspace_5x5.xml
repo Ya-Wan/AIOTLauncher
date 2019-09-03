@@ -61,7 +61,7 @@
 
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
     <!-- Dialer, Contacts, [All Apps], Messaging, Browser -->
-    <resolve
+   <!-- <resolve
         launcher:container="-101"
         launcher:screen="0"
         launcher:x="0"
@@ -111,6 +111,9 @@
         <favorite
             launcher:packageName="com.android.browser"
             launcher:className="com.android.browser.BrowserActivity" />
-    </resolve>
+    </resolve>-->
+
+    <!-- Hotseat -->
+    <include launcher:workspace="@xml/dw_phone_hotseat" />
 
 </favorites>

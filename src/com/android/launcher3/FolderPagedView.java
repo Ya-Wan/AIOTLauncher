@@ -18,6 +18,7 @@ package com.android.launcher3;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -87,8 +88,8 @@ public class FolderPagedView extends PagedView {
         LauncherAppState app = LauncherAppState.getInstance();
 
         InvariantDeviceProfile profile = app.getInvariantDeviceProfile();
-        mMaxCountX = profile.numFolderColumns;
-        mMaxCountY = profile.numFolderRows;
+        mMaxCountX = 3;
+        mMaxCountY = 3;
 
         mMaxItemsPerPage = mMaxCountX * mMaxCountY;
 
@@ -115,7 +116,7 @@ public class FolderPagedView extends PagedView {
      */
     private void setupContentDimensions(int count) {
         mAllocatedContentSize = count;
-        boolean done;
+        /*boolean done;
         if (count >= mMaxItemsPerPage) {
             mGridCountX = mMaxCountX;
             mGridCountY = mMaxCountY;
@@ -141,8 +142,11 @@ public class FolderPagedView extends PagedView {
                 mGridCountX = Math.max(0, mGridCountX - 1);
             }
             done = mGridCountX == oldCountX && mGridCountY == oldCountY;
-        }
+        }*/
 
+
+        mGridCountX = mMaxCountX;
+        mGridCountY = mMaxCountY;
         // Update grid size
         for (int i = getPageCount() - 1; i >= 0; i--) {
             getPageAt(i).setGridSize(mGridCountX, mGridCountY);
@@ -239,7 +243,8 @@ public class FolderPagedView extends PagedView {
     private CellLayout createAndAddNewPage() {
         DeviceProfile grid = ((Launcher) getContext()).getDeviceProfile();
         CellLayout page = new CellLayout(getContext());
-        page.setCellDimensions(grid.folderCellWidthPx, grid.folderCellHeightPx);
+        //page.setCellDimensions(grid.folderCellWidthPx, grid.folderCellHeightPx);
+        page.setCellDimensions(getResources().getDimensionPixelOffset(R.dimen.folder_cell_layout_width), getResources().getDimensionPixelOffset(R.dimen.folder_cell_layout_height));
         page.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
         page.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         page.setInvertIfRtl(true);
@@ -348,7 +353,7 @@ public class FolderPagedView extends PagedView {
         setEnableOverscroll(getPageCount() > 1);
 
         // Update footer
-        mPageIndicator.setVisibility(getPageCount() > 1 ? View.VISIBLE : View.GONE);
+        mPageIndicator.setVisibility(/*getPageCount() > 1 ?*/ View.VISIBLE/* : View.GONE*/);
         // Set the gravity as LEFT or RIGHT instead of START, as START depends on the actual text.
         mFolder.mFolderName.setGravity(getPageCount() > 1 ?
                 (mIsRtl ? Gravity.RIGHT : Gravity.LEFT) : Gravity.CENTER_HORIZONTAL);

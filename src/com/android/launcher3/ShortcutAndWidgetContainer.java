@@ -135,8 +135,8 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
 
     int getCellContentHeight() {
         final DeviceProfile grid = mLauncher.getDeviceProfile();
-        return Math.min(getMeasuredHeight(), mIsHotseatLayout ?
-                grid.hotseatCellHeightPx : grid.cellHeightPx);
+        return Math.min(getMeasuredHeight(), /*mIsHotseatLayout ?
+                grid.hotseatCellHeightPx :*/ grid.cellHeightPx);
     }
 
     public void measureChild(View child) {

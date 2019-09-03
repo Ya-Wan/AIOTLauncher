@@ -275,21 +275,24 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         ViewGroup grandParent = (ViewGroup) parent.getParent();
         if (mPageIndicator == null && mPageIndicatorViewId > -1) {
             mPageIndicator = (PageIndicator) grandParent.findViewById(mPageIndicatorViewId);
-            mPageIndicator.removeAllMarkers(true);
+            if (mPageIndicator != null) {
+                mPageIndicator.removeAllMarkers(true);
 
-            ArrayList<PageIndicator.PageMarkerResources> markers =
-                    new ArrayList<PageIndicator.PageMarkerResources>();
-            for (int i = 0; i < getChildCount(); ++i) {
-                markers.add(getPageIndicatorMarker(i));
+                ArrayList<PageIndicator.PageMarkerResources> markers =
+                        new ArrayList<PageIndicator.PageMarkerResources>();
+                for (int i = 0; i < getChildCount(); ++i) {
+                    markers.add(getPageIndicatorMarker(i));
+                }
+
+                mPageIndicator.addMarkers(markers, true);
+
+                OnClickListener listener = getPageIndicatorClickListener();
+                if (listener != null) {
+                    mPageIndicator.setOnClickListener(listener);
+                }
+                mPageIndicator.setContentDescription(getPageIndicatorDescription());
             }
 
-            mPageIndicator.addMarkers(markers, true);
-
-            OnClickListener listener = getPageIndicatorClickListener();
-            if (listener != null) {
-                mPageIndicator.setOnClickListener(listener);
-            }
-            mPageIndicator.setContentDescription(getPageIndicatorDescription());
         }
     }
 

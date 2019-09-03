@@ -110,6 +110,7 @@ import com.android.launcher3.util.Thunk;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.WidgetHostViewLoader;
 import com.android.launcher3.widget.WidgetsContainerView;
+import com.skyworth.aiotsdk.api.AIOTAPI;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -376,7 +377,7 @@ public class Launcher extends Activity
     @Thunk Runnable mBuildLayersRunnable = new Runnable() {
         public void run() {
             if (mWorkspace != null) {
-                mWorkspace.buildPageHardwareLayers();
+                //mWorkspace.buildPageHardwareLayers();
             }
         }
     };
@@ -428,6 +429,9 @@ public class Launcher extends Activity
                     .penaltyDeath()
                     .build());
         }
+
+        AIOTAPI.getInstance().init(this);
+        AIOTAPI.getInstance().onCreate();
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.preOnCreate();
@@ -952,7 +956,7 @@ public class Launcher extends Activity
     protected void onStop() {
         super.onStop();
         FirstFrameAnimatorHelper.setIsVisible(false);
-
+        AIOTAPI.getInstance().onStop();
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onStop();
         }
@@ -981,7 +985,7 @@ public class Launcher extends Activity
         }
 
         super.onResume();
-
+        AIOTAPI.getInstance().onResume();
         // Restore the previous launcher state
         if (mOnResumeState == State.WORKSPACE) {
             showWorkspace(false);
@@ -1043,8 +1047,8 @@ public class Launcher extends Activity
         // Consequently, the widgets will be inflated in the orientation of the foreground activity
         // (framework issue). On resuming, we ensure that any widgets are inflated for the current
         // orientation.
-        getWorkspace().reinflateWidgetsIfNecessary();
-        reinflateQSBIfNecessary();
+        //getWorkspace().reinflateWidgetsIfNecessary();
+        //reinflateQSBIfNecessary();
 
         if (DEBUG_RESUME_TIME) {
             Log.d(TAG, "Time spent in onResume: " + (System.currentTimeMillis() - startTime));
@@ -1080,7 +1084,7 @@ public class Launcher extends Activity
         mPaused = true;
         mDragController.cancelDrag();
         mDragController.resetLastGestureUpTime();
-
+        AIOTAPI.getInstance().onPause();
         // We call onHide() aggressively. The custom content callbacks should be able to
         // debounce excess onHide calls.
         if (mWorkspace.getCustomContentCallbacks() != null) {
@@ -1355,7 +1359,7 @@ public class Launcher extends Activity
         mDragLayer = (DragLayer) findViewById(R.id.drag_layer);
         mWorkspace = (Workspace) mDragLayer.findViewById(R.id.workspace);
         mWorkspace.setPageSwitchListener(this);
-        mPageIndicators = mDragLayer.findViewById(R.id.page_indicator);
+        //mPageIndicators = mDragLayer.findViewById(R.id.page_indicator);
 
         mLauncherView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -1417,8 +1421,8 @@ public class Launcher extends Activity
         dragController.addDragListener(mWorkspace);
 
         // Get the search/delete bar
-        mSearchDropTargetBar = (SearchDropTargetBar)
-                mDragLayer.findViewById(R.id.search_drop_target_bar);
+//        mSearchDropTargetBar = (SearchDropTargetBar)
+//                mDragLayer.findViewById(R.id.search_drop_target_bar);
 
         // Setup Apps and Widgets
         mAppsView = (AllAppsContainerView) findViewById(R.id.apps_view);
@@ -1990,7 +1994,7 @@ public class Launcher extends Activity
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        AIOTAPI.getInstance().onDestroy();
         // Remove all pending runnables
         mHandler.removeMessages(ADVANCE_MSG);
         mHandler.removeMessages(0);
@@ -2466,12 +2470,12 @@ public class Launcher extends Activity
             return;
         }
 
-        if (v instanceof Workspace) {
+        /*if (v instanceof Workspace) {
             if (mWorkspace.isInOverviewMode()) {
                 showWorkspace(true);
             }
             return;
-        }
+        }*/
 
         if (v instanceof CellLayout) {
             if (mWorkspace.isInOverviewMode()) {
@@ -3135,7 +3139,7 @@ public class Launcher extends Activity
         if (isWorkspaceLocked()) return false;
         if (mState != State.WORKSPACE) return false;
 
-        if (v == mAllAppsButton) {
+        /*if (v == mAllAppsButton) {
             onLongClickAllAppsButton(v);
             return true;
         }
@@ -3153,7 +3157,7 @@ public class Launcher extends Activity
             } else {
                 return false;
             }
-        }
+        }*/
 
         CellLayout.CellInfo longClickCellInfo = null;
         View itemUnderLongClick = null;
@@ -3175,7 +3179,7 @@ public class Launcher extends Activity
                 if (mWorkspace.isInOverviewMode()) {
                     mWorkspace.startReordering(v);
                 } else {
-                    showOverviewMode(true);
+                    //showOverviewMode(true);
                 }
             } else {
                 final boolean isAllAppsButton = inHotseat && isAllAppsButtonRank(
@@ -3322,11 +3326,11 @@ public class Launcher extends Activity
     }
 
     void showOverviewMode(boolean animated) {
-        mWorkspace.setVisibility(View.VISIBLE);
+        /*mWorkspace.setVisibility(View.VISIBLE);
         mStateTransitionAnimation.startAnimationToWorkspace(mState, Workspace.State.OVERVIEW,
                 WorkspaceStateTransitionAnimation.SCROLL_TO_CURRENT_PAGE, animated,
-                null /* onCompleteRunnable */);
-        mState = State.WORKSPACE;
+                null *//* onCompleteRunnable *//*);
+        mState = State.WORKSPACE;*/
     }
 
     /**
