@@ -36,6 +36,11 @@
     <string name="folder_name"></string>
     <!-- Work folder name -->
     <string name="work_folder_name">Work</string>
+    <string name="education_folder_name">Education</string>
+    <string name="entertainment_folder_name">Entertainment</string>
+    <string name="life_folder_name">Life</string>
+    <string name="all_app_folder_name">More</string>
+    <string name="folder_item_count_only_one">Only one item in folder</string>
     <!-- Displayed when user selects a shortcut for an app that was uninstalled [CHAR_LIMIT=none]-->
     <string name="activity_not_found">App isn\'t installed.</string>
     <!-- Displayed when user selects a shortcut for an app that is current not available [CHAR_LIMIT=none]-->

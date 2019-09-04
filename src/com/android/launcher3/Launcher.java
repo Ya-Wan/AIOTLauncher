@@ -95,6 +95,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.parser.Feature;
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.PagedView.PageSwitchListener;
 import com.android.launcher3.allapps.AllAppsContainerView;
@@ -103,6 +104,7 @@ import com.android.launcher3.compat.LauncherActivityInfoCompat;
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.UserHandleCompat;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.model.WidgetsModel;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.LongArrayMap;
@@ -3188,7 +3190,7 @@ public class Launcher extends Activity
                                 longClickCellInfo.cellY));
                 if (!(itemUnderLongClick instanceof Folder || isAllAppsButton)) {
                     // User long pressed on an item
-                    mWorkspace.startDrag(longClickCellInfo);
+                    //mWorkspace.startDrag(longClickCellInfo);
                 }
             }
         }
@@ -4075,7 +4077,7 @@ public class Launcher extends Activity
     }
 
     public boolean isAllAppsButtonRank(int rank) {
-        if (mHotseat != null) {
+        if (FeatureFlags.DISABLE_ALL_APPS && mHotseat != null) {
             return mHotseat.isAllAppsButtonRank(rank);
         }
         return false;

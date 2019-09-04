@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -51,6 +52,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.launcher3.CellLayout.CellInfo;
 import com.android.launcher3.DragController.DragListener;
@@ -244,6 +246,10 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     public boolean onLongClick(View v) {
         // Return if global dragging is not enabled
         if (!mLauncher.isDraggingEnabled()) return true;
+        /*if (getItemCount() <= 1) {
+            Toast.makeText(mLauncher, getResources().getString(R.string.folder_item_count_only_one), Toast.LENGTH_SHORT).show();
+            return true;
+        }*/
         return beginDrag(v, false);
     }
 
@@ -399,7 +405,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mFolderIcon.post(new Runnable() {
             public void run() {
                 if (getItemCount() <= 1) {
-                    replaceFolderWithFinalItem();
+                    //replaceFolderWithFinalItem();
                 }
             }
         });
@@ -524,6 +530,11 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
                 }
             };
         }
+
+        DragLayer parent = (DragLayer) mLauncher.findViewById(R.id.drag_layer);
+
+        parent.setBackgroundColor(getResources().getColor(R.color.black_mask_color));
+
         openFolderAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -539,7 +550,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
                     onCompleteRunnable.run();
                 }
 
-                mContent.setFocusOnFirstChild();
+                //mContent.setFocusOnFirstChild();
             }
         });
 
@@ -550,7 +561,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
             float textWidth =  mFolderName.getPaint().measureText(mFolderName.getText().toString());
             float translation = (footerWidth - textWidth) / 2;
-            mFolderName.setTranslationX(mContent.mIsRtl ? -translation : translation);
+            //mFolderName.setTranslationX(mContent.mIsRtl ? -translation : translation);
             mContent.setMarkerScale(0);
 
             // Do not update the flag if we are in drag mode. The flag will be updated, when we
@@ -633,6 +644,10 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         oa.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                DragLayer parent = (DragLayer) mLauncher.findViewById(R.id.drag_layer);
+
+                parent.setBackgroundColor(Color.TRANSPARENT);
+
                 onCloseComplete();
                 setLayerType(LAYER_TYPE_NONE, null);
                 mState = STATE_SMALL;
@@ -816,7 +831,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
         if (successfulDrop) {
             if (mDeleteFolderOnDropCompleted && !mItemAddedBackToSelfViaIcon && target != this) {
-                replaceFolderWithFinalItem();
+                //replaceFolderWithFinalItem();
             }
         } else {
             // The drag failed, we need to return the item to the folder
@@ -1100,7 +1115,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         }
         if (getItemCount() <= 1) {
             if (!mDragInProgress && !mSuppressFolderDeletion) {
-                replaceFolderWithFinalItem();
+                //replaceFolderWithFinalItem();
             } else if (mDragInProgress) {
                 mDeleteFolderOnDropCompleted = true;
             }
@@ -1287,7 +1302,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
             rearrangeChildren();
         }
         if (getItemCount() <= 1) {
-            replaceFolderWithFinalItem();
+            //replaceFolderWithFinalItem();
         }
     }
 

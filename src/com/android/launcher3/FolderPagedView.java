@@ -83,6 +83,10 @@ public class FolderPagedView extends PagedView {
 
     private PageIndicator mPageIndicator;
 
+    private int mDefaultDesiredWidth = 644;
+    private int mDefaultDesiredHeighth = 668;
+
+
     public FolderPagedView(Context context, AttributeSet attrs) {
         super(context, attrs);
         LauncherAppState app = LauncherAppState.getInstance();
@@ -342,12 +346,12 @@ public class FolderPagedView extends PagedView {
 
         // Remove extra views.
         boolean removed = false;
-        while (pageItr.hasNext()) {
+        while (pageItr.hasNext() && getPageCount() >= 1) {
             removeView(pageItr.next());
             removed = true;
         }
         if (removed) {
-            setCurrentPage(0);
+            setCurrentPage(1);
         }
 
         setEnableOverscroll(getPageCount() > 1);
@@ -361,12 +365,12 @@ public class FolderPagedView extends PagedView {
 
     public int getDesiredWidth() {
         return getPageCount() > 0 ?
-                (getPageAt(0).getDesiredWidth() + getPaddingLeft() + getPaddingRight()) : 0;
+                (getPageAt(0).getDesiredWidth() + getPaddingLeft() + getPaddingRight()) : mDefaultDesiredWidth/*0*/;
     }
 
     public int getDesiredHeight()  {
         return  getPageCount() > 0 ?
-                (getPageAt(0).getDesiredHeight() + getPaddingTop() + getPaddingBottom()) : 0;
+                (getPageAt(0).getDesiredHeight() + getPaddingTop() + getPaddingBottom()) : mDefaultDesiredHeighth/*0*/;
     }
 
     public int getItemCount() {

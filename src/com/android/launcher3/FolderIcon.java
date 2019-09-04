@@ -162,6 +162,37 @@ public class FolderIcon extends FrameLayout implements FolderListener {
 
         // Offset the preview background to center this view accordingly
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
+
+        switch (folderInfo.cellX) {
+            case 0:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_education);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.education_folder_name));
+                break;
+
+            case 1:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_work);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.work_folder_name));
+                break;
+
+            case 2:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_entertainment);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.entertainment_folder_name));
+                break;
+
+            case 3:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_life);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.life_folder_name));
+                break;
+
+            case 4:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_all_app);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.all_app_folder_name));
+                break;
+
+                default:
+                    break;
+        }
+
         lp = (FrameLayout.LayoutParams) icon.mPreviewBackground.getLayoutParams();
         lp.topMargin = grid.folderBackgroundOffset;
         lp.width = grid.folderIconSizePx;
@@ -511,7 +542,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             mMaxPerspectiveShift = mBaselineIconSize * PERSPECTIVE_SHIFT_FACTOR;
 
             mPreviewOffsetX = (mTotalWidth - mAvailableSpaceInPreview) / 2;
-            mPreviewOffsetY = previewPadding + grid.folderBackgroundOffset;
+            mPreviewOffsetY = previewPadding + 20/*grid.folderBackgroundOffset*/;
         }
     }
 
@@ -628,11 +659,11 @@ public class FolderIcon extends FrameLayout implements FolderListener {
                     d = getTopDrawable(v);
                     mParams = computePreviewItemDrawingParams(i, mParams);
                     mParams.drawable = d;
-                    drawPreviewItem(canvas, mParams);
+                    //drawPreviewItem(canvas, mParams);
                 }
             }
         } else {
-            drawPreviewItem(canvas, mAnimParams);
+            //drawPreviewItem(canvas, mAnimParams);
         }
     }
 
