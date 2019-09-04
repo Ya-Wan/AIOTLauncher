@@ -26,6 +26,7 @@ import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.text.InputType;
 import android.text.Selection;
@@ -33,6 +34,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.ActionMode;
+import android.view.Display;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -143,10 +145,11 @@ public class Folder extends AbstractFloatingView implements DragSource,
     @Thunk FolderIcon mFolderIcon;
 
     @Thunk FolderPagedView mContent;
-    public ExtendedEditText mFolderName;
+    //public ExtendedEditText mFolderName;
+    public TextView mFolderName;
     private PageIndicatorDots mPageIndicator;
 
-    private View mFooter;
+    private View mFooter, mFolderNameContainer;
     private int mFooterHeight;
 
     // Cell ranks used for drag and drop
@@ -214,8 +217,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
         mPageIndicator = findViewById(R.id.folder_page_indicator);
         mFolderName = findViewById(R.id.folder_name);
-        mFolderName.setOnBackKeyListener(this);
-        mFolderName.setOnFocusChangeListener(this);
+        //mFolderName.setOnBackKeyListener(this);
+        //mFolderName.setOnFocusChangeListener(this);
 
         if (!Utilities.ATLEAST_MARSHMALLOW) {
             // We disable action mode in older OSes where floating selection menu is not yet
@@ -243,9 +246,10 @@ public class Folder extends AbstractFloatingView implements DragSource,
                 & ~InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
                 & ~InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                 | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-        mFolderName.forceDisableSuggestions(true);
+        //mFolderName.forceDisableSuggestions(true);
 
         mFooter = findViewById(R.id.folder_footer);
+        mFolderNameContainer = findViewById(R.id.folder_name_container);
 
         // We find out how tall footer wants to be (it is set to wrap_content), so that
         // we can allocate the appropriate amount of space for it.
@@ -325,7 +329,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
         post(new Runnable() {
             @Override
             public void run() {
-                mFolderName.setHint("");
+                //mFolderName.setHint("");
                 mIsEditingName = true;
             }
         });
@@ -340,7 +344,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
         mInfo.setTitle(newTitle);
         mLauncher.getModelWriter().updateItemInDatabase(mInfo);
 
-        mFolderName.setHint(sDefaultFolderName.contentEquals(newTitle) ? sHintText : null);
+        //mFolderName.setHint(sDefaultFolderName.contentEquals(newTitle) ? sHintText : null);
 
         sendCustomAccessibilityEvent(
                 this, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
@@ -350,14 +354,14 @@ public class Folder extends AbstractFloatingView implements DragSource,
         // the text and brings up the soft keyboard if necessary.
         mFolderName.clearFocus();
 
-        Selection.setSelection(mFolderName.getText(), 0, 0);
+        //Selection.setSelection(mFolderName.getText(), 0, 0);
         mIsEditingName = false;
         return true;
     }
 
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-            mFolderName.dispatchBackKey();
+            //mFolderName.dispatchBackKey();
             return true;
         }
         return false;
@@ -425,8 +429,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
             mFolderName.setText(mInfo.title);
             mFolderName.setHint(null);
         } else {
-            mFolderName.setText("");
-            mFolderName.setHint(sHintText);
+            //mFolderName.setText("");
+            //mFolderName.setHint(sHintText);
         }
 
         // In case any children didn't come across during loading, clean up the folder accordingly
@@ -593,7 +597,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
         mIsOpen = false;
 
         if (isEditingName()) {
-            mFolderName.dispatchBackKey();
+            //mFolderName.dispatchBackKey();
         }
 
         if (mFolderIcon != null) {
@@ -911,7 +915,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
             mLauncher.getDragLayer().getDescendantRectRelativeToSelf(mLauncher.getOverviewPanel(),
                     sTempRect);
         } else {
-            mLauncher.getWorkspace().getPageAreaRelativeToDragLayer(sTempRect);
+            //mLauncher.getWorkspace().getPageAreaRelativeToDragLayer(sTempRect);
         }
         int left = Math.min(Math.max(sTempRect.left, centeredLeft),
                 sTempRect.right- width);
@@ -927,7 +931,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
             left = (grid.availableWidthPx - width) / 2;
         } else if (width >= sTempRect.width()) {
             // If the folder doesn't fit within the bounds, center it about the desired bounds
-            left = sTempRect.left + (sTempRect.width() - width) / 2;
+            left = (grid.availableWidthPx - width) / 2;
+            //left = sTempRect.left + (sTempRect.width() - width) / 2;
         }
         if (height >= sTempRect.height()) {
             // Folder height is greater than page height, center on page
@@ -950,10 +955,16 @@ public class Folder extends AbstractFloatingView implements DragSource,
         mFolderIconPivotY = (int) (mFolderIcon.getMeasuredHeight() *
                 (1.0f * folderPivotY / height));
 
+        Display defaultDisplay = mLauncher.getWindowManager().getDefaultDisplay();
+        Point point = new Point();
+        defaultDisplay.getSize(point);
+        int x = point.x;
+        int y = point.y;
+
         lp.width = width;
         lp.height = height;
         lp.x = left;
-        lp.y = top;
+        lp.y = y - height;
     }
 
     public float getPivotXForIconAnimation() {
@@ -981,7 +992,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
     }
 
     private int getFolderHeight() {
-        return getFolderHeight(getContentAreaHeight());
+        int offset = getResources().getDimensionPixelSize(R.dimen.folder_height_offset);
+        return getFolderHeight(getContentAreaHeight()) + offset;
     }
 
     private int getFolderHeight(int contentAreaHeight) {
@@ -1006,6 +1018,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
                     mContent.getPaddingRight() + cellIconGap,
                     mFooter.getPaddingBottom());
         }
+        mFolderNameContainer.measure(widthMeasureSpec,
+                MeasureSpec.makeMeasureSpec(80, MeasureSpec.UNSPECIFIED));
         mFooter.measure(contentAreaWidthSpec,
                 MeasureSpec.makeMeasureSpec(mFooterHeight, MeasureSpec.EXACTLY));
 
@@ -1323,7 +1337,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
             if (hasFocus) {
                 startEditingFolderName();
             } else {
-                mFolderName.dispatchBackKey();
+                //mFolderName.dispatchBackKey();
             }
         }
     }
@@ -1439,7 +1453,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
     @Override
     public boolean onBackPressed() {
         if (isEditingName()) {
-            mFolderName.dispatchBackKey();
+            //mFolderName.dispatchBackKey();
         } else {
             super.onBackPressed();
         }
@@ -1453,7 +1467,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
             if (isEditingName()) {
                 if (!dl.isEventOverView(mFolderName, ev)) {
-                    mFolderName.dispatchBackKey();
+                    //mFolderName.dispatchBackKey();
                     return true;
                 }
                 return false;

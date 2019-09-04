@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.launcher3.Alarm;
 import com.android.launcher3.AppInfo;
@@ -90,6 +91,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     // Delay when drag enters until the folder opens, in miliseconds.
     private static final int ON_OPEN_DELAY = 800;
 
+    @Thunk ImageView mPreviewBackground;
     @Thunk BubbleTextView mFolderName;
 
     PreviewBackground mBackground = new PreviewBackground();
@@ -165,6 +167,42 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         icon.mFolderName.setCompoundDrawablePadding(0);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) icon.mFolderName.getLayoutParams();
         lp.topMargin = grid.iconSizePx + grid.iconDrawablePaddingPx;
+
+        icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
+        switch (folderInfo.cellX) {
+            case 0:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_education);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.education_folder_name));
+                break;
+
+            case 1:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_work);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.work_folder_name));
+                break;
+
+            case 2:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_entertainment);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.entertainment_folder_name));
+                break;
+
+            case 3:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_life);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.life_folder_name));
+                break;
+
+            case 4:
+                icon.mPreviewBackground.setImageResource(R.drawable.ic_all_app);
+                icon.mFolderName.setText(launcher.getResources().getString(R.string.all_app_folder_name));
+                break;
+
+            default:
+                break;
+        }
+
+        lp = (FrameLayout.LayoutParams) icon.mPreviewBackground.getLayoutParams();
+        //lp.topMargin = grid.folderBackgroundOffset;
+        lp.width = grid.folderIconSizePx;
+        lp.height = grid.folderIconSizePx;
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(ItemClickHandler.INSTANCE);
@@ -459,7 +497,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         mPreviewItemManager.recomputePreviewDrawingParams();
 
         if (!mBackground.drawingDelegated()) {
-            mBackground.drawBackground(canvas);
+            //mBackground.drawBackground(canvas);
         }
 
         if (mFolder == null) return;
@@ -474,7 +512,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             canvas.clipPath(mBackground.getClipPath());
         }
 
-        mPreviewItemManager.draw(canvas);
+        //mPreviewItemManager.draw(canvas);
 
         if (canvas.isHardwareAccelerated()) {
             mBackground.clipCanvasHardware(canvas);
@@ -482,7 +520,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         canvas.restoreToCount(saveCount);
 
         if (!mBackground.drawingDelegated()) {
-            mBackground.drawBackgroundStroke(canvas);
+            //mBackground.drawBackgroundStroke(canvas);
         }
 
         drawBadge(canvas);
@@ -504,7 +542,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     }
 
     public void setTextVisible(boolean visible) {
-        if (visible) {
+        if (true/*visible*/) {
             mFolderName.setVisibility(VISIBLE);
         } else {
             mFolderName.setVisibility(INVISIBLE);

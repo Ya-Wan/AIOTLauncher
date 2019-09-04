@@ -52,8 +52,9 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     /** Note that these are in order of priority. */
     private static final SystemShortcut[] SYSTEM_SHORTCUTS = new SystemShortcut[] {
             new SystemShortcut.AppInfo(),
-            new SystemShortcut.Widgets(),
-            new SystemShortcut.Install()
+            //new SystemShortcut.Widgets(),
+            //new SystemShortcut.Install(),
+            new SystemShortcut.UnInstall()
     };
 
     private final Launcher mLauncher;
@@ -210,7 +211,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     }
 
     public void setAllWidgets(ArrayList<WidgetListRowEntry> allWidgets) {
-        mAllWidgets = allWidgets;
+        //mAllWidgets = allWidgets;
     }
 
     public ArrayList<WidgetListRowEntry> getAllWidgets() {
@@ -218,7 +219,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     }
 
     public List<WidgetItem> getWidgetsForPackageUser(PackageUserKey packageUserKey) {
-        for (WidgetListRowEntry entry : mAllWidgets) {
+        /*for (WidgetListRowEntry entry : mAllWidgets) {
             if (entry.pkgItem.packageName.equals(packageUserKey.mPackageName)) {
                 ArrayList<WidgetItem> widgets = new ArrayList<>(entry.widgets);
                 // Remove widgets not associated with the correct user.
@@ -230,7 +231,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
                 }
                 return widgets.isEmpty() ? null : widgets;
             }
-        }
+        }*/
         return null;
     }
 }

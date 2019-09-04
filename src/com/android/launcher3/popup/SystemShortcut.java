@@ -3,23 +3,33 @@ package com.android.launcher3.popup;
 import static com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import static com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.util.Log;
 import android.view.View;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BaseDraggingActivity;
 import com.android.launcher3.ItemInfo;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.ShortcutInfo;
+import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.model.WidgetItem;
 import com.android.launcher3.util.InstantAppResolver;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.widget.WidgetsBottomSheet;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -122,5 +132,51 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
     protected static void dismissTaskMenuView(BaseDraggingActivity activity) {
         AbstractFloatingView.closeOpenViews(activity, true,
             AbstractFloatingView.TYPE_ALL & ~AbstractFloatingView.TYPE_REBIND_SAFE);
+    }
+
+public static class UnInstall extends SystemShortcut {
+        public UnInstall() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.uninstall_drop_target_label);
+        }
+
+        @Override
+        public View.OnClickListener getOnClickListener(
+                BaseDraggingActivity activity, ItemInfo itemInfo) {
+            ComponentName cn = getUninstallTarget(itemInfo, activity);
+            if (cn == null) {
+                return null;
+            }
+
+            return view -> {
+                AbstractFloatingView.closeAllOpenViews(activity);
+                try {
+                    Intent i = Intent.parseUri(activity.getString(R.string.delete_package_intent), 0)
+                            .setData(Uri.fromParts("package", cn.getPackageName(), cn.getClassName()))
+                            .putExtra(Intent.EXTRA_USER, itemInfo.user);
+                    activity.startActivity(i);
+                } catch (URISyntaxException e) {
+                    Log.e("UnInstall", "Failed to parse intent to start uninstall activity for item=" + itemInfo);
+                }
+            };
+        }
+
+        private ComponentName getUninstallTarget(ItemInfo item, Context context) {
+            Intent intent = null;
+            UserHandle user = null;
+            if (item != null &&
+                    item.itemType == LauncherSettings.BaseLauncherColumns.ITEM_TYPE_APPLICATION) {
+                intent = item.getIntent();
+                user = item.user;
+            }
+            if (intent != null) {
+                LauncherActivityInfo info = LauncherAppsCompat.getInstance(context)
+                        .resolveActivity(intent, user);
+                if (info != null
+                        && (info.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    return info.getComponentName();
+                }
+            }
+            return null;
+        }
     }
 }

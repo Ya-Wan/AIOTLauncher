@@ -91,8 +91,11 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
     public FolderPagedView(Context context, AttributeSet attrs) {
         super(context, attrs);
         InvariantDeviceProfile profile = LauncherAppState.getIDP(context);
-        mMaxCountX = profile.numFolderColumns;
-        mMaxCountY = profile.numFolderRows;
+        /*mMaxCountX = profile.numFolderColumns;
+        mMaxCountY = profile.numFolderRows;*/
+
+        mMaxCountX = 3;
+        mMaxCountY = 3;
 
         mMaxItemsPerPage = mMaxCountX * mMaxCountY;
 
@@ -158,11 +161,12 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
      */
     public void setupContentDimensions(int count) {
         mAllocatedContentSize = count;
-        calculateGridSize(count, mGridCountX, mGridCountY, mMaxCountX, mMaxCountY, mMaxItemsPerPage,
+        /*calculateGridSize(count, mGridCountX, mGridCountY, mMaxCountX, mMaxCountY, mMaxItemsPerPage,
                 sTmpArray);
         mGridCountX = sTmpArray[0];
-        mGridCountY = sTmpArray[1];
-
+        mGridCountY = sTmpArray[1];*/
+        mGridCountX = mMaxCountX;
+        mGridCountY = mMaxCountY;
         // Update grid size
         for (int i = getPageCount() - 1; i >= 0; i--) {
             getPageAt(i).setGridSize(mGridCountX, mGridCountY);
@@ -256,7 +260,8 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
     private CellLayout createAndAddNewPage() {
         DeviceProfile grid = Launcher.getLauncher(getContext()).getDeviceProfile();
         CellLayout page = (CellLayout) mInflater.inflate(R.layout.folder_page, this, false);
-        page.setCellDimensions(grid.folderCellWidthPx, grid.folderCellHeightPx);
+        //page.setCellDimensions(grid.folderCellWidthPx, grid.folderCellHeightPx);
+        page.setCellDimensions(getResources().getDimensionPixelOffset(R.dimen.folder_cell_layout_width), getResources().getDimensionPixelOffset(R.dimen.folder_cell_layout_height));
         page.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
         page.setInvertIfRtl(true);
         page.setGridSize(mGridCountX, mGridCountY);

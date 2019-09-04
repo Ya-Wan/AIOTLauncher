@@ -426,11 +426,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         // Text should be visible everywhere but the hotseat.
         Object tag = getParent() instanceof FolderIcon ? ((View) getParent()).getTag() : getTag();
         ItemInfo info = tag instanceof ItemInfo ? (ItemInfo) tag : null;
-        return info == null || info.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT;
+        return info == null /*|| info.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT*/;
     }
 
     public void setTextVisibility(boolean visible) {
-        setTextAlpha(visible ? 1 : 0);
+        setTextAlpha(true/*visible*/ ? 1 : 0);
     }
 
     private void setTextAlpha(float alpha) {
@@ -439,12 +439,13 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     }
 
     private int getModifiedColor() {
-        if (mTextAlpha == 0) {
+        return Color.WHITE;
+        /*if (mTextAlpha == 0) {
             // Special case to prevent text shadows in high contrast mode
             return Color.TRANSPARENT;
         }
         return ColorUtils.setAlphaComponent(
-                mTextColor, Math.round(Color.alpha(mTextColor) * mTextAlpha));
+                mTextColor, Math.round(Color.alpha(mTextColor) * mTextAlpha));*/
     }
 
     /**

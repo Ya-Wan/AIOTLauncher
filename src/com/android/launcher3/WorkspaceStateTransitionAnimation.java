@@ -76,8 +76,11 @@ public class WorkspaceStateTransitionAnimation {
         PageAlphaProvider pageAlphaProvider = state.getWorkspacePageAlphaProvider(mLauncher);
         final int childCount = mWorkspace.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            applyChildState(state, (CellLayout) mWorkspace.getChildAt(i), i, pageAlphaProvider,
-                    propertySetter, builder, config);
+            if (mWorkspace.getChildAt(i) instanceof CellLayout) {
+                applyChildState(state, (CellLayout) mWorkspace.getChildAt(i), i, pageAlphaProvider,
+                        propertySetter, builder, config);
+            }
+
         }
 
         int elements = state.getVisibleElements(mLauncher);

@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
@@ -47,7 +48,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Interpolator;
 
 import com.android.launcher3.config.FeatureFlags;
@@ -57,6 +60,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -618,5 +622,68 @@ public final class Utilities {
         Message msg = Message.obtain(handler, callback);
         msg.setAsynchronous(true);
         handler.sendMessage(msg);
+    }
+
+    public static int getScreenWidth(Context context) {
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getDisplay(context).getMetrics(outMetrics);
+        return outMetrics.widthPixels;
+    }
+
+    public static int getScreenHeight(Context context) {
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getDisplay(context).getMetrics(outMetrics);
+        return outMetrics.heightPixels;
+    }
+
+    private static double mInch = 0;
+    public static double getScreenInch(Context context) {
+        if (mInch != 0.0d) {
+            return mInch;
+        }
+
+        try {
+            int realWidth = 0, realHeight = 0;
+            Display display = getDisplay(context);
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            if (android.os.Build.VERSION.SDK_INT >= 17) {
+                Point size = new Point();
+                display.getRealSize(size);
+                realWidth = size.x;
+                realHeight = size.y;
+            } else if (android.os.Build.VERSION.SDK_INT < 17
+                    && android.os.Build.VERSION.SDK_INT >= 14) {
+                Method mGetRawH = Display.class.getMethod("getRawHeight");
+                Method mGetRawW = Display.class.getMethod("getRawWidth");
+                realWidth = (Integer) mGetRawW.invoke(display);
+                realHeight = (Integer) mGetRawH.invoke(display);
+            } else {
+                realWidth = metrics.widthPixels;
+                realHeight = metrics.heightPixels;
+            }
+
+            mInch = formatDouble(Math.sqrt((realWidth / metrics.xdpi) * (realWidth / metrics.xdpi) + (realHeight / metrics.ydpi) * (realHeight / metrics.ydpi)), 1);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return mInch;
+    }
+
+    private static double formatDouble(double d, int newScale) {
+        BigDecimal bd = new BigDecimal(d);
+        return bd.setScale(newScale, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    private static Display getDisplay(Context context) {
+        WindowManager wm = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        if (wm != null) {
+            return wm.getDefaultDisplay();
+        } else {
+            return null;
+        }
     }
 }

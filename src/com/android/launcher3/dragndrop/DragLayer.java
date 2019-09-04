@@ -265,6 +265,7 @@ public class DragLayer extends BaseDragLayer<Launcher> {
     public void animateViewIntoPosition(DragView dragView, final View child, int duration,
             View anchorView) {
         ShortcutAndWidgetContainer parentChildren = (ShortcutAndWidgetContainer) child.getParent();
+        if (parentChildren == null) return;
         CellLayout.LayoutParams lp =  (CellLayout.LayoutParams) child.getLayoutParams();
         parentChildren.measureChild(child);
 

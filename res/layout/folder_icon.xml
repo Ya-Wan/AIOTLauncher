@@ -20,6 +20,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:focusable="true" >
+    <ImageView
+        android:id="@+id/preview_background"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:antialias="true"/>
     <com.android.launcher3.views.DoubleShadowBubbleTextView
         style="@style/BaseIcon.Workspace"
         android:id="@+id/folder_icon_name"

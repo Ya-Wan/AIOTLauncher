@@ -54,6 +54,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.launcher3.Launcher.LauncherOverlay;
@@ -93,6 +95,7 @@ import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.PendingAddShortcutInfo;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.PendingAppWidgetHostView;
+import com.skyworth.aiotsdk.api.AIOTAPI;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -359,6 +362,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
+        if (!FeatureFlags.ENABLE_WORKSPACE_DRAG) return;
+
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragStart", 0, 0);
         }
@@ -423,7 +428,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
 
         if (!mDeferRemoveExtraEmptyScreen) {
-            removeExtraEmptyScreen(true, mDragSourceInternal != null);
+            //removeExtraEmptyScreen(true, mDragSourceInternal != null);
         }
 
         updateChildrenLayersEnabled();
@@ -464,12 +469,12 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public void onViewAdded(View child) {
-        if (!(child instanceof CellLayout)) {
+        /*if (!(child instanceof CellLayout)) {
             throw new IllegalArgumentException("A Workspace can only have CellLayout children.");
         }
         CellLayout cl = ((CellLayout) child);
         cl.setOnInterceptTouchListener(this);
-        cl.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        cl.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);*/
         super.onViewAdded(child);
     }
 
@@ -482,7 +487,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
      * @param qsb an existing qsb to recycle or null.
      */
     public void bindAndInitFirstWorkspaceScreen(View qsb) {
-        if (!FeatureFlags.QSB_ON_FIRST_SCREEN) {
+        insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, 0);
+        /*if (!FeatureFlags.QSB_ON_FIRST_SCREEN) {
             return;
         }
         // Add the first page
@@ -499,7 +505,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         lp.canReorder = false;
         if (!firstPage.addViewToCellLayout(qsb, 0, R.id.search_container_workspace, lp, true)) {
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
-        }
+        }*/
     }
 
     public void removeAllWorkspaceScreens() {
@@ -540,15 +546,15 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         insertNewWorkspaceScreen(screenId, getChildCount());
     }
 
-    public CellLayout insertNewWorkspaceScreen(long screenId, int insertIndex) {
+    public View insertNewWorkspaceScreen(long screenId, int insertIndex) {
         if (mWorkspaceScreens.containsKey(screenId)) {
             throw new RuntimeException("Screen id " + screenId + " already exists!");
         }
 
         // Inflate the cell layout, but do not add it automatically so that we can get the newly
         // created CellLayout.
-        CellLayout newScreen = (CellLayout) LayoutInflater.from(getContext()).inflate(
-                        R.layout.workspace_screen, this, false /* attachToRoot */);
+        /*CellLayout newScreen = (CellLayout) LayoutInflater.from(getContext()).inflate(
+                        R.layout.workspace_screen, this, false *//* attachToRoot *//*);
         newScreen.getShortcutsAndWidgets().setId(R.id.workspace_page_container);
         int paddingLeftRight = mLauncher.getDeviceProfile().cellLayoutPaddingLeftRightPx;
         int paddingBottom = mLauncher.getDeviceProfile().cellLayoutBottomPaddingPx;
@@ -563,6 +569,24 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (mLauncher.getAccessibilityDelegate().isInAccessibleDrag()) {
             newScreen.enableAccessibleDrag(true, CellLayout.WORKSPACE_ACCESSIBILITY_DRAG);
         }
+
+        return newScreen;*/
+
+        RelativeLayout newScreen = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
+                R.layout.smart_center_layout, this, false /* attachToRoot */);
+
+        //newScreen.setOnLongClickListener(mLongClickListener);
+        //newScreen.setOnClickListener(mLauncher);
+        newScreen.setSoundEffectsEnabled(false);
+        //mWorkspaceScreens.put(screenId, newScreen);
+        mScreenOrder.add(insertIndex, screenId);
+
+
+        LinearLayout aiotViewContainer = newScreen.findViewById(R.id.smart_center_container);
+        View aiotView = AIOTAPI.getInstance().getView(786,  928,
+                Utilities.getScreenWidth(mLauncher), Utilities.getScreenHeight(mLauncher), (float) Utilities.getScreenInch(mLauncher));
+        aiotViewContainer.addView(aiotView);
+        addView(newScreen, insertIndex);
 
         return newScreen;
     }
@@ -589,7 +613,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             return;
         }
         if (!mWorkspaceScreens.containsKey(EXTRA_EMPTY_SCREEN_ID)) {
-            insertNewWorkspaceScreen(EXTRA_EMPTY_SCREEN_ID);
+            //insertNewWorkspaceScreen(EXTRA_EMPTY_SCREEN_ID);
         }
     }
 
@@ -970,11 +994,12 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        return false;
+        /*if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mXDown = ev.getX();
             mYDown = ev.getY();
         }
-        return super.onInterceptTouchEvent(ev);
+        return super.onInterceptTouchEvent(ev);*/
     }
 
     @Override
@@ -1101,6 +1126,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     protected void overScroll(float amount) {
+        if (!FeatureFlags.ENABLE_WORKSPACE_OVER_SCROLL) return;
+
         boolean shouldScrollOverlay = mLauncherOverlay != null &&
                 ((amount <= 0 && !mIsRtl) || (amount >= 0 && mIsRtl));
 
@@ -1303,19 +1330,24 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (!workspaceInModalState() && !mIsSwitchingState && !mDragController.isDragging()) {
             int screenCenter = getScrollX() + getMeasuredWidth() / 2;
             for (int i = 0; i < getChildCount(); i++) {
-                CellLayout child = (CellLayout) getChildAt(i);
-                if (child != null) {
-                    float scrollProgress = getScrollProgress(screenCenter, child, i);
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    if (mWorkspaceFadeInAdjacentScreens) {
-                        child.getShortcutsAndWidgets().setAlpha(alpha);
-                    } else {
-                        // Pages that are off-screen aren't important for accessibility.
-                        child.getShortcutsAndWidgets().setImportantForAccessibility(
-                                alpha > 0 ? IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                        : IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                if (getChildAt(i) instanceof CellLayout) {
+                    CellLayout child = (CellLayout) getChildAt(i);
+                    if (child != null) {
+                        float scrollProgress = getScrollProgress(screenCenter, child, i);
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        if (mWorkspaceFadeInAdjacentScreens) {
+                            child.getShortcutsAndWidgets().setAlpha(alpha);
+                        } else {
+                            // Pages that are off-screen aren't important for accessibility.
+                            child.getShortcutsAndWidgets().setImportantForAccessibility(
+                                    alpha > 0 ? IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                            : IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                        }
                     }
+                } else {
+                    getChildAt(i).setAlpha(1);
                 }
+
             }
         }
     }
@@ -1373,8 +1405,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
                 enableHwLayersOnVisiblePages();
             } else {
                 for (int i = 0; i < getPageCount(); i++) {
-                    final CellLayout cl = (CellLayout) getChildAt(i);
-                    cl.enableHardwareLayer(false);
+                    if (getChildAt(i) instanceof CellLayout) {
+                        final CellLayout cl = (CellLayout) getChildAt(i);
+                        cl.enableHardwareLayer(false);
+                    }
                 }
             }
         }
@@ -1404,10 +1438,12 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             }
 
             for (int i = 0; i < screenCount; i++) {
-                final CellLayout layout = (CellLayout) getPageAt(i);
-                // enable layers between left and right screen inclusive.
-                boolean enableLayer = leftScreen <= i && i <= rightScreen;
-                layout.enableHardwareLayer(enableLayer);
+                if (getPageAt(i) instanceof CellLayout) {
+                    final CellLayout layout = (CellLayout) getPageAt(i);
+                    // enable layers between left and right screen inclusive.
+                    boolean enableLayer = leftScreen <= i && i <= rightScreen;
+                    layout.enableHardwareLayer(enableLayer);
+                }
             }
         }
     }
@@ -1489,7 +1525,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (!mLauncher.getAccessibilityDelegate().isInAccessibleDrag()) {
             int total = getPageCount();
             for (int i = 0; i < total; i++) {
-                updateAccessibilityFlags(accessibilityFlag, (CellLayout) getPageAt(i));
+                if (getPageAt(i) instanceof CellLayout) {
+                    updateAccessibilityFlags(accessibilityFlag, (CellLayout) getPageAt(i));
+                }
             }
             setImportantForAccessibility(accessibilityFlag);
         }
@@ -2361,7 +2399,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
         // Always pick the current page.
         if (layout == null && nextPage >= 0 && nextPage < getPageCount()) {
-            layout = (CellLayout) getChildAt(nextPage);
+            if (getChildAt(nextPage) instanceof CellLayout) {
+                layout = (CellLayout) getChildAt(nextPage);
+            }
         }
         if (layout != mDragTargetLayout) {
             setCurrentDropLayout(layout);
@@ -3001,7 +3041,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         ArrayList<CellLayout> layouts = new ArrayList<>();
         int screenCount = getChildCount();
         for (int screen = 0; screen < screenCount; screen++) {
-            layouts.add(((CellLayout) getChildAt(screen)));
+            if (getChildAt(screen) instanceof CellLayout) {
+                layouts.add(((CellLayout) getChildAt(screen)));
+            }
         }
         if (mLauncher.getHotseat() != null) {
             layouts.add(mLauncher.getHotseat().getLayout());
@@ -3018,7 +3060,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         ArrayList<ShortcutAndWidgetContainer> childrenLayouts = new ArrayList<>();
         int screenCount = getChildCount();
         for (int screen = 0; screen < screenCount; screen++) {
-            childrenLayouts.add(((CellLayout) getChildAt(screen)).getShortcutsAndWidgets());
+            if (getChildAt(screen) instanceof CellLayout) {
+
+                childrenLayouts.add(((CellLayout) getChildAt(screen)).getShortcutsAndWidgets());
+            }
         }
         if (mLauncher.getHotseat() != null) {
             childrenLayouts.add(mLauncher.getHotseat().getLayout().getShortcutsAndWidgets());

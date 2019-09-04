@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="23dp"
+    android:paddingEnd="23dp">
+
+    <include layout="@layout/smart_center_title" />
+
+    <include layout="@layout/smart_center_device_status" />
+
+
+    <LinearLayout
+        android:id="@+id/smart_center_container"
+        android:layout_width="match_parent"
+        android:layout_height="968px"
+        android:layout_below="@+id/smart_center_device_status_container"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:orientation="vertical" />
+
+    <include
+        android:id="@+id/hotseat"
+        layout="@layout/hotseat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true" />
+
+
+</RelativeLayout>

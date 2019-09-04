@@ -85,6 +85,8 @@ public class FolderAnimationManager {
         mContent = folder.mContent;
         mFolderBackground = (GradientDrawable) mFolder.getBackground();
 
+        //mFolderBackground = (GradientDrawable) mFolder.findViewById(R.id.folder_content_wrapper).getBackground();
+
         mFolderIcon = folder.mFolderIcon;
         mPreviewBackground = mFolderIcon.mBackground;
 

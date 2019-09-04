@@ -25,7 +25,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
 import android.view.View.AccessibilityDelegate;
 
 import com.android.launcher3.DeviceProfile.OnDeviceProfileChangeListener;
@@ -34,6 +36,7 @@ import com.android.launcher3.logging.UserEventDispatcher.UserEventDelegate;
 import com.android.launcher3.uioverrides.UiFactory;
 import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.launcher3.util.SystemUiController;
+import com.skyworth.aiotsdk.api.AIOTAPI;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -136,6 +139,14 @@ public abstract class BaseActivity extends Activity implements UserEventDelegate
     }
 
     @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        AIOTAPI.getInstance().init(this);
+        AIOTAPI.getInstance().onCreate();
+    }
+
+    @Override
     protected void onStart() {
         mActivityFlags |= ACTIVITY_STATE_STARTED;
         super.onStart();
@@ -145,6 +156,8 @@ public abstract class BaseActivity extends Activity implements UserEventDelegate
     protected void onResume() {
         mActivityFlags |= ACTIVITY_STATE_RESUMED | ACTIVITY_STATE_USER_ACTIVE;
         super.onResume();
+
+        AIOTAPI.getInstance().onResume();
     }
 
     @Override
@@ -166,18 +179,27 @@ public abstract class BaseActivity extends Activity implements UserEventDelegate
         mActivityFlags &= ~ACTIVITY_STATE_STARTED & ~ACTIVITY_STATE_USER_ACTIVE;
         mForceInvisible = 0;
         super.onStop();
+
+        AIOTAPI.getInstance().onStop();
     }
 
     @Override
     protected void onPause() {
         mActivityFlags &= ~ACTIVITY_STATE_RESUMED;
         super.onPause();
-
+        AIOTAPI.getInstance().onPause();
         // Reset the overridden sysui flags used for the task-swipe launch animation, we do this
         // here instead of at the end of the animation because the start of the new activity does
         // not happen immediately, which would cause us to reset to launcher's sysui flags and then
         // back to the new app (causing a flash)
         getSystemUiController().updateUiState(UI_STATE_OVERVIEW, 0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        AIOTAPI.getInstance().onDestroy();
     }
 
     public boolean isStarted() {
