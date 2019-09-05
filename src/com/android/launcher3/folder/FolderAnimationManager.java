@@ -116,6 +116,13 @@ public class FolderAnimationManager {
         ClippedFolderIconLayoutRule rule = mFolderIcon.getLayoutRule();
         final List<BubbleTextView> itemsInPreview = mFolderIcon.getPreviewItems();
 
+        float iconSize;
+        if (itemsInPreview.size() == 0) {
+            iconSize = mLauncher.getDeviceProfile().iconSizePx;
+        } else {
+            iconSize = itemsInPreview.get(0).getIconSize();
+        }
+
         // Match position of the FolderIcon
         final Rect folderIconPos = new Rect();
         float scaleRelativeToDragLayer = mLauncher.getDragLayer()
@@ -126,7 +133,7 @@ public class FolderAnimationManager {
         // Match size/scale of icons in the preview
         float previewScale = rule.scaleForItem(itemsInPreview.size());
         float previewSize = rule.getIconSize() * previewScale;
-        float initialScale = previewSize / itemsInPreview.get(0).getIconSize()
+        float initialScale = previewSize / iconSize
                 * scaleRelativeToDragLayer;
         final float finalScale = 1f;
         float scale = mIsOpening ? initialScale : finalScale;
@@ -246,6 +253,8 @@ public class FolderAnimationManager {
                 ? numItemsInPreview : MAX_NUM_ITEMS_IN_PREVIEW;
 
         TimeInterpolator previewItemInterpolator = getPreviewItemInterpolator();
+
+        if (mContent.getPageAt(0) == null) return;
 
         ShortcutAndWidgetContainer cwc = mContent.getPageAt(0).getShortcutsAndWidgets();
         for (int i = 0; i < numItemsInPreview; ++i) {

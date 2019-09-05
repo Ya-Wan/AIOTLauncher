@@ -24,6 +24,7 @@
             android:src="@drawable/ic_device_status" />
 
         <TextView
+            android:id="@+id/device_status_tv"
             android:layout_width="wrap_content"
             android:layout_height="15dp"
             android:layout_marginStart="10dp"
@@ -46,6 +47,7 @@
             android:src="@drawable/ic_home_environment" />
 
         <TextView
+            android:id="@+id/home_environment_tv"
             android:layout_width="wrap_content"
             android:layout_height="15dp"
             android:layout_marginStart="10dp"

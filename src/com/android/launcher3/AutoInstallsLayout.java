@@ -22,6 +22,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.LauncherActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -32,6 +33,7 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Process;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -39,11 +41,14 @@ import android.util.Pair;
 import android.util.Patterns;
 import com.android.launcher3.LauncherProvider.SqlArguments;
 import com.android.launcher3.LauncherSettings.Favorites;
+import com.android.launcher3.compat.LauncherAppsCompat;
+import com.android.launcher3.compat.UserManagerCompat;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.util.Thunk;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,6 +70,8 @@ public class AutoInstallsLayout {
     private static final String FORMATTED_LAYOUT_RES_WITH_HOSTEAT = "default_layout_%dx%d_h%s";
     private static final String FORMATTED_LAYOUT_RES = "default_layout_%dx%d";
     private static final String LAYOUT_RES = "default_layout";
+
+    private ArrayList<String> intentList = new ArrayList<>();
 
     static AutoInstallsLayout get(Context context, AppWidgetHost appWidgetHost,
             LayoutParserCallback callback) {
@@ -358,7 +365,7 @@ public class AutoInstallsLayout {
                         .setComponent(cn)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-
+                    intentList.add(intent.toUri(0));
                     return addShortcut(info.loadLabel(mPackageManager).toString(),
                             intent, Favorites.ITEM_TYPE_APPLICATION);
                 } catch (PackageManager.NameNotFoundException e) {
@@ -399,6 +406,7 @@ public class AutoInstallsLayout {
                 .setComponent(new ComponentName(packageName, className))
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                         Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            intentList.add(intent.toUri(0));
             return addShortcut(mContext.getString(R.string.package_state_unknown), intent,
                     Favorites.ITEM_TYPE_APPLICATION);
         }
@@ -447,6 +455,7 @@ public class AutoInstallsLayout {
 
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                         Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            intentList.add(intent.toUri(0));
             return addShortcut(mSourceRes.getString(titleResId),
                     intent, Favorites.ITEM_TYPE_SHORTCUT);
         }
@@ -593,31 +602,92 @@ public class AutoInstallsLayout {
 
             long addedId = folderId;
 
+            if (TextUtils.equals(title, mContext.getResources().getString(R.string.all_app_folder_name))) {
+                loadAllAppsItem(folderId);
+            }
+
             // We can only have folders with >= 2 items, so we need to remove the
             // folder and clean up if less than 2 items were included, or some
             // failed to add, and less than 2 were actually added
-            if (folderItems.size() < 2) {
-                // Delete the folder
-                Uri uri = Favorites.getContentUri(folderId);
-                SqlArguments args = new SqlArguments(uri, null, null);
-                mDb.delete(args.table, args.where, args.args);
-                addedId = -1;
+            if (FeatureFlags.REPLACE_FOLDER_WITH_FINAL_ITEM) {
+                if (folderItems.size() < 2) {
+                    // Delete the folder
+                    Uri uri = Favorites.getContentUri(folderId);
+                    SqlArguments args = new SqlArguments(uri, null, null);
+                    mDb.delete(args.table, args.where, args.args);
+                    addedId = -1;
 
-                // If we have a single item, promote it to where the folder
-                // would have been.
-                if (folderItems.size() == 1) {
-                    final ContentValues childValues = new ContentValues();
-                    copyInteger(myValues, childValues, Favorites.CONTAINER);
-                    copyInteger(myValues, childValues, Favorites.SCREEN);
-                    copyInteger(myValues, childValues, Favorites.CELLX);
-                    copyInteger(myValues, childValues, Favorites.CELLY);
+                    // If we have a single item, promote it to where the folder
+                    // would have been.
+                    if (folderItems.size() == 1) {
+                        final ContentValues childValues = new ContentValues();
+                        copyInteger(myValues, childValues, Favorites.CONTAINER);
+                        copyInteger(myValues, childValues, Favorites.SCREEN);
+                        copyInteger(myValues, childValues, Favorites.CELLX);
+                        copyInteger(myValues, childValues, Favorites.CELLY);
 
-                    addedId = folderItems.get(0);
-                    mDb.update(Favorites.TABLE_NAME, childValues,
-                            Favorites._ID + "=" + addedId, null);
+                        addedId = folderItems.get(0);
+                        mDb.update(Favorites.TABLE_NAME, childValues,
+                                Favorites._ID + "=" + addedId, null);
+                    }
                 }
             }
+
             return addedId;
+        }
+    }
+
+    private void loadAllAppsItem(long folderId) {
+        final List<UserHandle> profiles = UserManagerCompat.getInstance(mContext).getUserProfiles();
+        for (UserHandle user : profiles) {
+            // Query for the set of apps
+            final List<LauncherActivityInfo> apps = LauncherAppsCompat.getInstance(mContext).getActivityList(null, user);
+            // Fail if we don't have any apps
+            // TODO: Fix this. Only fail for the current user.
+            if (apps == null || apps.isEmpty()) {
+                return;
+            }
+
+            // Create the ApplicationInfos
+            for (int i = 0; i < apps.size(); i++) {
+                LauncherActivityInfo app = apps.get(i);
+                // This builds the icon bitmaps.
+
+                final String packageName = app.getComponentName().getPackageName();
+                final String className = app.getComponentName().getClassName();
+
+                if (!TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(className)) {
+                    ActivityInfo info;
+                    try {
+                        ComponentName cn;
+                        try {
+                            cn = new ComponentName(packageName, className);
+                            info = mPackageManager.getActivityInfo(cn, 0);
+                        } catch (PackageManager.NameNotFoundException nnfe) {
+                            String[] packages = mPackageManager.currentToCanonicalPackageNames(
+                                    new String[] { packageName });
+                            cn = new ComponentName(packages[0], className);
+                            info = mPackageManager.getActivityInfo(cn, 0);
+                        }
+                        final Intent intent = new Intent(Intent.ACTION_MAIN, null)
+                                .addCategory(Intent.CATEGORY_LAUNCHER)
+                                .setComponent(cn)
+                                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
+                        mValues.put(Favorites.CONTAINER, folderId);
+                        mValues.put(Favorites.RANK, i);
+
+                        if (!intentList.contains(intent.toUri(0))) {
+                            addShortcut(info.loadLabel(mPackageManager).toString(),
+                                    intent, Favorites.ITEM_TYPE_APPLICATION);
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.e(TAG, "Favorite not found: " + packageName + "/" + className);
+                    }
+
+                }
+            }
         }
     }
 

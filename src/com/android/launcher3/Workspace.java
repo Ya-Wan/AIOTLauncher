@@ -35,7 +35,9 @@ import android.annotation.SuppressLint;
 import android.app.WallpaperManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -56,6 +58,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.launcher3.Launcher.LauncherOverlay;
@@ -249,6 +252,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
+
+    TextView deviceStatusTv,homeEnvironmentTv;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -577,6 +582,13 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
         //newScreen.setOnLongClickListener(mLongClickListener);
         //newScreen.setOnClickListener(mLauncher);
+        newScreen.findViewById(R.id.smart_device_add).setOnClickListener(v -> {
+            intentToIOTDeviceAdd();
+        });
+
+        deviceStatusTv = newScreen.findViewById(R.id.device_status_tv);
+        homeEnvironmentTv = newScreen.findViewById(R.id.home_environment_tv);
+
         newScreen.setSoundEffectsEnabled(false);
         //mWorkspaceScreens.put(screenId, newScreen);
         mScreenOrder.add(insertIndex, screenId);
@@ -3507,6 +3519,24 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         @Override
         public void onAnimationEnd(Animator animation) {
             onEndStateTransition();
+        }
+    }
+
+    private void intentToIOTDeviceAdd() {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.skyworth.smartsystem.vhome", "com.skyworth.smartsystem.vhome.SplashActivity"));
+        mLauncher.startActivity(intent);
+    }
+
+    public void setDeviceStatusTv(String status) {
+        if (deviceStatusTv != null) {
+            deviceStatusTv.setText(status);
+        }
+    }
+
+    public void setHomeEnvironmentTv(String environment) {
+        if (homeEnvironmentTv != null) {
+            homeEnvironmentTv.setText(environment);
         }
     }
 }

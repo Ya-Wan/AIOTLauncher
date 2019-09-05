@@ -76,6 +76,7 @@ import android.widget.Toast;
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.Workspace.ItemOperator;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
+import com.android.launcher3.aiot.AIOTStatus;
 import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.allapps.DiscoveryBounce;
@@ -245,6 +246,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
     private RotationHelper mRotationHelper;
 
+    private AIOTStatus aiotStatus;
 
     private final Handler mHandler = new Handler();
     private final Runnable mLogOnDelayedResume = this::logOnDelayedResume;
@@ -343,6 +345,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             mLauncherCallbacks.onCreate(savedInstanceState);
         }
         mRotationHelper.initialize();
+
+        aiotStatus = new AIOTStatus(this);
+        aiotStatus.bindAIOTService();
 
         TraceHelper.endSection("Launcher-onCreate");
     }
@@ -2207,6 +2212,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     @Override
     public void bindAppsAddedOrUpdated(ArrayList<AppInfo> apps) {
         mAppsView.getAppsStore().addOrUpdateApps(apps);
+        mHotseat.updateShortcuts(apps);
     }
 
     @Override

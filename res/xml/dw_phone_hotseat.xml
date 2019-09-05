@@ -17,7 +17,7 @@
 <favorites xmlns:launcher="http://schemas.android.com/apk/res-auto/com.android.launcher3">
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
     <!-- Dialer, Messaging, [All Apps], Browser, Camera -->
-    <resolve
+    <!--<resolve
         launcher:container="-101"
         launcher:screen="0"
         launcher:x="0"
@@ -39,7 +39,7 @@
         <favorite launcher:uri="mmsto:" />
     </resolve>
 
-    <!-- All Apps -->
+    &lt;!&ndash; All Apps &ndash;&gt;
 
     <resolve
         launcher:container="-101"
@@ -58,6 +58,372 @@
         launcher:y="0" >
         <favorite launcher:uri="#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end" />
         <favorite launcher:uri="#Intent;action=android.intent.action.CAMERA_BUTTON;end" />
-    </resolve>
+    </resolve>-->
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="0"
+        launcher:x="0"
+        launcher:y="0"
+        launcher:title="@string/education_folder_name" >
+
+        <favorite
+            launcher:packageName="com.google.android.googlequicksearchbox"
+            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+
+    </folder>
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="1"
+        launcher:x="1"
+        launcher:y="0"
+        launcher:title="@string/work_folder_name" >
+
+        <favorite
+            launcher:packageName="com.google.android.googlequicksearchbox"
+            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.android.chrome"
+            launcher:className="com.google.android.apps.chrome.Main"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.gm"
+            launcher:className="com.google.android.gm.ConversationListActivityGmail"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.apps.maps"
+            launcher:className="com.google.android.maps.MapsActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.youtube"
+            launcher:className="com.google.android.youtube.app.honeycomb.Shell$HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.apps.docs"
+            launcher:className="com.google.android.apps.docs.app.NewMainProxyActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.music"
+            launcher:className="com.android.music.activitymanagement.TopLevelActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.videos"
+            launcher:className="com.google.android.youtube.videos.EntryPoint"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.talk"
+            launcher:className="com.google.android.talk.SigningInActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.apps.tachyon"
+            launcher:className="com.google.android.apps.tachyon.MainActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="3" />
+        <favorite
+            launcher:packageName="com.google.android.apps.photos"
+            launcher:className="com.google.android.apps.photos.home.HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="3" />
+
+    </folder>
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="2"
+        launcher:x="2"
+        launcher:y="0"
+        launcher:title="@string/entertainment_folder_name" >
+
+        <favorite
+            launcher:packageName="com.google.android.googlequicksearchbox"
+            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.android.chrome"
+            launcher:className="com.google.android.apps.chrome.Main"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.gm"
+            launcher:className="com.google.android.gm.ConversationListActivityGmail"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.apps.maps"
+            launcher:className="com.google.android.maps.MapsActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.youtube"
+            launcher:className="com.google.android.youtube.app.honeycomb.Shell$HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.apps.docs"
+            launcher:className="com.google.android.apps.docs.app.NewMainProxyActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.music"
+            launcher:className="com.android.music.activitymanagement.TopLevelActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.videos"
+            launcher:className="com.google.android.youtube.videos.EntryPoint"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.talk"
+            launcher:className="com.google.android.talk.SigningInActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.apps.tachyon"
+            launcher:className="com.google.android.apps.tachyon.MainActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="3" />
+        <favorite
+            launcher:packageName="com.google.android.apps.photos"
+            launcher:className="com.google.android.apps.photos.home.HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="3" />
+
+    </folder>
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="3"
+        launcher:x="3"
+        launcher:y="0"
+        launcher:title="@string/life_folder_name" >
+
+        <favorite
+            launcher:packageName="com.google.android.googlequicksearchbox"
+            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.android.chrome"
+            launcher:className="com.google.android.apps.chrome.Main"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.gm"
+            launcher:className="com.google.android.gm.ConversationListActivityGmail"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.apps.maps"
+            launcher:className="com.google.android.maps.MapsActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.youtube"
+            launcher:className="com.google.android.youtube.app.honeycomb.Shell$HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.apps.docs"
+            launcher:className="com.google.android.apps.docs.app.NewMainProxyActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.music"
+            launcher:className="com.android.music.activitymanagement.TopLevelActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.videos"
+            launcher:className="com.google.android.youtube.videos.EntryPoint"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.talk"
+            launcher:className="com.google.android.talk.SigningInActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.apps.tachyon"
+            launcher:className="com.google.android.apps.tachyon.MainActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="3" />
+        <favorite
+            launcher:packageName="com.google.android.apps.photos"
+            launcher:className="com.google.android.apps.photos.home.HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="3" />
+
+    </folder>
+
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="4"
+        launcher:x="4"
+        launcher:y="0"
+        launcher:title="@string/all_app_folder_name" >
+
+        <!--<favorite
+            launcher:packageName="com.google.android.googlequicksearchbox"
+            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.android.chrome"
+            launcher:className="com.google.android.apps.chrome.Main"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.gm"
+            launcher:className="com.google.android.gm.ConversationListActivityGmail"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.google.android.apps.maps"
+            launcher:className="com.google.android.maps.MapsActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.youtube"
+            launcher:className="com.google.android.youtube.app.honeycomb.Shell$HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.apps.docs"
+            launcher:className="com.google.android.apps.docs.app.NewMainProxyActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="1" />
+        <favorite
+            launcher:packageName="com.google.android.music"
+            launcher:className="com.android.music.activitymanagement.TopLevelActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.videos"
+            launcher:className="com.google.android.youtube.videos.EntryPoint"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.talk"
+            launcher:className="com.google.android.talk.SigningInActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="2" />
+        <favorite
+            launcher:packageName="com.google.android.apps.tachyon"
+            launcher:className="com.google.android.apps.tachyon.MainActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="3" />
+        <favorite
+            launcher:packageName="com.google.android.apps.photos"
+            launcher:className="com.google.android.apps.photos.home.HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="3" />-->
+
+    </folder>
 
 </favorites>

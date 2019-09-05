@@ -473,10 +473,13 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
      * Sets the focus on the first visible child.
      */
     public void setFocusOnFirstChild() {
-        View firstChild = getCurrentCellLayout().getChildAt(0, 0);
-        if (firstChild != null) {
-            firstChild.requestFocus();
+        if (getCurrentCellLayout() != null) {
+            View firstChild = getCurrentCellLayout().getChildAt(0, 0);
+            if (firstChild != null) {
+                firstChild.requestFocus();
+            }
         }
+
     }
 
     @Override

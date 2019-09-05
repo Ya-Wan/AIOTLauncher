@@ -38,10 +38,14 @@ import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Target;
 
+import java.util.ArrayList;
+
 public class Hotseat extends FrameLayout implements LogContainerProvider, Insettable {
 
     private final Launcher mLauncher;
     private CellLayout mContent;
+
+    public static final int MAX_ITEM_COUNT = 5;
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHasVerticalHotseat;
@@ -173,4 +177,20 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
         setLayoutParams(lp);
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
+
+    void updateShortcuts(ArrayList<AppInfo> infos) {
+        final ViewGroup layout = getLayout().getShortcutsAndWidgets();
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            final View view = layout.getChildAt(i);
+            if (view.getTag() instanceof FolderInfo) {
+                FolderInfo folderInfo = (FolderInfo) view.getTag();
+                if (folderInfo.screenId == MAX_ITEM_COUNT - 1) {
+                    for (AppInfo info : infos) {
+                        folderInfo.add(new ShortcutInfo(info), false);
+                    }
+                }
+            }
+        }
+    }
+
 }

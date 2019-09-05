@@ -113,7 +113,7 @@ public class PageIndicatorDots extends View implements PageIndicator {
         mDotRadius = getResources().getDimension(R.dimen.page_indicator_dot_size) / 2;
         setOutlineProvider(new MyOutlineProver());
 
-        mActiveColor = Themes.getColorAccent(context);
+        mActiveColor = Themes.getAttrColor(context, android.R.attr.colorControlNormal);
         mInActiveColor = Themes.getAttrColor(context, android.R.attr.colorControlHighlight);
 
         mIsRtl = Utilities.isRtl(getResources());

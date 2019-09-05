@@ -26,6 +26,7 @@ import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.text.InputType;
@@ -566,6 +567,10 @@ public class Folder extends AbstractFloatingView implements DragSource,
             mFolderName.setTranslationX(0);
         }
 
+        DragLayer parent = (DragLayer) mLauncher.findViewById(R.id.drag_layer);
+
+        parent.setBackgroundColor(getResources().getColor(R.color.black_mask_color));
+
         mPageIndicator.stopAllAnimations();
         startAnimation(anim);
 
@@ -624,6 +629,9 @@ public class Folder extends AbstractFloatingView implements DragSource,
             public void onAnimationEnd(Animator animation) {
                 closeComplete(true);
                 announceAccessibilityChanges();
+                DragLayer parent = (DragLayer) mLauncher.findViewById(R.id.drag_layer);
+
+                parent.setBackgroundColor(Color.TRANSPARENT);
             }
         });
         startAnimation(a);
@@ -1051,6 +1059,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
     }
 
     @Thunk void replaceFolderWithFinalItem() {
+        if (!FeatureFlags.REPLACE_FOLDER_WITH_FINAL_ITEM) return;
         // Add the last remaining child to the workspace in place of the folder
         Runnable onCompleteRunnable = new Runnable() {
             @Override
