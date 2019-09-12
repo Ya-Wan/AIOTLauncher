@@ -30,6 +30,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.logging.UserEventDispatcher.LogContainerProvider;
@@ -44,8 +45,6 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
 
     private final Launcher mLauncher;
     private CellLayout mContent;
-
-    public static final int MAX_ITEM_COUNT = 5;
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHasVerticalHotseat;
@@ -96,7 +95,7 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
         } else {
             mContent.setGridSize(idp.numHotseatIcons, 1);
         }
-
+        Toast.makeText(mLauncher, "" + idp.numHotseatIcons, Toast.LENGTH_SHORT).show();
         if (!FeatureFlags.NO_ALL_APPS_ICON) {
             // Add the Apps button
             Context context = getContext();
@@ -175,16 +174,18 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
         getLayout().setPadding(padding.left, padding.top, padding.right, padding.bottom);
 
         setLayoutParams(lp);
+        setBackgroundColor(0XFF0000);
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
 
     void updateShortcuts(ArrayList<AppInfo> infos) {
         final ViewGroup layout = getLayout().getShortcutsAndWidgets();
+        InvariantDeviceProfile idp = mLauncher.getDeviceProfile().inv;
         for (int i = 0; i < layout.getChildCount(); i++) {
             final View view = layout.getChildAt(i);
             if (view.getTag() instanceof FolderInfo) {
                 FolderInfo folderInfo = (FolderInfo) view.getTag();
-                if (folderInfo.screenId == MAX_ITEM_COUNT - 1) {
+                if (folderInfo.screenId == idp.numHotseatIcons - 1) {
                     for (AppInfo info : infos) {
                         folderInfo.add(new ShortcutInfo(info), false);
                     }

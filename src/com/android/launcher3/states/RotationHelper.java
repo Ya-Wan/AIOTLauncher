@@ -25,6 +25,7 @@ import static com.android.launcher3.Utilities.ATLEAST_NOUGAT;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 
 import com.android.launcher3.R;
@@ -148,6 +149,7 @@ public class RotationHelper implements OnSharedPreferenceChangeListener {
         if (activityFlags != mLastActivityFlags) {
             mLastActivityFlags = activityFlags;
             mActivity.setRequestedOrientation(activityFlags);
+            //mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
 

@@ -59,4 +59,5 @@ abstract class BaseFlags {
     public static final boolean ENABLE_WORKSPACE_DRAG = false;
     public static final boolean ENABLE_WORKSPACE_OVER_SCROLL = false;
     public static final boolean REPLACE_FOLDER_WITH_FINAL_ITEM = false;
+    public static final boolean ENABLE_DRAG_UNINSTALL = false;
 }

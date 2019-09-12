@@ -83,7 +83,7 @@ public class FolderAnimationManager {
     public FolderAnimationManager(Folder folder, boolean isOpening) {
         mFolder = folder;
         mContent = folder.mContent;
-        mFolderBackground = (GradientDrawable) mFolder.getBackground();
+        mFolderBackground = (GradientDrawable) mFolder.mContentWrapper.getBackground();
 
         //mFolderBackground = (GradientDrawable) mFolder.findViewById(R.id.folder_content_wrapper).getBackground();
 
@@ -162,7 +162,8 @@ public class FolderAnimationManager {
         final float yDistance = initialY - lp.y;
 
         // Set up the Folder background.
-        final int finalColor = Themes.getAttrColor(mContext, android.R.attr.colorPrimary);
+        //final int finalColor = Themes.getAttrColor(mContext, android.R.attr.colorPrimary);
+        final int finalColor = mContent.getResources().getColor(R.color.launcher_primary_color);
         final int initialColor =
                 ColorUtils.setAlphaComponent(finalColor, mPreviewBackground.getBackgroundAlpha());
         mFolderBackground.setColor(mIsOpening ? initialColor : finalColor);

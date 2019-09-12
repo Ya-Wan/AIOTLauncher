@@ -48,14 +48,19 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -66,6 +71,7 @@ import com.android.launcher3.LauncherAppWidgetHost.ProviderChangedListener;
 import com.android.launcher3.LauncherStateManager.AnimationConfig;
 import com.android.launcher3.accessibility.AccessibleDragListenerAdapter;
 import com.android.launcher3.accessibility.WorkspaceAccessibilityHelper;
+import com.android.launcher3.aiot.RefrigeratorControlPopupWindow;
 import com.android.launcher3.anim.AnimatorSetBuilder;
 import com.android.launcher3.anim.Interpolators;
 import com.android.launcher3.badge.FolderBadgeInfo;
@@ -99,6 +105,10 @@ import com.android.launcher3.widget.PendingAddShortcutInfo;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.PendingAppWidgetHostView;
 import com.skyworth.aiotsdk.api.AIOTAPI;
+import com.skyworth.aiotsdk.api.AIOTConstant;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -253,7 +263,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
-    TextView deviceStatusTv,homeEnvironmentTv;
+    private RelativeLayout newScreen;
+    private TextView deviceOpenNumTv,airQualityTv;
+    private SwipeRefreshLayout smartCenterWrapper;
+    private ImageView deviceAddBt;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -577,17 +590,24 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
         return newScreen;*/
 
-        RelativeLayout newScreen = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
+        newScreen = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
                 R.layout.smart_center_layout, this, false /* attachToRoot */);
 
         //newScreen.setOnLongClickListener(mLongClickListener);
         //newScreen.setOnClickListener(mLauncher);
-        newScreen.findViewById(R.id.smart_device_add).setOnClickListener(v -> {
-            intentToIOTDeviceAdd();
+        smartCenterWrapper = newScreen.findViewById(R.id.smart_center_wrapper);
+        smartCenterWrapper.setProgressViewOffset(false, -1000, -1000);
+        smartCenterWrapper.setOnRefreshListener(() -> {
+            showRefrigeratorControlView();
+            smartCenterWrapper.setRefreshing(false);
         });
+        deviceAddBt = newScreen.findViewById(R.id.smart_device_add);
+        deviceAddBt.setOnClickListener(v -> intentToIOTDeviceAdd());
 
-        deviceStatusTv = newScreen.findViewById(R.id.device_status_tv);
-        homeEnvironmentTv = newScreen.findViewById(R.id.home_environment_tv);
+        deviceOpenNumTv = newScreen.findViewById(R.id.device_open_num_tv);
+        airQualityTv = newScreen.findViewById(R.id.air_quality_tv);
+
+        parseAiotData((String) AIOTAPI.getInstance().getInfo(AIOTConstant.MESSAGE_HOME_INFO, null));
 
         newScreen.setSoundEffectsEnabled(false);
         //mWorkspaceScreens.put(screenId, newScreen);
@@ -595,7 +615,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
 
         LinearLayout aiotViewContainer = newScreen.findViewById(R.id.smart_center_container);
-        View aiotView = AIOTAPI.getInstance().getView(786,  928,
+        View aiotView = AIOTAPI.getInstance().getView(939,
+                1146,
                 Utilities.getScreenWidth(mLauncher), Utilities.getScreenHeight(mLauncher), (float) Utilities.getScreenInch(mLauncher));
         aiotViewContainer.addView(aiotView);
         addView(newScreen, insertIndex);
@@ -2989,9 +3010,11 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     public void restoreInstanceStateForChild(int child) {
         if (mSavedStates != null) {
             mRestoredPages.add(child);
-            CellLayout cl = (CellLayout) getChildAt(child);
-            if (cl != null) {
-                cl.restoreInstanceState(mSavedStates);
+            if (getChildAt(child) instanceof CellLayout) {
+                CellLayout cl = (CellLayout) getChildAt(child);
+                if (cl != null) {
+                    cl.restoreInstanceState(mSavedStates);
+                }
             }
         }
     }
@@ -3522,21 +3545,68 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
     }
 
+
     private void intentToIOTDeviceAdd() {
         Intent intent = new Intent();
-        intent.setComponent(new ComponentName("com.skyworth.smartsystem.vhome", "com.skyworth.smartsystem.vhome.SplashActivity"));
+        intent.setClassName("com.skyworth.smartsystem.vhome", "com.skyworth.smartsystem.vhome.WXPageActivity");
         mLauncher.startActivity(intent);
     }
 
-    public void setDeviceStatusTv(String status) {
-        if (deviceStatusTv != null) {
-            deviceStatusTv.setText(status);
+    private RefrigeratorControlPopupWindow popupWindow;
+    private void showRefrigeratorControlView() {
+        WindowManager.LayoutParams lp = mLauncher.getWindow().getAttributes();
+        lp.alpha = 0.4f;
+        mLauncher.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        mLauncher.getWindow().setAttributes(lp);
+
+
+        if (popupWindow == null) {
+            popupWindow = new RefrigeratorControlPopupWindow.PopupWindowBuilder(mLauncher)
+                    .setView(R.layout.refrigerator_control_layout)
+                    .size(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+                    .setFocusable(true)
+                    .setOnDissmissListener(() -> {
+                        WindowManager.LayoutParams lp1 = mLauncher.getWindow()
+                                .getAttributes();
+                        lp1.alpha = 1f;
+                        mLauncher.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                        mLauncher.getWindow().setAttributes(lp1);
+                        popupWindow = null;
+                    })
+                    .create();
+        }
+        popupWindow.showAtLocation(mLauncher.getWindow().getDecorView(), Gravity.NO_GRAVITY, 0, 0);
+    }
+
+    public void parseAiotData(String json) {
+        if (json != null) {
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject(json);
+                mLauncher.runOnUiThread(() -> {
+                    setDeviceStatusTv(jsonObject.optString("device_open_num"), jsonObject.optString("notify_msg"));
+                    setHomeEnvironmentTv(jsonObject.optString("air_quality"));
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void setHomeEnvironmentTv(String environment) {
-        if (homeEnvironmentTv != null) {
-            homeEnvironmentTv.setText(environment);
+    public void setDeviceStatusTv(String num, String notifyMsg) {
+        if (deviceOpenNumTv != null) {
+            if (!TextUtils.isEmpty(notifyMsg)) {
+                deviceOpenNumTv.setText(String.format("%s | %s", String.format("%s%s", num, getResources().getString(R.string.aiot_device_open_num)), notifyMsg));
+            } else {
+                deviceOpenNumTv.setText(num + getResources().getString(R.string.aiot_device_open_num));
+            }
+        }
+    }
+
+    public void setHomeEnvironmentTv(String quality) {
+        Log.d(TAG, "setHomeEnvironmentTv: " + quality + airQualityTv);
+        if (airQualityTv != null) {
+            airQualityTv.setText(getResources().getString(R.string.aiot_air_quality) + quality);
         }
     }
 }

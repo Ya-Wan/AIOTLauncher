@@ -71,6 +71,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.android.launcher3.DropTarget.DragObject;
@@ -132,6 +133,12 @@ import com.android.launcher3.widget.WidgetHostViewLoader;
 import com.android.launcher3.widget.WidgetListRowEntry;
 import com.android.launcher3.widget.WidgetsFullSheet;
 import com.android.launcher3.widget.custom.CustomWidgetParser;
+import com.skyworth.aiotsdk.api.AIOTAPI;
+import com.skyworth.aiotsdk.api.AIOTConstant;
+import com.skyworth.aiotsdk.api.IInfoUpdateListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -145,7 +152,7 @@ import java.util.Set;
  * Default launcher application.
  */
 public class Launcher extends BaseDraggingActivity implements LauncherExterns,
-        LauncherModel.Callbacks, LauncherProviderChangeListener, UserEventDelegate{
+        LauncherModel.Callbacks, LauncherProviderChangeListener, UserEventDelegate, View.OnClickListener {
     public static final String TAG = "Launcher";
     static final boolean LOGD = false;
 
@@ -198,6 +205,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     @Thunk DragLayer mDragLayer;
     private DragController mDragController;
 
+    private FrameLayout mMaskLayout;
+
     private AppWidgetManagerCompat mAppWidgetManager;
     private LauncherAppWidgetHost mAppWidgetHost;
 
@@ -246,10 +255,20 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
     private RotationHelper mRotationHelper;
 
-    private AIOTStatus aiotStatus;
-
     private final Handler mHandler = new Handler();
     private final Runnable mLogOnDelayedResume = this::logOnDelayedResume;
+
+    private IInfoUpdateListener l = new IInfoUpdateListener() {
+        @Override
+        public void onChange(String s, Object o) {
+            if(TextUtils.equals(s, "MESSAGE_HOME_INFO")) {
+                mWorkspace.parseAiotData((String) o);
+            } else if (TextUtils.equals(s, "MESSAGE_HOME_STATUS_CHANGE")) {
+                mWorkspace.parseAiotData((String) o);
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -268,7 +287,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     .build());
         }
         TraceHelper.beginSection("Launcher-onCreate");
-
+        Utilities.setCustomDensity(this, getApplication());
         super.onCreate(savedInstanceState);
         TraceHelper.partitionSection("Launcher-onCreate", "super call");
 
@@ -346,8 +365,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         }
         mRotationHelper.initialize();
 
-        aiotStatus = new AIOTStatus(this);
-        aiotStatus.bindAIOTService();
+        AIOTAPI.getInstance().regInfoUpdateListener(l);
 
         TraceHelper.endSection("Launcher-onCreate");
     }
@@ -926,6 +944,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         mOverviewPanel = findViewById(R.id.overview_panel);
         mHotseat = findViewById(R.id.hotseat);
         mHotseatSearchBox = findViewById(R.id.search_container_hotseat);
+        mMaskLayout = findViewById(R.id.mask_layout);
 
         mLauncherView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -950,7 +969,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
         // Setup the drag controller (drop targets have to be added in reverse order in priority)
         mDragController.setMoveTarget(mWorkspace);
-        mDropTargetBar.setup(mDragController);
+        if (FeatureFlags.ENABLE_DRAG_UNINSTALL) {
+            mDropTargetBar.setup(mDragController);
+        }
 
         mAllAppsController.setupViews(mAppsView);
     }
@@ -1165,6 +1186,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         return mDragLayer;
     }
 
+    public FrameLayout getMaskLayout() {
+        return mMaskLayout;
+    }
+
     public AllAppsContainerView getAppsView() {
         return mAppsView;
     }
@@ -1319,7 +1344,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
         unregisterReceiver(mScreenOffReceiver);
         mWorkspace.removeFolderListeners();
-
+        AIOTAPI.getInstance().unRegInfoUpdateListener(l);
         UiFactory.setOnTouchControllersChangedListener(this, null);
 
         // Stop callbacks from LauncherModel
@@ -2428,6 +2453,11 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             return (Launcher) context;
         }
         return ((Launcher) ((ContextWrapper) context).getBaseContext());
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 
     /**

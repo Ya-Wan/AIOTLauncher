@@ -16,7 +16,10 @@
 
 package com.android.launcher3;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.WallpaperManager;
+import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +29,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -685,5 +689,44 @@ public final class Utilities {
         } else {
             return null;
         }
+    }
+
+    private static float sNoncompatDensity;
+    private static float sNoncompatScaleDensity;
+
+    public static void setCustomDensity(Activity activity, Application application) {
+        final DisplayMetrics appDisplayMetrics = application.getResources().getDisplayMetrics();
+
+        if (sNoncompatDensity == 0) {
+            sNoncompatDensity = appDisplayMetrics.density;
+            sNoncompatScaleDensity = appDisplayMetrics.scaledDensity;
+            application.registerComponentCallbacks(new ComponentCallbacks() {
+                @Override
+                public void onConfigurationChanged(Configuration newConfig) {
+                    if (newConfig != null && newConfig.fontScale > 0) {
+                        sNoncompatScaleDensity = application.getResources().getDisplayMetrics().scaledDensity;
+                    }
+                }
+
+                @Override
+                public void onLowMemory() {
+
+                }
+            });
+        }
+
+        final float targetDensity = appDisplayMetrics.widthPixels / 480;
+        final float targetScaleDensity = targetDensity * (sNoncompatScaleDensity / sNoncompatDensity);
+        final int targetDensityDpi = (int) (160 * targetDensity);
+
+        appDisplayMetrics.density = targetDensity;
+        appDisplayMetrics.scaledDensity = targetScaleDensity;
+        appDisplayMetrics.densityDpi = targetDensityDpi;
+
+        final DisplayMetrics activityDisplayMetrics = activity.getResources().getDisplayMetrics();
+        activityDisplayMetrics.density = targetDensity;
+        activityDisplayMetrics.scaledDensity = targetScaleDensity;
+        activityDisplayMetrics.densityDpi = targetDensityDpi;
+
     }
 }

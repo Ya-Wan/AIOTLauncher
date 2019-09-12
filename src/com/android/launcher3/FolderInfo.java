@@ -17,6 +17,7 @@
 package com.android.launcher3;
 
 import android.os.Process;
+import android.text.TextUtils;
 
 import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.util.ContentWriter;
@@ -73,6 +74,12 @@ public class FolderInfo extends ItemInfo {
      */
     public void add(ShortcutInfo item, int rank, boolean animate) {
         rank = Utilities.boundToRange(rank, 0, contents.size());
+        for (ShortcutInfo info:
+        contents) {
+            if (TextUtils.equals(info.intent.toUri(0), item.intent.toUri(0))) {
+                return;
+            }
+        }
         contents.add(rank, item);
         for (int i = 0; i < listeners.size(); i++) {
             listeners.get(i).onAdd(item, rank);

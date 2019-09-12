@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="1080px"
+    android:layout_height="1920px">
+
+    <include layout="@layout/temp_seek_bar_layout" />
+
+    <include layout="@layout/temp_mode_layout" />
+
+</LinearLayout>

@@ -31,6 +31,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.text.InputType;
 import android.text.Selection;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -47,7 +48,9 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Alarm;
@@ -146,6 +149,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
     @Thunk FolderIcon mFolderIcon;
 
     @Thunk FolderPagedView mContent;
+    @Thunk View mContentWrapper;
     //public ExtendedEditText mFolderName;
     public TextView mFolderName;
     private PageIndicatorDots mPageIndicator;
@@ -213,6 +217,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mContentWrapper = findViewById(R.id.folder_content_wrapper);
         mContent = findViewById(R.id.folder_content);
         mContent.setFolder(this);
 
@@ -567,9 +572,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
             mFolderName.setTranslationX(0);
         }
 
-        DragLayer parent = (DragLayer) mLauncher.findViewById(R.id.drag_layer);
-
-        parent.setBackgroundColor(getResources().getColor(R.color.black_mask_color));
+        FrameLayout maskLayout = mLauncher.getMaskLayout();
+        maskLayout.setVisibility(View.VISIBLE);
 
         mPageIndicator.stopAllAnimations();
         startAnimation(anim);
@@ -629,9 +633,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
             public void onAnimationEnd(Animator animation) {
                 closeComplete(true);
                 announceAccessibilityChanges();
-                DragLayer parent = (DragLayer) mLauncher.findViewById(R.id.drag_layer);
 
-                parent.setBackgroundColor(Color.TRANSPARENT);
             }
         });
         startAnimation(a);
@@ -649,6 +651,10 @@ public class Folder extends AbstractFloatingView implements DragSource,
         if (parent != null) {
             parent.removeView(this);
         }
+
+        FrameLayout maskLayout = mLauncher.getMaskLayout();
+        maskLayout.setVisibility(View.GONE);
+
         mDragController.removeDropTarget(this);
         clearFocus();
         if (mFolderIcon != null) {
@@ -969,6 +975,10 @@ public class Folder extends AbstractFloatingView implements DragSource,
         int x = point.x;
         int y = point.y;
 
+//        Toast.makeText(mLauncher, "X: " + x + "   y: " + y +
+//                 "      FolderHeight:" + height + "   lp.y " + (y-height)
+//                + "     densityDpi: " + getResources().getDisplayMetrics().densityDpi, Toast.LENGTH_LONG).show();
+
         lp.width = width;
         lp.height = height;
         lp.x = left;
@@ -1001,6 +1011,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
     private int getFolderHeight() {
         int offset = getResources().getDimensionPixelSize(R.dimen.folder_height_offset);
+        Toast.makeText(mLauncher,  "" + getContentAreaHeight() + "        height: " + getFolderHeight(getContentAreaHeight())
+                + "    width:   " + getFolderWidth(), Toast.LENGTH_LONG).show();
         return getFolderHeight(getContentAreaHeight()) + offset;
     }
 
@@ -1017,6 +1029,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
         mContent.setFixedSize(contentWidth, contentHeight);
         mContent.measure(contentAreaWidthSpec, contentAreaHeightSpec);
+        mContentWrapper.measure(contentAreaWidthSpec, contentAreaHeightSpec);
 
         if (mContent.getChildCount() > 0) {
             int cellIconGap = (mContent.getPageAt(0).getCellWidth()

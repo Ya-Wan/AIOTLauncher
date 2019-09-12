@@ -165,9 +165,9 @@
         launcher:numColumns="7"
         launcher:numFolderRows="6"
         launcher:numFolderColumns="6"
-        launcher:iconSize="100"
+        launcher:iconSize="50"
         launcher:iconTextSize="20.0"
-        launcher:numHotseatIcons="7"
+        launcher:numHotseatIcons="5"
         launcher:defaultLayoutId="@xml/default_workspace_5x6"
         />
 

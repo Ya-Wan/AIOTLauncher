@@ -38,6 +38,7 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.ShortcutInfo;
 import com.android.launcher3.accessibility.DragViewStateAnnouncer;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.TouchController;
@@ -387,7 +388,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     public void onDriverDragEnd(float x, float y) {
         DropTarget dropTarget;
         Runnable flingAnimation = mFlingToDeleteHelper.getFlingAnimation(mDragObject);
-        if (flingAnimation != null) {
+        if (flingAnimation != null && FeatureFlags.ENABLE_DRAG_UNINSTALL) {
             dropTarget = mFlingToDeleteHelper.getDropTarget();
         } else {
             dropTarget = findDropTarget((int) x, (int) y, mCoordinatesTemp);

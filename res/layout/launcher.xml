@@ -73,6 +73,13 @@
             layout="@layout/hotseat"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <FrameLayout
+            android:id="@+id/mask_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black_mask_color"
+            android:visibility="gone"/>
     </com.android.launcher3.dragndrop.DragLayer>
 
 </com.android.launcher3.LauncherRootView>

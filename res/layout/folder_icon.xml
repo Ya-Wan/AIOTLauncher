@@ -31,6 +31,7 @@
         android:id="@+id/folder_icon_name"
         android:focusable="false"
         android:layout_gravity="top"
+        android:textColor="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </com.android.launcher3.folder.FolderIcon>

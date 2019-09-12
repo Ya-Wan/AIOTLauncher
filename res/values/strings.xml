@@ -348,4 +348,7 @@
     <string name="work_mode_off_label">Notifications and apps are off</string>
     <string name="bottom_work_tab_user_education_close_button">Close</string>
     <string name="bottom_work_tab_user_education_closed">Closed</string>
+
+    <string name="aiot_device_open_num">"个开机"</string>
+    <string name="aiot_air_quality">"空气质量 "</string>
 </resources>
