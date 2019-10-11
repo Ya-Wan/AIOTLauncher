@@ -124,7 +124,7 @@ public class WallpaperManagerCompatVL extends WallpaperManagerCompat {
         JobInfo job = new JobInfo.Builder(Utilities.WALLPAPER_COMPAT_JOB_ID,
                 new ComponentName(mContext, ColorExtractionService.class))
                 .setMinimumLatency(0).build();
-        ((JobScheduler) mContext.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(job);
+        //((JobScheduler) mContext.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(job);
     }
 
     private void handleResult(String result) {
@@ -136,7 +136,7 @@ public class WallpaperManagerCompatVL extends WallpaperManagerCompat {
     }
 
     private static final int getWallpaperId(Context context) {
-        if (!Utilities.ATLEAST_NOUGAT) {
+        if (true/*!Utilities.ATLEAST_NOUGAT*/) {
             return -1;
         }
         return context.getSystemService(WallpaperManager.class).getWallpaperId(FLAG_SYSTEM);

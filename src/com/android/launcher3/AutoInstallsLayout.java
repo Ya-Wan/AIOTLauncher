@@ -48,6 +48,7 @@ import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.util.Thunk;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import org.xmlpull.v1.XmlPullParser;
@@ -657,6 +658,9 @@ public class AutoInstallsLayout {
                 final String className = app.getComponentName().getClassName();
 
                 if (!TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(className)) {
+
+                    if (filterApp(packageName)) continue;
+
                     ActivityInfo info;
                     try {
                         ComponentName cn;
@@ -689,6 +693,23 @@ public class AutoInstallsLayout {
                 }
             }
         }
+    }
+
+    String[] pkgNames = new String[] {
+            "com.coocaa.app_browser",
+            "com.tianci.user",
+            "com.skyworth.skywebviewapp.webview",
+            "com.baidu.duer.tv.video"
+    };
+
+    private boolean filterApp(String pkgName) {
+
+        List<String> packagesNames = Arrays.asList(pkgNames);
+        if (packagesNames.contains(pkgName)) {
+            return true;
+        }
+
+        return false;
     }
 
     protected static void beginDocument(XmlPullParser parser, String firstElementName)

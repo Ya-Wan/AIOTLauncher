@@ -118,8 +118,8 @@
             launcher:x="1"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.liulishuo.engzo"
-            launcher:className="com.liulishuo.engzo.app.activity.LauncherActivity"
+            launcher:packageName="org.vv.tang300"
+            launcher:className="org.vv.tang300.StartActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -130,6 +130,22 @@
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
+            launcher:y="2" />
+
+        <favorite
+            launcher:packageName="com.netease.edu.study"
+            launcher:className="com.netease.edu.study.activity.ActivityWelcome"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
+
+        <favorite
+            launcher:packageName="com.jinxin.namibox"
+            launcher:className="com.jinxin.namibox.ui.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
             launcher:y="2" />
 
     </folder>
@@ -157,8 +173,8 @@
             launcher:x="1"
             launcher:y="0" />
         <favorite
-            launcher:packageName="net.xmind.doughnut"
-            launcher:className="net.xmind.doughnut.MainActivity"
+            launcher:packageName="cn.wps.note"
+            launcher:className="cn.wps.note.StartActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -185,8 +201,8 @@
             launcher:x="2"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.ifeimo.audiorecord"
-            launcher:className="com.ifeimo.audiorecord.mvp.ui.activity.SplahActivity"
+            launcher:packageName="com.hudun.androidrecorder"
+            launcher:className="com.hudun.androidrecorder.tony.activity.WelcomeNewActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
@@ -329,8 +345,8 @@
             launcher:x="1"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.moji.mjweather"
-            launcher:className="com.moji.mjweather.LauncherActivity"
+            launcher:packageName="com.netease.newsreader.activity"
+            launcher:className="com.netease.nr.biz.ad.newAd.AdActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -343,11 +359,19 @@
             launcher:x="0"
             launcher:y="2" />
         <favorite
-            launcher:packageName="com.boe.mhealth"
-            launcher:className="com.boe.mhealth.advertise.SplashActivity"
+            launcher:packageName="cn.xuexi.android"
+            launcher:className="com.alibaba.android.rimet.biz.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
+            launcher:y="2" />
+
+        <favorite
+            launcher:packageName="com.baidu.searchbox"
+            launcher:className="com.baidu.searchbox.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
             launcher:y="2" />
 
     </folder>

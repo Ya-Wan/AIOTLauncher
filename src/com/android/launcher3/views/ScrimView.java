@@ -109,11 +109,10 @@ public class ScrimView extends View implements Insettable, OnChangeListener,
     protected int mEndFlatColorAlpha;
 
     protected final int mDragHandleSize;
-    protected float mDragHandleOffset;
     private final Rect mDragHandleBounds;
     private final RectF mHitRect = new RectF();
 
-    private final AccessibilityHelper mAccessibilityHelper;
+    //private final AccessibilityHelper mAccessibilityHelper;
     @Nullable
     protected Drawable mDragHandle;
 
@@ -131,8 +130,8 @@ public class ScrimView extends View implements Insettable, OnChangeListener,
                 .getDimensionPixelSize(R.dimen.vertical_drag_handle_size);
         mDragHandleBounds = new Rect(0, 0, mDragHandleSize, mDragHandleSize);
 
-        mAccessibilityHelper = createAccessibilityHelper();
-        ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper);
+        //mAccessibilityHelper = createAccessibilityHelper();
+        //ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper);
 
         mAM = (AccessibilityManager) context.getSystemService(ACCESSIBILITY_SERVICE);
         setFocusable(false);
@@ -224,14 +223,8 @@ public class ScrimView extends View implements Insettable, OnChangeListener,
         if (mCurrentFlatColor != 0) {
             canvas.drawColor(mCurrentFlatColor);
         }
-        drawDragHandle(canvas);
-    }
-
-    protected void drawDragHandle(Canvas canvas) {
         if (mDragHandle != null) {
-            canvas.translate(0, -mDragHandleOffset);
             mDragHandle.draw(canvas);
-            canvas.translate(0, mDragHandleOffset);
         }
     }
 
@@ -244,23 +237,20 @@ public class ScrimView extends View implements Insettable, OnChangeListener,
 
             final Drawable drawable = mDragHandle;
             mDragHandle = null;
+            drawable.setBounds(mDragHandleBounds);
 
-            Rect bounds = new Rect(mDragHandleBounds);
-            bounds.offset(0, -(int) mDragHandleOffset);
-            drawable.setBounds(bounds);
+            Rect topBounds = new Rect(mDragHandleBounds);
+            topBounds.offset(0, -mDragHandleBounds.height() / 2);
 
-            Rect topBounds = new Rect(bounds);
-            topBounds.offset(0, -bounds.height() / 2);
-
-            Rect invalidateRegion = new Rect(bounds);
+            Rect invalidateRegion = new Rect(mDragHandleBounds);
             invalidateRegion.top = topBounds.top;
 
             Keyframe frameTop = Keyframe.ofObject(0.6f, topBounds);
             frameTop.setInterpolator(DEACCEL);
-            Keyframe frameBot = Keyframe.ofObject(1, bounds);
+            Keyframe frameBot = Keyframe.ofObject(1, mDragHandleBounds);
             frameBot.setInterpolator(ACCEL);
             PropertyValuesHolder holder = PropertyValuesHolder .ofKeyframe("bounds",
-                    Keyframe.ofObject(0, bounds), frameTop, frameBot);
+                    Keyframe.ofObject(0, mDragHandleBounds), frameTop, frameBot);
             holder.setEvaluator(new RectEvaluator());
 
             ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(drawable, holder);
@@ -339,19 +329,19 @@ public class ScrimView extends View implements Insettable, OnChangeListener,
 
     @Override
     public boolean dispatchHoverEvent(MotionEvent event) {
-        return mAccessibilityHelper.dispatchHoverEvent(event) || super.dispatchHoverEvent(event);
+        return /*mAccessibilityHelper.dispatchHoverEvent(event) || */super.dispatchHoverEvent(event);
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        return mAccessibilityHelper.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
+        return /*mAccessibilityHelper.dispatchKeyEvent(event) || */super.dispatchKeyEvent(event);
     }
 
     @Override
     public void onFocusChanged(boolean gainFocus, int direction,
             Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
-        mAccessibilityHelper.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        //mAccessibilityHelper.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
     }
 
     @Override

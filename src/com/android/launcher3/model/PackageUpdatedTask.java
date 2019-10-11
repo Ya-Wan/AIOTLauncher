@@ -18,12 +18,11 @@ package com.android.launcher3.model;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.LauncherActivityInfo;
+import android.graphics.Bitmap;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.launcher3.AllAppsList;
 import com.android.launcher3.AppInfo;
@@ -32,7 +31,6 @@ import com.android.launcher3.InstallShortcutReceiver;
 import com.android.launcher3.ItemInfo;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherAppWidgetInfo;
-import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherModel.CallbackTask;
 import com.android.launcher3.LauncherModel.Callbacks;
 import com.android.launcher3.LauncherSettings.Favorites;
@@ -44,9 +42,6 @@ import com.android.launcher3.compat.UserManagerCompat;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.graphics.BitmapInfo;
 import com.android.launcher3.graphics.LauncherIcons;
-import com.android.launcher3.logging.FileLog;
-import com.android.launcher3.shortcuts.DeepShortcutManager;
-import com.android.launcher3.shortcuts.ShortcutInfoCompat;
 import com.android.launcher3.util.FlagOp;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LongArrayMap;
@@ -57,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Handles updates due to changes in package manager (app installed/updated/removed)
@@ -168,7 +162,12 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
 
         final ArrayMap<ComponentName, AppInfo> addedOrUpdatedApps = new ArrayMap<>();
         if (!addedOrModified.isEmpty()) {
-            scheduleCallbackTask((callbacks) -> callbacks.bindAppsAddedOrUpdated(addedOrModified));
+            scheduleCallbackTask(new CallbackTask() {
+                @Override
+                public void execute(Callbacks callbacks) {
+                    callbacks.bindAppsAddedOrUpdated(addedOrModified);
+                }
+            });
             for (AppInfo ai : addedOrModified) {
                 addedOrUpdatedApps.put(ai.componentName, ai);
             }
@@ -214,26 +213,11 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
                             }
 
                             if (si.isPromise() && isNewApkAvailable) {
-                                boolean isTargetValid = true;
-                                if (si.itemType == Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
-                                    List<ShortcutInfoCompat> shortcut = DeepShortcutManager
-                                            .getInstance(context).queryForPinnedShortcuts(
-                                                    cn.getPackageName(),
-                                                    Arrays.asList(si.getDeepShortcutId()), mUser);
-                                    if (shortcut.isEmpty()) {
-                                        isTargetValid = false;
-                                    } else {
-                                        si.updateFromDeepShortcutInfo(shortcut.get(0), context);
-                                        infoUpdated = true;
-                                    }
-                                } else if (!cn.getClassName().equals(IconCache.EMPTY_CLASS_NAME)) {
-                                    isTargetValid = LauncherAppsCompat.getInstance(context)
-                                            .isActivityEnabledForProfile(cn, mUser);
-                                }
-
                                 if (si.hasStatusFlag(ShortcutInfo.FLAG_AUTOINSTALL_ICON)) {
                                     // Auto install icon
-                                    if (!isTargetValid) {
+                                    LauncherAppsCompat launcherApps
+                                            = LauncherAppsCompat.getInstance(context);
+                                    if (!launcherApps.isActivityEnabledForProfile(cn, mUser)) {
                                         // Try to find the best match activity.
                                         Intent intent = new PackageManagerHelper(context)
                                                 .getAppLaunchIntent(cn.getPackageName(), mUser);
@@ -251,11 +235,6 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
                                             continue;
                                         }
                                     }
-                                } else if (!isTargetValid) {
-                                    removedShortcuts.put(si.id, true);
-                                    FileLog.e(TAG, "Restored shortcut no longer valid "
-                                            + si.intent);
-                                    continue;
                                 } else {
                                     si.status = ShortcutInfo.DEFAULT;
                                     infoUpdated = true;

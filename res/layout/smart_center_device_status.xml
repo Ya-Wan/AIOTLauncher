@@ -3,9 +3,9 @@
     android:id="@+id/smart_center_device_status_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_below="@+id/smart_center_title"
-    android:layout_marginTop="40dp"
-    android:layout_marginBottom="19dp"
+    android:layout_marginTop="@dimen/aiot_layout_status_padding_top"
+    android:paddingTop="@dimen/aiot_layout_status_padding"
+    android:paddingBottom="@dimen/aiot_layout_status_padding"
     android:background="@drawable/device_status_background"
     android:orientation="vertical">
 
@@ -13,44 +13,47 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="5dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="9dp">
+        android:orientation="horizontal">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/aiot_layout_status_icon_padding_start"
             android:src="@drawable/ic_device_status" />
 
         <TextView
             android:id="@+id/device_open_num_tv"
             android:layout_width="wrap_content"
-            android:layout_height="15dp"
-            android:layout_marginStart="10dp"
-            android:textColor="#ffffffff"
-            android:textSize="12sp" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/aiot_layout_status_icon_padding_start"
+            android:text="0 个设备"
+            android:textColor="#b3dedede"
+            android:textSize="@dimen/aiot_layout_status_text_size" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="5dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="9dp">
+        android:layout_marginTop="@dimen/aiot_layout_status_icon_padding_start"
+        android:orientation="horizontal">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/aiot_layout_status_icon_padding_start"
             android:src="@drawable/ic_home_environment" />
 
         <TextView
             android:id="@+id/air_quality_tv"
             android:layout_width="wrap_content"
-            android:layout_height="15dp"
-            android:layout_marginStart="10dp"
-            android:textColor="#ffffffff"
-            android:textSize="12sp" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/aiot_layout_status_icon_padding_start"
+            android:text="空气质量"
+            android:textColor="#b3dedede"
+            android:textSize="@dimen/aiot_layout_status_text_size" />
     </LinearLayout>
 </LinearLayout>

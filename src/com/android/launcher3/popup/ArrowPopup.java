@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -266,7 +267,11 @@ public abstract class ArrowPopup extends AbstractFloatingView {
         }
 
         // Insets are added later, so subtract them now.
-        x -= insets.left;
+        if (mIsRtl) {
+            x += insets.right;
+        } else {
+            x -= insets.left;
+        }
         y -= insets.top;
 
         mGravity = 0;
@@ -295,7 +300,7 @@ public abstract class ArrowPopup extends AbstractFloatingView {
             }
             mIsAboveIcon = true;
         }
-
+        Log.d("y.wan", "orientAboutObject: " + x);
         setX(x);
         if (Gravity.isVertical(mGravity)) {
             return;
@@ -327,8 +332,8 @@ public abstract class ArrowPopup extends AbstractFloatingView {
         }
 
         if (Gravity.isHorizontal(mGravity)) {
-            setX(dragLayer.getWidth() / 2 - getMeasuredWidth() / 2);
-            mArrow.setVisibility(INVISIBLE);
+            setX(dragLayer.getWidth() / 2/* - getMeasuredWidth() / 2*/);
+            //mArrow.setVisibility(INVISIBLE);
         }
         if (Gravity.isVertical(mGravity)) {
             setY(dragLayer.getHeight() / 2 - getMeasuredHeight() / 2);

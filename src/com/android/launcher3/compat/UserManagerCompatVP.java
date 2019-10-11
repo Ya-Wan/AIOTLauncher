@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.launcher3.compat;
+/*package com.android.launcher3.compat;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -31,4 +31,4 @@ public class UserManagerCompatVP extends UserManagerCompatVNMr1 {
     public boolean requestQuietModeEnabled(boolean enableQuietMode, UserHandle user) {
         return mUserManager.requestQuietModeEnabled(enableQuietMode, user);
     }
-}
+}*/

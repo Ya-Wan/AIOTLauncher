@@ -30,9 +30,14 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -182,12 +187,7 @@ public class LauncherIcons implements AutoCloseable {
      * The bitmap is also visually normalized with other icons.
      */
     public BitmapInfo createBadgedIconBitmap(Drawable icon, UserHandle user, int iconAppTargetSdk) {
-        return createBadgedIconBitmap(icon, user, iconAppTargetSdk, false, null);
-    }
-
-    public BitmapInfo createBadgedIconBitmap(Drawable icon, UserHandle user, int iconAppTargetSdk,
-            boolean isInstantApp) {
-        return createBadgedIconBitmap(icon, user, iconAppTargetSdk, isInstantApp, null);
+        return createBadgedIconBitmap(icon, user, iconAppTargetSdk, false);
     }
 
     /**
@@ -196,11 +196,12 @@ public class LauncherIcons implements AutoCloseable {
      * The bitmap is also visually normalized with other icons.
      */
     public BitmapInfo createBadgedIconBitmap(Drawable icon, UserHandle user, int iconAppTargetSdk,
-            boolean isInstantApp, float [] scale) {
-        if (scale == null) {
-            scale = new float[1];
-        }
-        icon = normalizeAndWrapToAdaptiveIcon(icon, iconAppTargetSdk, null, scale);
+            boolean isInstantApp) {
+        float[] scale = new float[1];
+        //changed by y.wan for remove icon mask start 2019/7/11
+        //icon = normalizeAndWrapToAdaptiveIcon(icon, iconAppTargetSdk, null, scale);
+        icon = normalizeAndWrapToAdaptiveIcon(icon, 23, null, scale);
+        //changed by y.wan for remove icon mask end 2019/7/11
         Bitmap bitmap = createIconBitmap(icon, scale[0]);
         if (Utilities.ATLEAST_OREO && icon instanceof AdaptiveIconDrawable) {
             mCanvas.setBitmap(bitmap);
@@ -248,8 +249,7 @@ public class LauncherIcons implements AutoCloseable {
     private Drawable normalizeAndWrapToAdaptiveIcon(Drawable icon, int iconAppTargetSdk,
             RectF outIconBounds, float[] outScale) {
         float scale = 1f;
-        if ((Utilities.ATLEAST_OREO && iconAppTargetSdk >= Build.VERSION_CODES.O) ||
-                Utilities.ATLEAST_P) {
+        if (Utilities.ATLEAST_OREO && iconAppTargetSdk >= Build.VERSION_CODES.O) {
             boolean[] outShape = new boolean[1];
             if (mWrapperIcon == null) {
                 mWrapperIcon = mContext.getDrawable(R.drawable.adaptive_icon_drawable_wrapper)
@@ -340,7 +340,7 @@ public class LauncherIcons implements AutoCloseable {
         if (Utilities.ATLEAST_OREO && icon instanceof AdaptiveIconDrawable) {
             int offset = Math.max((int) Math.ceil(BLUR_FACTOR * textureWidth), Math.max(left, top));
             int size = Math.max(width, height);
-            icon.setBounds(offset, offset, size - offset, size - offset);
+            icon.setBounds(offset, offset, offset + size, offset + size);
         } else {
             icon.setBounds(left, top, left+width, top+height);
         }
@@ -351,7 +351,10 @@ public class LauncherIcons implements AutoCloseable {
         icon.setBounds(mOldBounds);
         mCanvas.setBitmap(null);
 
+        //changed by y.wan for add gradient mask for icon start 2019/9/25
         return bitmap;
+        //return addBorderToImage(bitmap, mIconBitmapSize);
+        //changed by y.wan for gradient mask for icon end 2019/9/25
     }
 
     public BitmapInfo createShortcutIcon(ShortcutInfoCompat shortcutInfo) {
@@ -441,5 +444,111 @@ public class LauncherIcons implements AutoCloseable {
         public int getIntrinsicWidth() {
             return getBitmap().getWidth();
         }
+    }
+
+    private static float mRoundedRate = 7f;
+
+    private static Bitmap addBorderToImage(Bitmap src, int iconSize) {
+
+        int width = iconSize;//getBorderWidth();
+        int height = iconSize;//getBorderHeight();
+
+        Bitmap output = Bitmap.createBitmap(width, height,
+                Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(output);
+
+        RectF outerRect = new RectF(0, 0, width, height);
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+
+        LinearGradient mLinearGradientClamp = new LinearGradient(0, 0, 0, height, new int[]{getCenterTopColor(src), getCenterBottomColor(src)}, null, Shader.TileMode.CLAMP);
+
+        paint.setShader(mLinearGradientClamp);
+
+        canvas.drawRoundRect(outerRect, width / mRoundedRate, height / mRoundedRate, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+        int sw = src.getWidth();
+        int sh = src.getHeight();
+
+        Rect srcRect = new Rect(0, 0, sw, sh);
+        Rect dstRect = getDstRect(sw, sh, width, height);
+
+        canvas.drawBitmap(src, srcRect, dstRect, paint);
+
+        return output;
+    }
+
+    private static Rect getDstRect(int sw, int sh, int w, int h) {
+        return new Rect(0, 0, w, h);
+    }
+
+    /**
+     * 得到原始图片中，底部中间的第一个完全不透明的颜色
+     *
+     * @return
+     */
+    private static int getCenterTopColor(Bitmap src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+
+        int x = (int) (w * 0.5);
+
+        int c = Color.WHITE;
+        for (int y = h - 1; y >= 0; --y) {
+            int pixel = src.getPixel(x, y);
+            if (Color.alpha(pixel) == 0xFF) {
+                c = pixel;
+            }
+        }
+        return softColor(c);
+    }
+
+    /**
+     * 得到原始图片中，顶部中间的第一个完全不透明的颜色
+     *
+     * @return
+     */
+    private static int getCenterBottomColor(Bitmap src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+
+        int x = (int) (w * 0.5);
+
+        int c = Color.WHITE;
+        for (int y = 0; y < h; ++y) {
+            int pixel = src.getPixel(x, y);
+            if (Color.alpha(pixel) == 0xFF) {
+                c = pixel;
+            }
+        }
+
+        return softColor(c);
+    }
+
+    /**
+     * 将颜色变浅，变淡
+     *
+     * @param color
+     * @return
+     */
+    private static int softColor(int color) {
+        int r = (int) (Color.red(color) * 1.3);
+        int b = (int) (Color.blue(color) * 1.3);
+        int g = (int) (Color.green(color) * 1.3);
+        int af = 0xFF;
+
+        if (b >= 0xFF) {
+            b = 0xFF;
+        }
+        if (r >= 0xFF) {
+            r = 0xFF;
+        }
+        if (g >= 0xFF) {
+            g = 0xFF;
+        }
+
+        return af << 24 | r << 16 | g << 8 | b;
     }
 }

@@ -16,12 +16,13 @@
 
 package com.android.launcher3;
 
-import static com.android.launcher3.LauncherState.ALL_APPS;
-
 import android.content.Context;
+import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -30,16 +31,20 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.entry.HotseatCategory;
 import com.android.launcher3.logging.UserEventDispatcher.LogContainerProvider;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Target;
+import com.android.launcher3.util.ComponentKey;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import static com.android.launcher3.LauncherState.ALL_APPS;
 
 public class Hotseat extends FrameLayout implements LogContainerProvider, Insettable {
 
@@ -48,6 +53,11 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHasVerticalHotseat;
+
+    private ArrayList<HotseatCategory> categories = null;
+    private ArrayList<String> defaultPackages = new ArrayList<>();
+
+    private final HashMap<Integer, HashMap<ComponentKey, AppInfo>> mComponentToAppMap = new HashMap<>();
 
     public Hotseat(Context context) {
         this(context, null);
@@ -60,6 +70,7 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
     public Hotseat(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mLauncher = Launcher.getLauncher(context);
+        parseDefaultCategories();
     }
 
     public CellLayout getLayout() {
@@ -95,7 +106,7 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
         } else {
             mContent.setGridSize(idp.numHotseatIcons, 1);
         }
-        Toast.makeText(mLauncher, "" + idp.numHotseatIcons, Toast.LENGTH_SHORT).show();
+
         if (!FeatureFlags.NO_ALL_APPS_ICON) {
             // Add the Apps button
             Context context = getContext();
@@ -160,10 +171,10 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
             if (grid.isSeascape()) {
                 lp.gravity = Gravity.LEFT;
-                lp.width = grid.hotseatBarSizePx + insets.left;
+                lp.width = grid.hotseatBarSizePx + insets.left + grid.hotseatBarSidePaddingPx;
             } else {
                 lp.gravity = Gravity.RIGHT;
-                lp.width = grid.hotseatBarSizePx + insets.right;
+                lp.width = grid.hotseatBarSizePx + insets.right + grid.hotseatBarSidePaddingPx;
             }
         } else {
             lp.gravity = Gravity.BOTTOM;
@@ -174,24 +185,123 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
         getLayout().setPadding(padding.left, padding.top, padding.right, padding.bottom);
 
         setLayoutParams(lp);
-        setBackgroundColor(0XFF0000);
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
 
     void updateShortcuts(ArrayList<AppInfo> infos) {
         final ViewGroup layout = getLayout().getShortcutsAndWidgets();
         InvariantDeviceProfile idp = mLauncher.getDeviceProfile().inv;
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            final View view = layout.getChildAt(i);
-            if (view.getTag() instanceof FolderInfo) {
-                FolderInfo folderInfo = (FolderInfo) view.getTag();
-                if (folderInfo.screenId == idp.numHotseatIcons - 1) {
-                    for (AppInfo info : infos) {
-                        folderInfo.add(new ShortcutInfo(info), false);
+
+
+        if (categories != null) {
+            for (int i = 0; i < categories.size(); i++) {
+                ArrayList<String> packages = categories.get(i).packageNames;
+
+                for (int j = 0; j < infos.size(); j++) {
+                    AppInfo appInfo = infos.get(j);
+                    if (isDefaultApp(appInfo)) {
+                        if (packages.contains(appInfo.componentName.getPackageName())) {
+                            final View view = layout.getChildAt(i);
+                            if (view.getTag() instanceof FolderInfo) {
+                                FolderInfo folderInfo = (FolderInfo) view.getTag();
+                                folderInfo.add(new ShortcutInfo(appInfo), false);
+                            }
+                        }
+                    } else if (isUpdateInfo(appInfo)) {
+                        Log.d("HotSeat", "UpdateInfo: " + appInfo.componentName);
+                    } else {
+                        for (int k = 0; k < layout.getChildCount(); k++) {
+                            final View view = layout.getChildAt(k);
+                            if (view.getTag() instanceof FolderInfo) {
+                                FolderInfo folderInfo = (FolderInfo) view.getTag();
+
+                                if (folderInfo.screenId == idp.numHotseatIcons - 1) {
+                                    for (AppInfo info : infos) {
+                                        folderInfo.add(new ShortcutInfo(info), false);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+
+    boolean isDefaultApp(AppInfo info) {
+        Log.d("Hotseat", "isDefaultApp: " + defaultPackages.size());
+        return defaultPackages.contains(info.componentName.getPackageName());
+    }
+
+    boolean isUpdateInfo(AppInfo appInfo) {
+        final ViewGroup layout = getLayout().getShortcutsAndWidgets();
+
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            final View view = layout.getChildAt(i);
+            if (view.getTag() instanceof FolderInfo) {
+                FolderInfo folderInfo = (FolderInfo) view.getTag();
+
+                for (int j = 0; j < folderInfo.contents.size(); j++) {
+                    ShortcutInfo shortcutInfo = folderInfo.contents.get(j);
+                    if (TextUtils.equals(shortcutInfo.intent.getComponent().getPackageName(), appInfo.componentName.getPackageName())) {
+                        folderInfo.contents.remove(j);
+                        folderInfo.contents.add(j, new ShortcutInfo(appInfo));
+                        return true;
+                    }
+                }
+
+                    /*for (ShortcutInfo shortcutInfo : folderInfo.contents) {
+                        if (TextUtils.equals(shortcutInfo.intent.getComponent().getPackageName(), appInfo.componentName.getPackageName())) {
+                            return true;
+                        }
+                    }*/
+            }
+
+        }
+
+        return false;
+    }
+
+    private void parseDefaultCategories() {
+        XmlResourceParser parser = mLauncher.getResources().getXml(R.xml.default_hotseat_category);
+        final int depth = parser.getDepth();
+
+        HotseatCategory hotseatCategory = null;
+        try {
+            int type = parser.getEventType();
+            while (type != XmlResourceParser.END_DOCUMENT) {
+                switch (type) {
+                    case XmlResourceParser.START_DOCUMENT:
+                        categories = new ArrayList<>();
+                        defaultPackages.clear();
+                        break;
+
+                    case XmlResourceParser.START_TAG:
+                        if (parser.getName().equals("category")) {
+                            hotseatCategory = new HotseatCategory();
+                            hotseatCategory.setCategoryName(parser.getAttributeValue(0));
+                        }
+
+                        if (parser.getName().equals("packageName")) {
+                            String packageName = parser.nextText();
+                            hotseatCategory.addPackage(packageName);
+                            defaultPackages.add(packageName);
+                        }
+                        break;
+
+                    case XmlResourceParser.END_TAG:
+                        if (parser.getName().equals("category")) {
+                            categories.add(hotseatCategory);
+                        }
+                        break;
+                }
+                type = parser.next();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

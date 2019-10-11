@@ -48,15 +48,14 @@ public class ShortcutsToHomeTest extends AbstractLauncherUiTest {
         clearHomescreen();
         mActivityMonitor.startLauncher();
 
-        LauncherActivityInfo testApp  = getSettingsApp();
+        LauncherActivityInfo settingsApp  = getSettingsApp();
 
         // Open all apps and wait for load complete.
         final UiObject2 appsContainer = openAllApps();
-        assertTrue(Wait.atMost(Condition.minChildCount(appsContainer, 2),
-                DEFAULT_UI_TIMEOUT));
+        assertTrue(Wait.atMost(Condition.minChildCount(appsContainer, 2), DEFAULT_UI_TIMEOUT));
 
         // Find the app and long press it to show shortcuts.
-        UiObject2 icon = scrollAndFind(appsContainer, By.text(testApp.getLabel().toString()));
+        UiObject2 icon = scrollAndFind(appsContainer, By.text(settingsApp.getLabel().toString()));
         // Press icon center until shortcuts appear
         Point iconCenter = icon.getVisibleCenter();
         sendPointer(MotionEvent.ACTION_DOWN, iconCenter);
@@ -66,7 +65,7 @@ public class ShortcutsToHomeTest extends AbstractLauncherUiTest {
 
         // Drag the first shortcut to the home screen.
         assertTrue(deepShortcutsContainer.getChildCount() > 0);
-        UiObject2 shortcut = deepShortcutsContainer.getChildren().get(1)
+        UiObject2 shortcut = deepShortcutsContainer.getChildren().get(0)
                 .findObject(getSelectorForId(R.id.bubble_text));
         String shortcutName = shortcut.getText();
         dragToWorkspace(shortcut, false);
@@ -75,7 +74,7 @@ public class ShortcutsToHomeTest extends AbstractLauncherUiTest {
         // (the app opens and has the same text as the shortcut).
         mDevice.findObject(By.text(shortcutName)).click();
         assertTrue(mDevice.wait(Until.hasObject(By.pkg(
-                testApp.getComponentName().getPackageName())
+                settingsApp.getComponentName().getPackageName())
                 .text(shortcutName)), DEFAULT_UI_TIMEOUT));
     }
 }

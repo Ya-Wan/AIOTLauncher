@@ -18,11 +18,14 @@ package com.android.launcher3;
 
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.util.ContentWriter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Represents a folder containing shortcuts or apps.
@@ -69,17 +72,39 @@ public class FolderInfo extends ItemInfo {
         add(item, contents.size(), animate);
     }
 
+    String[] pkgNames = new String[] {
+            "com.coocaa.app_browser",
+            "com.tianci.user",
+            "com.skyworth.skywebviewapp.webview",
+            "com.baidu.duer.tv.video"
+    };
+
+    private boolean filterApp(String pkgName) {
+
+        List<String> packagesNames = Arrays.asList(pkgNames);
+        if (packagesNames.contains(pkgName)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Add an app or shortcut for a specified rank.
      */
     public void add(ShortcutInfo item, int rank, boolean animate) {
         rank = Utilities.boundToRange(rank, 0, contents.size());
+
         for (ShortcutInfo info:
         contents) {
-            if (TextUtils.equals(info.intent.toUri(0), item.intent.toUri(0))) {
+            Log.d("FolderInfo", "add: " + info.intent.getComponent().getPackageName() + "      item: " + item.intent.getComponent().getPackageName());
+            if (TextUtils.equals(info.intent.getComponent().getPackageName(), item.intent.getComponent().getPackageName())) {
                 return;
             }
         }
+
+        if (filterApp(item.intent.getComponent().getPackageName())) return;
+
         contents.add(rank, item);
         for (int i = 0; i < listeners.size(); i++) {
             listeners.get(i).onAdd(item, rank);

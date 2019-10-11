@@ -1,33 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingStart="20dp"
-    android:paddingEnd="20dp"
-    android:layout_marginEnd="23dp"
-    android:layout_marginStart="23dp"
-    android:layout_marginTop="20dp"
+    android:layout_height="@dimen/aiot_refrigerator_layout_height"
+    android:paddingStart="@dimen/aiot_refrigerator_layout_padding_start_end"
+    android:paddingEnd="@dimen/aiot_refrigerator_layout_padding_start_end"
+    android:paddingTop="@dimen/aiot_refrigerator_layout_padding_top"
+    android:layout_marginTop="@dimen/aiot_refrigerator_layout_margin"
     android:background="@drawable/refrigerator_mode_bg"
     android:orientation="vertical">
 
     <TextView
-        android:layout_width="274dp"
-        android:layout_height="19dp"
-        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="模式"
-        android:textColor="#ff333333"
-        android:textSize="13sp" />
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/aiot_refrigerator_text_size" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
-        android:layout_marginBottom="16dp">
+        android:layout_marginTop="@dimen/aiot_refrigerator_text_padding">
 
         <LinearLayout
             android:id="@+id/mode_tea_container"
             android:layout_width="0dp"
-            android:layout_height="27dp"
+            android:layout_height="@dimen/aiot_refrigerator_mode_height"
             android:layout_weight="1"
             android:gravity="center">
 
@@ -35,6 +32,8 @@
                 android:id="@+id/mode_tea_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="@dimen/aiot_refrigerator_text_size"
                 android:text="茶叶"/>
 
         </LinearLayout>
@@ -42,16 +41,18 @@
         <LinearLayout
             android:id="@+id/mode_wine_container"
             android:layout_width="0dp"
-            android:layout_height="27dp"
+            android:layout_height="@dimen/aiot_refrigerator_mode_height"
             android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="@dimen/aiot_refrigerator_mode_padding"
+            android:layout_marginEnd="@dimen/aiot_refrigerator_mode_padding"
             android:gravity="center">
 
             <TextView
                 android:id="@+id/mode_wine_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="@dimen/aiot_refrigerator_text_size"
                 android:text="红酒"/>
 
         </LinearLayout>
@@ -59,15 +60,16 @@
         <LinearLayout
             android:id="@+id/mode_beer_container"
             android:layout_width="0dp"
-            android:layout_height="27dp"
+            android:layout_height="@dimen/aiot_refrigerator_mode_height"
             android:layout_weight="1"
-            android:focusable="false"
             android:gravity="center">
 
             <TextView
                 android:id="@+id/mode_beer_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="@dimen/aiot_refrigerator_text_size"
                 android:text="啤酒"/>
 
         </LinearLayout>

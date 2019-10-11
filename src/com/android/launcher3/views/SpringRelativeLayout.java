@@ -23,7 +23,7 @@ import android.support.animation.SpringAnimation;
 import android.support.animation.SpringForce;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.EdgeEffectFactory;
+//import android.support.v7.widget.RecyclerView.EdgeEffectFactory;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.View;
@@ -54,7 +54,7 @@ public class SpringRelativeLayout extends RelativeLayout {
                 }
             };
 
-    protected final SparseBooleanArray mSpringViews = new SparseBooleanArray();
+    private final SparseBooleanArray mSpringViews = new SparseBooleanArray();
     private final SpringAnimation mSpring;
 
     private float mDampedScrollShift = 0;
@@ -85,24 +85,12 @@ public class SpringRelativeLayout extends RelativeLayout {
         invalidate();
     }
 
-    /**
-     * Used to clip the canvas when drawing child views during overscroll.
-     */
-    public int getCanvasClipTopForOverscroll() {
-        return 0;
-    }
-
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (mDampedScrollShift != 0 && mSpringViews.get(child.getId())) {
-            int saveCount = canvas.save();
-
-            canvas.clipRect(0, getCanvasClipTopForOverscroll(), getWidth(), getHeight());
             canvas.translate(0, mDampedScrollShift);
             boolean result = super.drawChild(canvas, child, drawingTime);
-
-            canvas.restoreToCount(saveCount);
-
+            canvas.translate(0, -mDampedScrollShift);
             return result;
         }
         return super.drawChild(canvas, child, drawingTime);
@@ -135,11 +123,11 @@ public class SpringRelativeLayout extends RelativeLayout {
         finishScrollWithVelocity(velocity);
     }
 
-    public EdgeEffectFactory createEdgeEffectFactory() {
+    /*public EdgeEffectFactory createEdgeEffectFactory() {
         return new SpringEdgeEffectFactory();
-    }
+    }*/
 
-    private class SpringEdgeEffectFactory extends EdgeEffectFactory {
+    /*private class SpringEdgeEffectFactory extends EdgeEffectFactory {
 
         @NonNull @Override
         protected EdgeEffect createEdgeEffect(RecyclerView view, int direction) {
@@ -151,7 +139,7 @@ public class SpringRelativeLayout extends RelativeLayout {
             }
             return super.createEdgeEffect(view, direction);
         }
-    }
+    }*/
 
     private class SpringEdgeEffect extends EdgeEffect {
 

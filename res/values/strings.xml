@@ -351,4 +351,49 @@
 
     <string name="aiot_device_open_num">"个开机"</string>
     <string name="aiot_air_quality">"空气质量 "</string>
+    
+    <string-array name="edu_category">
+        <item>com.netease.edu.study</item>
+        <item>com.civitas.quantumphysics</item>
+        <item>com.xiaobanlong.main</item>
+        <item>com.xiaohaizi.ui</item>
+        <item>com.xes.jazhanghui.activity</item>
+        <item>com.liulishuo.engzo</item>
+        <item>com.youdao.dict</item>
+    </string-array>
+
+    <string-array name="work_category">
+        <item>com.tencent.androidqqmail</item>
+        <item>cn.wps.moffice_eng</item>
+        <item>net.xmind.doughnut</item>
+        <item>cn.readpad.whiteboard</item>
+        <item>cn.ticktick.task</item>
+        <item>com.alibaba.android.rimet</item>
+        <item>com.ifeimo.audiorecord</item>
+        <item>com.tencent.FileManager</item>
+        <item>com.yinxiang</item>
+    </string-array>
+
+    <string-array name="entertainment_category">
+        <item>com.xs.pooltd.dbzq.m</item>
+        <item>com.tencent.qqmusic</item>
+        <item>com.liubowang.lauchpad</item>
+        <item>com.ss.android.ugc.aweme</item>
+        <item>com.adsk.sketchbook</item>
+        <item>com.tencent.karaoke</item>
+        <item>com.gamestar.perfectpiano</item>
+        <item>com.cnvcs.go</item>
+        <item>com.cnvcs.xiangqi</item>
+    </string-array>
+
+    <string-array name="life_category">
+        <item>com.tencent.mm</item>
+        <item>com.tencent.mobileqq</item>
+        <item>com.taobao.taobao</item>
+        <item>com.UCMobile</item>
+        <item>com.ss.android.article.news</item>
+        <item>com.moji.mjweather</item>
+        <item>com.peopledailychina.activity</item>
+        <item>com.boe.mhealth</item>
+    </string-array>
 </resources>

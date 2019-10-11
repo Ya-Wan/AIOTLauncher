@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/smart_center_wrapper"
+    android:layout_width="match_parent"
+    android:paddingTop="25dp"
+    android:layout_height="266dp"
+    android:paddingEnd="@dimen/aiot_layout_margin_start_end"
+    android:paddingStart="@dimen/aiot_layout_margin_start_end">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include layout="@layout/smart_center_title" />
+
+        <include layout="@layout/smart_center_device_status" />
+    </LinearLayout>
+
+</android.support.v4.widget.SwipeRefreshLayout>

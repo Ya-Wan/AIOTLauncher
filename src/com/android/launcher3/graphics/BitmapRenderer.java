@@ -33,16 +33,16 @@ public class BitmapRenderer {
           return result;
      }
 
-     @TargetApi(Build.VERSION_CODES.P)
+     //@TargetApi(Build.VERSION_CODES.P)
      public static Bitmap createHardwareBitmap(int width, int height, Renderer renderer) {
           if (!USE_HARDWARE_BITMAP) {
                return createSoftwareBitmap(width, height, renderer);
           }
-
-          Picture picture = new Picture();
+          return createSoftwareBitmap(width, height, renderer);
+          /*Picture picture = new Picture();
           renderer.draw(picture.beginRecording(width, height));
           picture.endRecording();
-          return Bitmap.createBitmap(picture);
+          return Bitmap.createBitmap(picture);*/
      }
 
      /**

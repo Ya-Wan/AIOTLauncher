@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.launcher3.uioverrides.dynamicui;
+/*package com.android.launcher3.uioverrides.dynamicui;
 
 import android.annotation.TargetApi;
-import android.app.WallpaperColors;
+//import android.app.WallpaperColors;
 import android.app.WallpaperManager;
-import android.app.WallpaperManager.OnColorsChangedListener;
+//import android.app.WallpaperManager.OnColorsChangedListener;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
@@ -81,4 +81,4 @@ public class WallpaperManagerCompatVOMR1 extends WallpaperManagerCompat {
         }
         return new WallpaperColorsCompat(primaryVal, secondaryVal, tertiaryVal, colorHints);
     }
-}
+}*/

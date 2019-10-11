@@ -204,7 +204,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     private DragPreviewProvider mOutlineProvider = null;
     private boolean mWorkspaceFadeInAdjacentScreens;
 
-    final WallpaperOffsetInterpolator mWallpaperOffset;
+    //final WallpaperOffsetInterpolator mWallpaperOffset;
     private boolean mUnlockWallpaperFromDefaultPageOnLayout;
 
     // Variables relating to the creation of user folders by hovering shortcuts over shortcuts
@@ -292,7 +292,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         mStateTransitionAnimation = new WorkspaceStateTransitionAnimation(mLauncher, this);
         mWallpaperManager = WallpaperManager.getInstance(context);
 
-        mWallpaperOffset = new WallpaperOffsetInterpolator(this);
+        //mWallpaperOffset = new WallpaperOffsetInterpolator(this);
 
         setHapticFeedbackEnabled(false);
         initWorkspace();
@@ -307,9 +307,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         mInsets.set(insets);
 
         DeviceProfile grid = mLauncher.getDeviceProfile();
-        mMaxDistanceForFolderCreation = grid.isTablet
-                ? 0.75f * grid.iconSizePx
-                : 0.55f * grid.iconSizePx;
+        mMaxDistanceForFolderCreation = (0.65f * grid.iconSizePx);
         mWorkspaceFadeInAdjacentScreens = grid.shouldFadeAdjacentWorkspaceScreens();
 
         Rect padding = grid.workspacePadding;
@@ -369,7 +367,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     public float getWallpaperOffsetForCenterPage() {
         int pageScroll = getScrollForPage(getPageNearestToCenterOfScreen());
-        return mWallpaperOffset.wallpaperOffsetForScroll(pageScroll);
+        return 0/*mWallpaperOffset.wallpaperOffsetForScroll(pageScroll)*/;
     }
 
     public Rect estimateItemPosition(CellLayout cl, int hCell, int vCell, int hSpan, int vSpan) {
@@ -465,7 +463,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         setupLayoutTransition();
 
         // Set the wallpaper dimensions when Launcher starts up
-        setWallpaperDimension();
+        //setWallpaperDimension();
     }
 
     private void setupLayoutTransition() {
@@ -615,9 +613,13 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
 
         LinearLayout aiotViewContainer = newScreen.findViewById(R.id.smart_center_container);
-        View aiotView = AIOTAPI.getInstance().getView(939,
-                1146,
+        View aiotView = AIOTAPI.getInstance().getView(getResources().getDimensionPixelSize(R.dimen.aiot_container_width),
+                getResources().getDimensionPixelSize(R.dimen.aiot_container_height),
                 Utilities.getScreenWidth(mLauncher), Utilities.getScreenHeight(mLauncher), (float) Utilities.getScreenInch(mLauncher));
+        Log.d(TAG, "insertNewWorkspaceScreen: " + getResources().getDimensionPixelSize(R.dimen.aiot_container_width)
+        + "        "  + getResources().getDimensionPixelSize(R.dimen.aiot_container_height) +
+                "    " + Utilities.getScreenWidth(mLauncher) + "     " + Utilities.getScreenHeight(mLauncher)
+        + "        " + Utilities.getScreenInch(mLauncher));
         aiotViewContainer.addView(aiotView);
         addView(newScreen, insertIndex);
 
@@ -1316,20 +1318,20 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public void lockWallpaperToDefaultPage() {
-        mWallpaperOffset.setLockToDefaultPage(true);
+        //mWallpaperOffset.setLockToDefaultPage(true);
     }
 
     public void unlockWallpaperFromDefaultPageOnNextLayout() {
-        if (mWallpaperOffset.isLockedToDefaultPage()) {
+        /*if (mWallpaperOffset.isLockedToDefaultPage()) {
             mUnlockWallpaperFromDefaultPageOnLayout = true;
             requestLayout();
-        }
+        }*/
     }
 
     @Override
     public void computeScroll() {
         super.computeScroll();
-        mWallpaperOffset.syncWithScroll();
+        //mWallpaperOffset.syncWithScroll();
     }
 
     public void computeScrollWithoutInvalidation() {
@@ -1380,7 +1382,6 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
                 } else {
                     getChildAt(i).setAlpha(1);
                 }
-
             }
         }
     }
@@ -1388,26 +1389,26 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         IBinder windowToken = getWindowToken();
-        mWallpaperOffset.setWindowToken(windowToken);
+        //mWallpaperOffset.setWindowToken(windowToken);
         computeScroll();
         mDragController.setWindowToken(windowToken);
     }
 
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mWallpaperOffset.setWindowToken(null);
+        //mWallpaperOffset.setWindowToken(null);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mUnlockWallpaperFromDefaultPageOnLayout) {
+        /*if (mUnlockWallpaperFromDefaultPageOnLayout) {
             mWallpaperOffset.setLockToDefaultPage(false);
             mUnlockWallpaperFromDefaultPageOnLayout = false;
         }
         if (mFirstLayout && mCurrentPage >= 0 && mCurrentPage < getChildCount()) {
             mWallpaperOffset.syncWithScroll();
             mWallpaperOffset.jumpToFinal();
-        }
+        }*/
         super.onLayout(changed, left, top, right, bottom);
         updatePageAlphaValues();
     }
@@ -2462,12 +2463,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     private void manageFolderFeedback(CellLayout targetLayout,
             int[] targetCell, float distance, DragObject dragObject) {
-        if (distance > mMaxDistanceForFolderCreation) {
-            if (mDragMode != DRAG_MODE_NONE) {
-                setDragMode(DRAG_MODE_NONE);
-            }
-            return;
-        }
+        if (distance > mMaxDistanceForFolderCreation) return;
 
         final View dragOverView = mDragTargetLayout.getChildAt(mTargetCell[0], mTargetCell[1]);
         ItemInfo info = dragObject.dragInfo;
@@ -3548,7 +3544,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     private void intentToIOTDeviceAdd() {
         Intent intent = new Intent();
-        intent.setClassName("com.skyworth.smartsystem.vhome", "com.skyworth.smartsystem.vhome.WXPageActivity");
+        intent.setAction("com.skyworth.smartsystem.vhome.adddevice");
         mLauncher.startActivity(intent);
     }
 
@@ -3563,7 +3559,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (popupWindow == null) {
             popupWindow = new RefrigeratorControlPopupWindow.PopupWindowBuilder(mLauncher)
                     .setView(R.layout.refrigerator_control_layout)
-                    .size(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+                    .size(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
                     .setFocusable(true)
                     .setOnDissmissListener(() -> {
                         WindowManager.LayoutParams lp1 = mLauncher.getWindow()

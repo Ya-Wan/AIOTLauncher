@@ -75,7 +75,7 @@ public class WidgetsFullSheet extends BaseWidgetSheet
 
         TopRoundedCornerView springLayout = (TopRoundedCornerView) mContent;
         springLayout.addSpringView(R.id.widgets_list_view);
-        mRecyclerView.setEdgeEffectFactory(springLayout.createEdgeEffectFactory());
+        //mRecyclerView.setEdgeEffectFactory(springLayout.createEdgeEffectFactory());
         onWidgetsBound();
     }
 

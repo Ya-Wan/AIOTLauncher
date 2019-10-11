@@ -15,8 +15,6 @@
  */
 package com.android.launcher3.anim;
 
-import static com.android.launcher3.anim.Interpolators.LINEAR;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
@@ -74,7 +72,7 @@ public abstract class AnimatorPlaybackController implements ValueAnimator.Animat
         mOnCancelRunnable = onCancelRunnable;
 
         mAnimationPlayer = ValueAnimator.ofFloat(0, 1);
-        mAnimationPlayer.setInterpolator(LINEAR);
+        mAnimationPlayer.setInterpolator(Interpolators.LINEAR);
         mAnimationPlayer.addListener(new OnAnimationEndDispatcher());
         mAnimationPlayer.addUpdateListener(this);
 
@@ -107,10 +105,6 @@ public abstract class AnimatorPlaybackController implements ValueAnimator.Animat
 
     public long getDuration() {
         return mDuration;
-    }
-
-    public TimeInterpolator getInterpolator() {
-        return mAnim.getInterpolator() != null ? mAnim.getInterpolator() : LINEAR;
     }
 
     /**
@@ -204,19 +198,6 @@ public abstract class AnimatorPlaybackController implements ValueAnimator.Animat
         if (animator instanceof AnimatorSet) {
             for (Animator anim : nonNullList(((AnimatorSet) animator).getChildAnimations())) {
                 dispatchOnCancelRecursively(anim);
-            }
-        }
-    }
-
-    public void dispatchSetInterpolator(TimeInterpolator interpolator) {
-        dispatchSetInterpolatorRecursively(mAnim, interpolator);
-    }
-
-    private void dispatchSetInterpolatorRecursively(Animator anim, TimeInterpolator interpolator) {
-        anim.setInterpolator(interpolator);
-        if (anim instanceof AnimatorSet) {
-            for (Animator child : nonNullList(((AnimatorSet) anim).getChildAnimations())) {
-                dispatchSetInterpolatorRecursively(child, interpolator);
             }
         }
     }

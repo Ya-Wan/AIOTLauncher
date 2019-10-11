@@ -192,8 +192,10 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
 
     public void allocateSpaceForRank(int rank) {
         ArrayList<View> views = new ArrayList<>(mFolder.getItemsInReadingOrder());
-        views.add(rank, null);
-        arrangeChildren(views, views.size(), false);
+        if (rank < views.size()) {
+            views.add(rank, null);
+            arrangeChildren(views, views.size(), false);
+        }
     }
 
     /**
@@ -229,8 +231,14 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
         CellLayout.LayoutParams lp = (CellLayout.LayoutParams) view.getLayoutParams();
         lp.cellX = item.cellX;
         lp.cellY = item.cellY;
-        getPageAt(pageNo).addViewToCellLayout(
-                view, -1, mFolder.mLauncher.getViewIdForItem(item), lp, true);
+
+        if (getPageAt(pageNo) == null) {
+            createAndAddNewPage().addViewToCellLayout(
+                    view, -1, mFolder.mLauncher.getViewIdForItem(item), lp, true);
+        } else {
+            getPageAt(pageNo).addViewToCellLayout(
+                    view, -1, mFolder.mLauncher.getViewIdForItem(item), lp, true);
+        }
     }
 
     @SuppressLint("InflateParams")
@@ -241,6 +249,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
         textView.setHapticFeedbackEnabled(false);
         textView.setOnClickListener(ItemClickHandler.INSTANCE);
         textView.setOnLongClickListener(mFolder);
+        textView.setTextSize(20);
         textView.setOnFocusChangeListener(mFocusIndicatorHelper);
 
         textView.setLayoutParams(new CellLayout.LayoutParams(
@@ -389,12 +398,12 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> {
 
     public int getDesiredWidth() {
         return getPageCount() > 0 ?
-                (getPageAt(0).getDesiredWidth() + getPaddingLeft() + getPaddingRight()) : 0;
+                (getPageAt(0).getDesiredWidth() + getPaddingLeft() + getPaddingRight()) : 918;
     }
 
     public int getDesiredHeight()  {
         return  getPageCount() > 0 ?
-                (getPageAt(0).getDesiredHeight() + getPaddingTop() + getPaddingBottom()) : 0;
+                (getPageAt(0).getDesiredHeight() + getPaddingTop() + getPaddingBottom()) : 947;
     }
 
     public int getItemCount() {

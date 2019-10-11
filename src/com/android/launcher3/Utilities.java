@@ -91,11 +91,15 @@ public final class Utilities {
     private static final Matrix sMatrix = new Matrix();
     private static final Matrix sInverseMatrix = new Matrix();
 
-    public static final boolean ATLEAST_P =
+    /*public static final boolean ATLEAST_P =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.P;
 
     public static final boolean ATLEAST_OREO_MR1 =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1;
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1;*/
+
+    public static final boolean ATLEAST_P = false;
+
+    public static final boolean ATLEAST_OREO_MR1 = false;
 
     public static final boolean ATLEAST_OREO =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
@@ -118,9 +122,8 @@ public final class Utilities {
      * Indicates if the device has a debug build. Should only be used to store additional info or
      * add extra logging and not for changing the app behavior.
      */
-    public static final boolean IS_DEBUG_DEVICE =
-            Build.TYPE.toLowerCase(Locale.ROOT).contains("debug") ||
-            Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
+    public static final boolean IS_DEBUG_DEVICE = Build.TYPE.toLowerCase().contains("debug")
+            || Build.TYPE.toLowerCase().equals("eng");
 
     // An intent extra to indicate the horizontal scroll of the wallpaper.
     public static final String EXTRA_WALLPAPER_OFFSET = "com.android.launcher3.WALLPAPER_OFFSET";
@@ -168,11 +171,14 @@ public final class Utilities {
             // For TextViews, scroll has a meaning which relates to the text position
             // which is very strange... ignore the scroll.
             if (v != descendant || includeRootScroll) {
+                Log.e(TAG, "getDescendantCoordRelativeToAncestor: " + sPoint[0]);
                 sPoint[0] -= v.getScrollX();
                 sPoint[1] -= v.getScrollY();
             }
 
+            Log.d(TAG, "getDescendantCoordRelativeToAncestor: " + sPoint[0]);
             v.getMatrix().mapPoints(sPoint);
+            Log.i(TAG, "getDescendantCoordRelativeToAncestor: " + sPoint[0] + "    " + v  + "   left: "+ v.getLeft());
             sPoint[0] += v.getLeft();
             sPoint[1] += v.getTop();
             scale *= v.getScaleX();

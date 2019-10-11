@@ -261,7 +261,7 @@ public class FastBitmapDrawable extends Drawable {
     /**
      * Updates the paint to reflect the current brightness and saturation.
      */
-    protected void updateFilter() {
+    private void updateFilter() {
         boolean usePorterDuffFilter = false;
         int key = -1;
         if (mDesaturation > 0) {

@@ -21,7 +21,11 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="649227358658669779">"Launcher3"</string>
     <string name="folder_name" msgid="7371454440695724752"></string>
-    <string name="work_folder_name" msgid="3753320833950115786">"Work"</string>
+    <string name="work_folder_name" msgid="3753320833950115786">"工作"</string>
+    <string name="education_folder_name">教育</string>
+    <string name="entertainment_folder_name">娱乐</string>
+    <string name="life_folder_name">生活</string>
+    <string name="all_app_folder_name">更多</string>
     <string name="activity_not_found" msgid="8071924732094499514">"未安装该应用。"</string>
     <string name="activity_not_available" msgid="7456344436509528827">"应用不可用"</string>
     <string name="safemode_shortcut_error" msgid="9160126848219158407">"安全模式下不允许使用下载的此应用"</string>
@@ -147,4 +151,6 @@
 
     <string name="aiot_device_open_num">"个开机"</string>
     <string name="aiot_air_quality">"空气质量 "</string>
+
+
 </resources>

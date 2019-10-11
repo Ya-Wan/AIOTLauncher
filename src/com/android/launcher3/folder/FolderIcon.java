@@ -166,7 +166,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         icon.mFolderName.setText(folderInfo.title);
         icon.mFolderName.setCompoundDrawablePadding(0);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) icon.mFolderName.getLayoutParams();
-        lp.topMargin = grid.iconSizePx/* + grid.iconDrawablePaddingPx*/;
+        lp.topMargin = /*grid.iconSizePx + grid.iconDrawablePaddingPx*/ 126;
 
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
         switch (folderInfo.cellX) {
@@ -201,8 +201,10 @@ public class FolderIcon extends FrameLayout implements FolderListener {
 
         lp = (FrameLayout.LayoutParams) icon.mPreviewBackground.getLayoutParams();
         //lp.topMargin = grid.folderBackgroundOffset;
-        lp.width = grid.folderIconSizePx;
-        lp.height = grid.folderIconSizePx;
+        //lp.width = grid.folderIconSizePx;
+        //lp.height = grid.folderIconSizePx;
+        lp.width = 126;
+        lp.height = 126;
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(ItemClickHandler.INSTANCE);
@@ -281,7 +283,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     OnAlarmListener mOnOpenListener = new OnAlarmListener() {
         public void onAlarm(Alarm alarm) {
             mFolder.beginExternalDrag();
-            mFolder.animateOpen();
+            //mFolder.animateOpen();
         }
     };
 

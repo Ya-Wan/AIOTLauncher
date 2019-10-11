@@ -29,17 +29,16 @@
         android:gravity="center"
         android:paddingLeft="0dp"
         android:paddingRight="0dp"
-        android:layout_marginBottom="14dp">
+        android:layout_marginBottom="42px">
 
         <TextView
             android:id="@+id/folder_name"
             android:layout_width="wrap_content"
-            android:layout_height="28dp"
+            android:layout_height="wrap_content"
             android:textColor="#ffffffff"
             android:singleLine="true"
-            android:text="Games"
             android:marqueeRepeatLimit="marquee_forever"
-            android:textSize="20sp" />
+            android:textSize="@dimen/folder_name_text_size" />
 
     </LinearLayout>
 
@@ -95,6 +94,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingTop="10px"
                 android:elevation="1dp"
                 />
 

@@ -1,7 +1,7 @@
 package com.android.launcher3;
 
 import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
-import static android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE;
+//import static android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE;
 
 import static com.android.launcher3.ItemInfoWithIcon.FLAG_SYSTEM_MASK;
 import static com.android.launcher3.ItemInfoWithIcon.FLAG_SYSTEM_NO;
@@ -209,10 +209,10 @@ public class SecondaryDropTarget extends ButtonDropTarget implements OnAlarmList
         if (widgetInfo == null || widgetInfo.configure == null) {
             return INVALID_APPWIDGET_ID;
         }
-        if ( (LauncherAppWidgetProviderInfo.fromProviderInfo(getContext(), widgetInfo)
+        /*if ( (LauncherAppWidgetProviderInfo.fromProviderInfo(getContext(), widgetInfo)
                 .getWidgetFeatures() & WIDGET_FEATURE_RECONFIGURABLE) == 0) {
             return INVALID_APPWIDGET_ID;
-        }
+        }*/
         return hostView.getAppWidgetId();
     }
 

@@ -123,8 +123,8 @@
         launcher:numColumns="5"
         launcher:numFolderRows="4"
         launcher:numFolderColumns="4"
-        launcher:iconSize="56"
-        launcher:iconTextSize="14.4"
+        launcher:iconSize="60"
+        launcher:iconTextSize="18"
         launcher:numHotseatIcons="5"
         launcher:defaultLayoutId="@xml/default_workspace_5x5"
         />
@@ -133,13 +133,13 @@
         launcher:name="Nexus 7"
         launcher:minWidthDps="575"
         launcher:minHeightDps="904"
-        launcher:numRows="6"
+        launcher:numRows="5"
         launcher:numColumns="6"
         launcher:numFolderRows="4"
         launcher:numFolderColumns="5"
         launcher:iconSize="64"
         launcher:iconTextSize="14.4"
-        launcher:numHotseatIcons="6"
+        launcher:numHotseatIcons="7"
         launcher:defaultLayoutId="@xml/default_workspace_5x6"
         />
 
@@ -147,17 +147,17 @@
         launcher:name="Nexus 10"
         launcher:minWidthDps="727"
         launcher:minHeightDps="1207"
-        launcher:numRows="6"
-        launcher:numColumns="7"
-        launcher:numFolderRows="4"
-        launcher:numFolderColumns="5"
-        launcher:iconSize="76"
+        launcher:numRows="5"
+        launcher:numColumns="6"
+        launcher:numFolderRows="3"
+        launcher:numFolderColumns="3"
+        launcher:iconSize="127"
         launcher:iconTextSize="14.4"
-        launcher:numHotseatIcons="7"
+        launcher:numHotseatIcons="5"
         launcher:defaultLayoutId="@xml/default_workspace_5x6"
         />
 
-    <profile
+    <!--<profile
         launcher:name="20-inch Tablet"
         launcher:minWidthDps="1527"
         launcher:minHeightDps="2527"
@@ -165,10 +165,10 @@
         launcher:numColumns="7"
         launcher:numFolderRows="6"
         launcher:numFolderColumns="6"
-        launcher:iconSize="50"
+        launcher:iconSize="100"
         launcher:iconTextSize="20.0"
-        launcher:numHotseatIcons="5"
+        launcher:numHotseatIcons="7"
         launcher:defaultLayoutId="@xml/default_workspace_5x6"
-        />
+        />-->
 
 </profiles>

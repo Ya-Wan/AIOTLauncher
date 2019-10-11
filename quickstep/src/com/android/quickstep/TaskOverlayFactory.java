@@ -18,7 +18,6 @@ package com.android.quickstep;
 
 import android.content.Context;
 import android.graphics.Matrix;
-import android.support.annotation.AnyThread;
 import android.view.View;
 
 import com.android.launcher3.R;
@@ -41,11 +40,6 @@ public class TaskOverlayFactory {
                     context.getApplicationContext(), R.string.task_overlay_factory_class);
         }
         return sInstance;
-    }
-
-    @AnyThread
-    public boolean needAssist() {
-        return false;
     }
 
     public TaskOverlay createOverlay(View thumbnailView) {

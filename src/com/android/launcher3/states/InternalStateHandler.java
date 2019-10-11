@@ -96,12 +96,10 @@ public abstract class InternalStateHandler extends Binder {
         private WeakReference<InternalStateHandler> mPendingHandler = new WeakReference<>(null);
         private MainThreadExecutor mMainThreadExecutor;
 
-        public void schedule(InternalStateHandler handler) {
-            synchronized (this) {
-                mPendingHandler = new WeakReference<>(handler);
-                if (mMainThreadExecutor == null) {
-                    mMainThreadExecutor = new MainThreadExecutor();
-                }
+        public synchronized void schedule(InternalStateHandler handler) {
+            mPendingHandler = new WeakReference<>(handler);
+            if (mMainThreadExecutor == null) {
+                mMainThreadExecutor = new MainThreadExecutor();
             }
             mMainThreadExecutor.execute(this);
         }
@@ -120,25 +118,23 @@ public abstract class InternalStateHandler extends Binder {
             initIfPending(launcher, launcher.isStarted());
         }
 
-        public boolean initIfPending(Launcher launcher, boolean alreadyOnHome) {
+        public synchronized boolean initIfPending(Launcher launcher, boolean alreadyOnHome) {
             InternalStateHandler pendingHandler = mPendingHandler.get();
             if (pendingHandler != null) {
                 if (!pendingHandler.init(launcher, alreadyOnHome)) {
-                    clearReference(pendingHandler);
+                    mPendingHandler.clear();
                 }
                 return true;
             }
             return false;
         }
 
-        public boolean clearReference(InternalStateHandler handler) {
-            synchronized (this) {
-                if (mPendingHandler.get() == handler) {
-                    mPendingHandler.clear();
-                    return true;
-                }
-                return false;
+        public synchronized boolean clearReference(InternalStateHandler handler) {
+            if (mPendingHandler.get() == handler) {
+                mPendingHandler.clear();
+                return true;
             }
+            return false;
         }
 
         public boolean hasPending() {

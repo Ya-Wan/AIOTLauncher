@@ -19,8 +19,9 @@
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.launcher3">
-    <uses-sdk android:targetSdkVersion="23" android:minSdkVersion="21"/>
+    package="com.android.launcher3"
+    android:sharedUserId="android.uid.system">
+    <uses-sdk android:targetSdkVersion="23" />
     <!--
     Manifest entries specific to Launcher3. This is merged with AndroidManifest-common.xml.
     Refer comments around specific entries on how to extend individual components.
@@ -32,13 +33,13 @@
     name in the permissions. eq com.mypackage.permission.READ_SETTINGS
     -->
     <permission
-        android:name="com.android.launcher3.permission.READ_SETTINGS"
+        android:name="com.android.launcher.permission.READ_SETTINGS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signatureOrSystem"
         android:label="@string/permlab_read_settings"
         android:description="@string/permdesc_read_settings"/>
     <permission
-        android:name="com.android.launcher3.permission.WRITE_SETTINGS"
+        android:name="com.android.launcher.permission.WRITE_SETTINGS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signatureOrSystem"
         android:label="@string/permlab_write_settings"
@@ -49,19 +50,40 @@
     <uses-permission android:name="com.android.launcher3.permission.READ_SETTINGS" />
     <uses-permission android:name="com.android.launcher3.permission.WRITE_SETTINGS" />
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- 获取网络状态改变的权限 -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" /> <!-- 允许应用程序改变网络状态 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> <!-- 允许应用程序改变WIFI连接状态 -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 允许应用程序完全使用网络 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- 获取蓝牙的权限 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" /><!-- 开启/禁用屏保权限 -->
+    <uses-permission android:name="com.tianci.user.permission.READ_CONTENT"/>
+
     <application
+        android:name="com.skyworth.framework.skysdk.ipc.SkyApplication"
         android:backupAgent="com.android.launcher3.LauncherBackupAgent"
         android:fullBackupOnly="true"
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher_home"
         android:label="@string/derived_app_name"
-        android:theme="@style/AppTheme"
+        android:theme="@style/LauncherTheme"
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
         android:supportsRtl="true"
         xmlns:tools="http://schemas.android.com/tools"
-        tools:replace="label">
+        tools:replace="label,android:theme">
 
         <!--
         Main launcher activity. When extending only change the name, and keep all the
@@ -85,7 +107,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.MONKEY"/>
                 <category android:name="android.intent.category.LAUNCHER_APP" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
@@ -110,10 +132,10 @@
         -->
         <provider
             android:name="com.android.launcher3.LauncherProvider"
-            android:authorities="com.android.launcher3.settings"
+            android:authorities="com.android.launcher.settings"
             android:exported="true"
-            android:writePermission="com.android.launcher3.permission.WRITE_SETTINGS"
-            android:readPermission="com.android.launcher3.permission.READ_SETTINGS" />
+            android:writePermission="com.android.launcher.permission.WRITE_SETTINGS"
+            android:readPermission="com.android.launcher.permission.READ_SETTINGS" />
 
     </application>
 </manifest>

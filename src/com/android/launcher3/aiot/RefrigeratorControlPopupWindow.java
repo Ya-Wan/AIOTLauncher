@@ -172,7 +172,7 @@ public class RefrigeratorControlPopupWindow {
                 mode.setTextColor(Color.WHITE);
                 container.setBackgroundResource(R.drawable.refrigerator_mode_selected);
                 drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
-                mode.setCompoundDrawablePadding(40);
+                mode.setCompoundDrawablePadding(20);
                 mode.setCompoundDrawables(drawable, null, null, null);
 
             } else {

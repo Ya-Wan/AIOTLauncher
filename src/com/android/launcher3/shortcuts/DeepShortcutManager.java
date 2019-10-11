@@ -181,12 +181,7 @@ public class DeepShortcutManager {
      * If packageName is null, returns all pinned shortcuts regardless of package.
      */
     public List<ShortcutInfoCompat> queryForPinnedShortcuts(String packageName, UserHandle user) {
-        return queryForPinnedShortcuts(packageName, null, user);
-    }
-
-    public List<ShortcutInfoCompat> queryForPinnedShortcuts(String packageName,
-            List<String> shortcutIds, UserHandle user) {
-        return query(ShortcutQuery.FLAG_MATCH_PINNED, packageName, null, shortcutIds, user);
+        return query(ShortcutQuery.FLAG_MATCH_PINNED, packageName, null, null, user);
     }
 
     public List<ShortcutInfoCompat> queryForAllShortcuts(UserHandle user) {

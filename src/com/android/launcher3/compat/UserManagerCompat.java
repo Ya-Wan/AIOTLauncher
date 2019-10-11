@@ -34,7 +34,7 @@ public abstract class UserManagerCompat {
         synchronized (sInstanceLock) {
             if (sInstance == null) {
                 if (Utilities.ATLEAST_P) {
-                    sInstance = new UserManagerCompatVP(context.getApplicationContext());
+                    //sInstance = new UserManagerCompatVP(context.getApplicationContext());
                 } else if (Utilities.ATLEAST_NOUGAT_MR1) {
                     sInstance = new UserManagerCompatVNMr1(context.getApplicationContext());
                 } else if (Utilities.ATLEAST_NOUGAT) {

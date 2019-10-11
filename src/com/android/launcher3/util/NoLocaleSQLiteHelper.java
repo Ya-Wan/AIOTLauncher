@@ -25,7 +25,7 @@ import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.database.sqlite.SQLiteDatabase.OpenParams;
+//import android.database.sqlite.SQLiteDatabase.OpenParams;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
@@ -35,10 +35,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 public abstract class NoLocaleSQLiteHelper extends SQLiteOpenHelper {
 
     public NoLocaleSQLiteHelper(Context context, String name, int version) {
-        super(ATLEAST_P ? context : new NoLocalContext(context), name, null, version);
+        super(new NoLocalContext(context), name, null, version);
+        /*super(ATLEAST_P ? context : new NoLocalContext(context), name, null, version);
         if (ATLEAST_P) {
             setOpenParams(new OpenParams.Builder().addOpenFlags(NO_LOCALIZED_COLLATORS).build());
-        }
+        }*/
     }
 
     private static class NoLocalContext extends ContextWrapper {

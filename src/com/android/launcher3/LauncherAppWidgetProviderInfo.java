@@ -96,10 +96,12 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo {
     }
 
     public int getWidgetFeatures() {
-        if (Utilities.ATLEAST_P) {
+        /*if (Utilities.ATLEAST_P) {
             return widgetFeatures;
         } else {
             return 0;
-        }
+        }*/
+
+        return 0;
     }
  }

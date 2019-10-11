@@ -31,7 +31,7 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher_home"
         android:label="@string/derived_app_name"
-        android:theme="@style/AppTheme"
+        android:theme="@style/LauncherTheme"
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
         android:supportsRtl="true" >
@@ -73,9 +73,9 @@
         </provider>
 
 
-        <service
+        <!--<service
             android:name="com.android.launcher3.uioverrides.dynamicui.WallpaperManagerCompatVL$ColorExtractionService"
-            tools:node="remove" />
+            tools:node="remove" />-->
 
     </application>
 

@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
@@ -214,7 +215,7 @@ public class PopupContainerWithArrow extends ArrowPopup implements DragSource,
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.P)
+    //@TargetApi(Build.VERSION_CODES.P)
     private void populateAndShow(final BubbleTextView originalIcon, final List<String> shortcutIds,
             final List<NotificationKeyData> notificationKeys, List<SystemShortcut> systemShortcuts) {
         mNumNotifications = notificationKeys.size();
@@ -263,9 +264,9 @@ public class PopupContainerWithArrow extends ArrowPopup implements DragSource,
         reorderAndShow(viewsToFlip);
 
         ItemInfo originalItemInfo = (ItemInfo) originalIcon.getTag();
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        /*if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             setAccessibilityPaneTitle(getTitleForAccessibility());
-        }
+        }*/
 
         mLauncher.getDragController().addDragListener(this);
         mOriginalIcon.forceHideBadge(true);
@@ -294,12 +295,15 @@ public class PopupContainerWithArrow extends ArrowPopup implements DragSource,
     @Override
     protected void getTargetObjectLocation(Rect outPos) {
         mLauncher.getDragLayer().getDescendantRectRelativeToSelf(mOriginalIcon, outPos);
+        Log.d("y.wan", "getTargetObjectLocation: " + outPos.top +
+                "    left: " + outPos.left + "    right: " + outPos.right);
         outPos.top += mOriginalIcon.getPaddingTop();
         outPos.left += mOriginalIcon.getPaddingLeft();
         outPos.right -= mOriginalIcon.getPaddingRight();
         outPos.bottom = outPos.top + (mOriginalIcon.getIcon() != null
                 ? mOriginalIcon.getIcon().getBounds().height()
                 : mOriginalIcon.getHeight());
+
     }
 
     public void applyNotificationInfos(List<NotificationInfo> notificationInfos) {

@@ -50,7 +50,6 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Alarm;
@@ -122,7 +121,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
     /**
      * Fraction of icon width which behave as scroll region.
      */
-    private static final float ICON_OVERSCROLL_WIDTH_FACTOR = 0.45f;
+    private static final float ICON_OVERSCROLL_WIDTH_FACTOR = 0.15f;
 
     private static final int FOLDER_NAME_ANIMATION_DURATION = 633;
 
@@ -613,7 +612,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
             mFolderIcon.clearLeaveBehindIfExists();
         }
 
-        if (animate) {
+        if (animate/* && mInfo.contents.size() > 0*/) {
             animateClosed();
         } else {
             closeComplete(false);
@@ -633,7 +632,6 @@ public class Folder extends AbstractFloatingView implements DragSource,
             public void onAnimationEnd(Animator animation) {
                 closeComplete(true);
                 announceAccessibilityChanges();
-
             }
         });
         startAnimation(a);
@@ -975,14 +973,10 @@ public class Folder extends AbstractFloatingView implements DragSource,
         int x = point.x;
         int y = point.y;
 
-//        Toast.makeText(mLauncher, "X: " + x + "   y: " + y +
-//                 "      FolderHeight:" + height + "   lp.y " + (y-height)
-//                + "     densityDpi: " + getResources().getDisplayMetrics().densityDpi, Toast.LENGTH_LONG).show();
-
         lp.width = width;
         lp.height = height;
         lp.x = left;
-        lp.y = y - height;
+        lp.y = y - height - getResources().getDimensionPixelSize(R.dimen.folder_margin_bottom);
     }
 
     public float getPivotXForIconAnimation() {
@@ -1011,8 +1005,6 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
     private int getFolderHeight() {
         int offset = getResources().getDimensionPixelSize(R.dimen.folder_height_offset);
-        Toast.makeText(mLauncher,  "" + getContentAreaHeight() + "        height: " + getFolderHeight(getContentAreaHeight())
-                + "    width:   " + getFolderWidth(), Toast.LENGTH_LONG).show();
         return getFolderHeight(getContentAreaHeight()) + offset;
     }
 
@@ -1029,7 +1021,7 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
         mContent.setFixedSize(contentWidth, contentHeight);
         mContent.measure(contentAreaWidthSpec, contentAreaHeightSpec);
-        mContentWrapper.measure(contentAreaWidthSpec, contentAreaHeightSpec);
+        mContentWrapper.measure(contentAreaWidthSpec,contentAreaHeightSpec);
 
         if (mContent.getChildCount() > 0) {
             int cellIconGap = (mContent.getPageAt(0).getCellWidth()
@@ -1046,6 +1038,8 @@ public class Folder extends AbstractFloatingView implements DragSource,
 
         int folderWidth = getPaddingLeft() + getPaddingRight() + contentWidth;
         int folderHeight = getFolderHeight(contentHeight);
+//        int folderHeight = mContentWrapper.getMeasuredHeight() + mFolderNameContainer.getMeasuredHeight()
+//                + getPaddingTop() + getPaddingBottom();
         setMeasuredDimension(folderWidth, folderHeight);
     }
 
@@ -1259,11 +1253,13 @@ public class Folder extends AbstractFloatingView implements DragSource,
     // to correspond to the animation of the icon back into the folder. This is
     public void hideItem(ShortcutInfo info) {
         View v = getViewForInfo(info);
-        v.setVisibility(INVISIBLE);
+        if (v != null)
+            v.setVisibility(INVISIBLE);
     }
     public void showItem(ShortcutInfo info) {
         View v = getViewForInfo(info);
-        v.setVisibility(VISIBLE);
+        if (v != null)
+            v.setVisibility(VISIBLE);
     }
 
     @Override

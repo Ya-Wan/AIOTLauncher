@@ -29,7 +29,7 @@ abstract class BaseFlags {
     BaseFlags() {}
 
     public static final boolean IS_DOGFOOD_BUILD = false;
-    public static final String AUTHORITY = "com.android.launcher3.settings".intern();
+    public static final String AUTHORITY = "com.android.launcher.settings".intern();
 
     // When enabled allows to use any point on the fast scrollbar to start dragging.
     public static final boolean LAUNCHER3_DIRECT_SCROLL = true;
@@ -47,7 +47,7 @@ abstract class BaseFlags {
     public static final boolean ENABLE_CUSTOM_WIDGETS = false;
 
     // Features to control Launcher3Go behavior
-    public static final boolean GO_DISABLE_WIDGETS = false;
+    public static final boolean GO_DISABLE_WIDGETS = true;
 
     // When enabled shows a work profile tab in all apps
     public static final boolean ALL_APPS_TABS_ENABLED = true;
@@ -60,4 +60,5 @@ abstract class BaseFlags {
     public static final boolean ENABLE_WORKSPACE_OVER_SCROLL = false;
     public static final boolean REPLACE_FOLDER_WITH_FINAL_ITEM = false;
     public static final boolean ENABLE_DRAG_UNINSTALL = false;
+    public static final boolean SHOW_ALL_APPS = false;
 }

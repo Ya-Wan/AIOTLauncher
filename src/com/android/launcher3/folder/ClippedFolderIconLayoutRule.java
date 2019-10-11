@@ -17,7 +17,7 @@ public class ClippedFolderIconLayoutRule {
 
     private float mAvailableSpace;
     private float mRadius;
-    private float mIconSize;
+    private float mIconSize = 154;
     private boolean mIsRtl;
     private float mBaselineIconScale;
 
@@ -36,7 +36,7 @@ public class ClippedFolderIconLayoutRule {
         float transY;
         float overlayAlpha = 0;
 
-        if (index == EXIT_INDEX) {
+        /*if (index == EXIT_INDEX) {
             // 0 1 * <-- Exit position (row 0, col 2)
             // 2 3
             getGridPosition(0, 2, mTmpPoint);
@@ -49,8 +49,8 @@ public class ClippedFolderIconLayoutRule {
             mTmpPoint[0] = mTmpPoint[1] = mAvailableSpace / 2 - (mIconSize * totalScale) / 2;
         } else {
             getPosition(index, curNumItems, mTmpPoint);
-        }
-
+        }*/
+        mTmpPoint[0] = mTmpPoint[1] = mAvailableSpace / 2 - (mIconSize * totalScale) / 2;
         transX = mTmpPoint[0];
         transY = mTmpPoint[1];
 

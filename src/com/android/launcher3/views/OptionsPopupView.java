@@ -153,10 +153,7 @@ public class OptionsPopupView extends ArrowPopup
     }
 
     public static boolean onWidgetsClicked(View view) {
-        return openWidgets(Launcher.getLauncher(view.getContext()));
-    }
-
-    public static boolean openWidgets(Launcher launcher) {
+        Launcher launcher = Launcher.getLauncher(view.getContext());
         if (launcher.getPackageManager().isSafeMode()) {
             Toast.makeText(launcher, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show();
             return false;

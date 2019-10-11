@@ -23,12 +23,16 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.CellLayout;
+import com.android.launcher3.R;
 import com.android.launcher3.ShortcutInfo;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.touch.ItemClickHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,6 +203,12 @@ public class PreviewItemManager {
 
     void buildParamsForPage(int page, ArrayList<PreviewItemDrawingParams> params, boolean animate) {
         List<BubbleTextView> items = mIcon.getPreviewItemsOnPage(page);
+
+        if (items.size() == 0) {
+            buildParamsForPageForEmpty(page, params, items, animate);
+            return;
+        }
+
         int prevNumItems = params.size();
 
         // We adjust the size of the list to match the number of items in the preview.
@@ -240,6 +250,67 @@ public class PreviewItemManager {
                 p.anim.start();
             }
         }
+    }
+
+    void buildParamsForPageForEmpty(int page, ArrayList<PreviewItemDrawingParams> params, List<BubbleTextView> items, boolean animate) {
+
+        //create a BubbleTextView for empty folder to init preview params
+        BubbleTextView textView = (BubbleTextView) LayoutInflater.from(mIcon.mLauncher).inflate(
+                    R.layout.folder_application, null, false);
+        textView.setHapticFeedbackEnabled(false);
+        Drawable d = mIcon.mLauncher.getResources().getDrawable(R.drawable.all_apps_button_icon);
+        d.setBounds(0, 0, d.getMinimumWidth(), d.getMinimumHeight());
+
+        textView.setCompoundDrawables(null, d, null, null);
+
+        textView.setLayoutParams(new CellLayout.LayoutParams(
+                    0, 0, 1, 1));
+        items.add(textView);
+
+
+        int prevNumItems = params.size();
+
+        // We adjust the size of the list to match the number of items in the preview.
+        while (items.size() < params.size()) {
+            params.remove(params.size() - 1);
+        }
+        while (items.size() > params.size()) {
+            params.add(new PreviewItemDrawingParams(0, 0, 0, 0));
+        }
+
+        int numItemsInFirstPagePreview = page == 0 ? items.size() : MAX_NUM_ITEMS_IN_PREVIEW;
+        for (int i = 0; i < params.size(); i++) {
+            PreviewItemDrawingParams p = params.get(i);
+            p.drawable = items.get(i).getCompoundDrawables()[1];
+
+            if (p.drawable != null && !mIcon.mFolder.isOpen()) {
+                // Set the callback to FolderIcon as it is responsible to drawing the icon. The
+                // callback will be released when the folder is opened.
+                p.drawable.setCallback(mIcon);
+            }
+
+            if (!animate) {
+                computePreviewItemDrawingParams(i, numItemsInFirstPagePreview, p);
+                if (mReferenceDrawable == null) {
+                    mReferenceDrawable = p.drawable;
+                }
+            } else {
+                FolderPreviewItemAnim anim = new FolderPreviewItemAnim(this, p, i, prevNumItems, i,
+                        numItemsInFirstPagePreview, DROP_IN_ANIMATION_DURATION, null);
+
+                if (p.anim != null) {
+                    if (p.anim.hasEqualFinalState(anim)) {
+                        // do nothing, let the current animation finish
+                        continue;
+                    }
+                    p.anim.cancel();
+                }
+                p.anim = anim;
+                p.anim.start();
+            }
+        }
+
+        items.clear();
     }
 
     void onFolderClose(int currentPage) {

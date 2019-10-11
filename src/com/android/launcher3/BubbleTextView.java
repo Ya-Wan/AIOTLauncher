@@ -439,7 +439,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     }
 
     private int getModifiedColor() {
-        //return Color.WHITE;
         if (mTextAlpha == 0) {
             // Special case to prevent text shadows in high contrast mode
             return Color.TRANSPARENT;

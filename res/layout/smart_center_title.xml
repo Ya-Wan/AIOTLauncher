@@ -7,15 +7,17 @@
 
     <TextView
         android:layout_width="0dp"
-        android:layout_height="26dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:text="智能人居系统智控中心"
-        android:textColor="#ffffffff"
-        android:textSize="18sp" />
+        android:textColor="@android:color/white"
+        android:textSize="26sp" />
 
     <ImageView
         android:id="@+id/smart_device_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_device_add"/>
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_device_add" />
 </LinearLayout>
