@@ -114,20 +114,29 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
         CellLayout.LayoutParams lp = (CellLayout.LayoutParams) child.getLayoutParams();
         final DeviceProfile profile = mLauncher.getDeviceProfile();
 
-        if (child instanceof LauncherAppWidgetHostView) {
-            lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX,
-                    profile.appWidgetScale.x, profile.appWidgetScale.y);
-            // Widgets have their own padding
-        } else {
-            lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX);
-            // Center the icon/folder
-            int cHeight = getCellContentHeight();
-            int cellPaddingY = (int) Math.max(0, ((lp.height - cHeight) / 2f));
-            int cellPaddingX = mContainerType == CellLayout.WORKSPACE
-                    ? profile.workspaceCellPaddingXPx
-                    : (int) (profile.edgeMarginPx / 2f);
-            child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+        if (!lp.isFullscreen) {
+            if (child instanceof LauncherAppWidgetHostView) {
+                lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX,
+                        profile.appWidgetScale.x, profile.appWidgetScale.y);
+                // Widgets have their own padding
+            } else {
+                lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX);
+                // Center the icon/folder
+                int cHeight = getCellContentHeight();
+                int cellPaddingY = (int) Math.max(0, ((lp.height - cHeight) / 2f));
+                int cellPaddingX = mContainerType == CellLayout.WORKSPACE
+                        ? profile.workspaceCellPaddingXPx
+                        : (int) (profile.edgeMarginPx / 2f);
+                child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+            }
+        }else {
+            lp.x = 0;
+            lp.y = 0;
+            lp.width = getMeasuredWidth();
+            lp.height = getMeasuredHeight();
         }
+
+
         int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
         int childheightMeasureSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
         child.measure(childWidthMeasureSpec, childheightMeasureSpec);

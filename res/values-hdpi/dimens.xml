@@ -37,7 +37,7 @@
     <dimen name="dynamic_grid_hotseat_bottom_padding">0dp</dimen>
     <!-- Extra bottom padding for non-tall devices. -->
     <dimen name="dynamic_grid_hotseat_bottom_non_tall_padding">0dp</dimen>
-    <dimen name="dynamic_grid_hotseat_size">150dp</dimen>
+    <dimen name="dynamic_grid_hotseat_size">0dp</dimen>
     <dimen name="dynamic_grid_hotseat_side_padding">0dp</dimen>
 
     <!-- Hotseat/all-apps scrim -->
@@ -241,9 +241,8 @@
     <dimen name="aiot_layout_status_padding_top">60dp</dimen>
     <dimen name="aiot_layout_status_icon_padding_start">14dp</dimen>
     <dimen name="aiot_layout_status_padding">16dp</dimen>
-    <dimen name="aiot_container_width">633dp</dimen>
-    <dimen name="aiot_container_height">750dp</dimen>
-
+    <!--<dimen name="aiot_container_width">633dp</dimen>
+    <dimen name="aiot_container_height">750dp</dimen>-->
     <dimen name="aiot_refrigerator_layout_height">166dp</dimen>
     <dimen name="aiot_refrigerator_temp_seekbar_width">400dp</dimen>
     <dimen name="aiot_refrigerator_text_padding">35dp</dimen>

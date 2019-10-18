@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/weather_clock_content"
+    android:layout_width="wrap_content"
+    android:layout_height="190px"
+    android:layout_marginTop="50px"
+    android:layout_marginStart="@dimen/weather_clock_padding_start_end"
+    android:layout_marginEnd="@dimen/weather_clock_padding_start_end"
+    android:background="@drawable/weather_time_bg"
+    android:paddingBottom="33px"
+    android:layout_below="@+id/content_title">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="34px"
+        android:orientation="horizontal">
+
+        <TextClock
+            android:id="@+id/tv_lock_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="hh:mm"
+            android:format24Hour="HH:mm"
+            android:textColor="#DEDEDE"
+            android:textSize="@dimen/time_hm_text_size" />
+
+        <TextClock
+            android:id="@+id/tv_lock_date"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:format12Hour="yyyy/MM/dd\nEE"
+            android:format24Hour="yyyy/MM/dd\nEE"
+            android:gravity="center_vertical"
+            android:layout_marginStart="18px"
+            android:textColor="#DEDEDE"
+            android:textSize="@dimen/time_md_text_size" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginEnd="50px"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true">
+
+        <ImageView
+            android:id="@+id/iv_weather_icon"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_height="140px"
+            android:src="@drawable/weather_cloudy" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="18px"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_weather_current_tem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="26℃"
+                android:textColor="#DEDEDE"
+                android:textSize="@dimen/time_hm_text_size" />
+
+            <TextView
+                android:id="@+id/tv_weather_temp_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="32px"
+                android:text="23~29℃"
+                android:textColor="#DEDEDE"
+                android:textSize="@dimen/time_md_text_size" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

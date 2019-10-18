@@ -44,4 +44,7 @@
     <color name="refrigerator_mode_primary_color">#FF0DA5F3</color>
     <color name="launcher_primary_color">#FF282828</color>
 
+    <color name="recent_app_bg_color">#33FFFFFF</color>
+    <color name="weather_time_bg_color">#1AFFFFFF</color>
+
 </resources>

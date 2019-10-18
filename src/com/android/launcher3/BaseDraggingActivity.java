@@ -39,7 +39,6 @@ import com.android.launcher3.uioverrides.DisplayRotationListener;
 import com.android.launcher3.uioverrides.WallpaperColorInfo;
 import com.android.launcher3.shortcuts.DeepShortcutManager;
 import com.android.launcher3.views.BaseDragLayer;
-import com.skyworth.aiotsdk.api.AIOTAPI;
 
 /**
  * Extension of BaseActivity allowing support for drag-n-drop

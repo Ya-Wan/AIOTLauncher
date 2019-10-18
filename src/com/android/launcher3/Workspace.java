@@ -35,7 +35,6 @@ import android.annotation.SuppressLint;
 import android.app.WallpaperManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -48,18 +47,16 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -99,16 +96,12 @@ import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LongArrayMap;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.Thunk;
-import com.android.launcher3.util.WallpaperOffsetInterpolator;
+import com.android.launcher3.weather.WeatherManager;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.PendingAddShortcutInfo;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.PendingAppWidgetHostView;
 import com.skyworth.aiotsdk.api.AIOTAPI;
-import com.skyworth.aiotsdk.api.AIOTConstant;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -139,13 +132,14 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     private static final int ADJACENT_SCREEN_DROP_DURATION = 300;
 
-    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE = 1;
 
     private static final boolean MAP_NO_RECURSE = false;
     private static final boolean MAP_RECURSE = true;
 
     // The screen id used for the empty screen always present to the right.
     public static final long EXTRA_EMPTY_SCREEN_ID = -201;
+    private final static long CUSTOM_CONTENT_SCREEN_ID = -301;
     // The is the first screen. It is always present, even if its empty.
     public static final long FIRST_SCREEN_ID = 0;
 
@@ -263,10 +257,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
-    private RelativeLayout newScreen;
-    private TextView deviceOpenNumTv,airQualityTv;
-    private SwipeRefreshLayout smartCenterWrapper;
-    private ImageView deviceAddBt;
+    private ImageView weatherIv;
+    private TextView weatherCurrentTem, weatherTemRange;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -485,12 +477,12 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public void onViewAdded(View child) {
-        /*if (!(child instanceof CellLayout)) {
+        if (!(child instanceof CellLayout)) {
             throw new IllegalArgumentException("A Workspace can only have CellLayout children.");
         }
         CellLayout cl = ((CellLayout) child);
         cl.setOnInterceptTouchListener(this);
-        cl.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);*/
+        cl.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         super.onViewAdded(child);
     }
 
@@ -504,6 +496,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
      */
     public void bindAndInitFirstWorkspaceScreen(View qsb) {
         insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, 0);
+        createCustomContentContainer();
         /*if (!FeatureFlags.QSB_ON_FIRST_SCREEN) {
             return;
         }
@@ -562,19 +555,20 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         insertNewWorkspaceScreen(screenId, getChildCount());
     }
 
-    public View insertNewWorkspaceScreen(long screenId, int insertIndex) {
+    public CellLayout insertNewWorkspaceScreen(long screenId, int insertIndex) {
         if (mWorkspaceScreens.containsKey(screenId)) {
             throw new RuntimeException("Screen id " + screenId + " already exists!");
         }
 
         // Inflate the cell layout, but do not add it automatically so that we can get the newly
         // created CellLayout.
-        /*CellLayout newScreen = (CellLayout) LayoutInflater.from(getContext()).inflate(
-                        R.layout.workspace_screen, this, false *//* attachToRoot *//*);
-        newScreen.getShortcutsAndWidgets().setId(R.id.workspace_page_container);
-        int paddingLeftRight = mLauncher.getDeviceProfile().cellLayoutPaddingLeftRightPx;
+        CellLayout newScreen = (CellLayout) LayoutInflater.from(getContext()).inflate(
+                        R.layout.workspace_screen, this, false /* attachToRoot */);
+        /*int paddingLeftRight = mLauncher.getDeviceProfile().cellLayoutPaddingLeftRightPx;
         int paddingBottom = mLauncher.getDeviceProfile().cellLayoutBottomPaddingPx;
-        newScreen.setPadding(paddingLeftRight, 0, paddingLeftRight, paddingBottom);
+        newScreen.setPadding(paddingLeftRight, 0, paddingLeftRight, paddingBottom);*/
+
+        newScreen.setPadding(0, 0, 0, 0);
 
         mWorkspaceScreens.put(screenId, newScreen);
         mScreenOrder.add(insertIndex, screenId);
@@ -582,48 +576,104 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         mStateTransitionAnimation.applyChildState(
                 mLauncher.getStateManager().getState(), newScreen, insertIndex);
 
+        addAIoTContentToFirstPage(newScreen);
+
         if (mLauncher.getAccessibilityDelegate().isInAccessibleDrag()) {
             newScreen.enableAccessibleDrag(true, CellLayout.WORKSPACE_ACCESSIBILITY_DRAG);
         }
 
-        return newScreen;*/
+        return newScreen;
+    }
 
-        newScreen = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
-                R.layout.smart_center_layout, this, false /* attachToRoot */);
+    private void addAIoTContentToFirstPage(CellLayout newScreen) {
+        RelativeLayout container = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
+                R.layout.aiot_content_layout, null, false /* attachToRoot */);
 
-        //newScreen.setOnLongClickListener(mLongClickListener);
-        //newScreen.setOnClickListener(mLauncher);
-        smartCenterWrapper = newScreen.findViewById(R.id.smart_center_wrapper);
-        smartCenterWrapper.setProgressViewOffset(false, -1000, -1000);
-        smartCenterWrapper.setOnRefreshListener(() -> {
-            showRefrigeratorControlView();
-            smartCenterWrapper.setRefreshing(false);
-        });
-        deviceAddBt = newScreen.findViewById(R.id.smart_device_add);
-        deviceAddBt.setOnClickListener(v -> intentToIOTDeviceAdd());
+        weatherIv = container.findViewById(R.id.iv_weather_icon);
+        weatherCurrentTem = container.findViewById(R.id.tv_weather_current_tem);
+        weatherTemRange = container.findViewById(R.id.tv_weather_temp_range);
 
-        deviceOpenNumTv = newScreen.findViewById(R.id.device_open_num_tv);
-        airQualityTv = newScreen.findViewById(R.id.air_quality_tv);
+        if (container.getParent() instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) container.getParent();
+            parent.removeView(container);
+        }
 
-        parseAiotData((String) AIOTAPI.getInstance().getInfo(AIOTConstant.MESSAGE_HOME_INFO, null));
+        int spanX = newScreen.getCountX();
+        int spanY = newScreen.getCountY();
+        CellLayout.LayoutParams lp = new CellLayout.LayoutParams(0, 0, spanX, spanY);
+        lp.canReorder  = false;
+        lp.isFullscreen  = true;
 
-        newScreen.setSoundEffectsEnabled(false);
-        //mWorkspaceScreens.put(screenId, newScreen);
-        mScreenOrder.add(insertIndex, screenId);
+        newScreen.removeAllViews();
+        newScreen.addViewToCellLayout(container, 0, 0, lp, false);
 
+        bindAIoTLayout(container);
+    }
 
-        LinearLayout aiotViewContainer = newScreen.findViewById(R.id.smart_center_container);
+    public void updateWeather(WeatherManager weatherManager) {
+        weatherManager.updateWeather(weatherIv, weatherCurrentTem, weatherTemRange);
+    }
+
+    private void bindAIoTLayout(View container) {
+        LinearLayout aiotContainer = container.findViewById(R.id.aiot_view_container);
+
         View aiotView = AIOTAPI.getInstance().getView(getResources().getDimensionPixelSize(R.dimen.aiot_container_width),
                 getResources().getDimensionPixelSize(R.dimen.aiot_container_height),
                 Utilities.getScreenWidth(mLauncher), Utilities.getScreenHeight(mLauncher), (float) Utilities.getScreenInch(mLauncher));
-        Log.d(TAG, "insertNewWorkspaceScreen: " + getResources().getDimensionPixelSize(R.dimen.aiot_container_width)
-        + "        "  + getResources().getDimensionPixelSize(R.dimen.aiot_container_height) +
-                "    " + Utilities.getScreenWidth(mLauncher) + "     " + Utilities.getScreenHeight(mLauncher)
-        + "        " + Utilities.getScreenInch(mLauncher));
-        aiotViewContainer.addView(aiotView);
-        addView(newScreen, insertIndex);
 
-        return newScreen;
+        aiotContainer.addView(aiotView);
+    }
+
+    public void createCustomContentContainer() {
+        CellLayout customScreen = (CellLayout)
+                mLauncher.getLayoutInflater().inflate(R.layout.workspace_screen, this, false);
+
+        mWorkspaceScreens.put(CUSTOM_CONTENT_SCREEN_ID, customScreen);
+        mScreenOrder.add(1, CUSTOM_CONTENT_SCREEN_ID);
+
+        // We want no padding on the custom content
+        customScreen.setPadding(0, 0, 0, 0);
+
+        // addFullScreenPage(customScreen);
+        addView(customScreen, 0);
+
+    }
+
+    public void removeCustomContentPage() {
+        CellLayout customScreen = getScreenWithId(CUSTOM_CONTENT_SCREEN_ID);
+        if (customScreen == null) {
+            throw new RuntimeException("Expected custom content screen to exist");
+        }
+
+        mWorkspaceScreens.remove(CUSTOM_CONTENT_SCREEN_ID);
+        mScreenOrder.remove(CUSTOM_CONTENT_SCREEN_ID);
+        removeView(customScreen);
+    }
+
+    public void addToCustomContentPage(View customContent) {
+        if (getPageIndexForScreenId(CUSTOM_CONTENT_SCREEN_ID) < 0) {
+            throw new RuntimeException("Expected custom content screen to exist");
+        }
+
+        // Add the custom content to the full screen custom page
+        CellLayout customScreen = getScreenWithId(CUSTOM_CONTENT_SCREEN_ID);
+        int spanX = customScreen.getCountX();
+        int spanY = customScreen.getCountY();
+        CellLayout.LayoutParams lp = new CellLayout.LayoutParams(0, 0, spanX, spanY);
+        lp.canReorder  = false;
+        lp.isFullscreen = true;
+        if (customContent instanceof Insettable) {
+            ((Insettable)customContent).setInsets(mInsets);
+        }
+
+        // Verify that the child is removed from any existing parent.
+        if (customContent.getParent() instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) customContent.getParent();
+            parent.removeView(customContent);
+        }
+        customScreen.removeAllViews();
+        customScreen.addViewToCellLayout(customContent, 0, 0, lp, true);
+
     }
 
     public void addExtraEmptyScreenOnDrag() {
@@ -648,7 +698,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             return;
         }
         if (!mWorkspaceScreens.containsKey(EXTRA_EMPTY_SCREEN_ID)) {
-            //insertNewWorkspaceScreen(EXTRA_EMPTY_SCREEN_ID);
+            insertNewWorkspaceScreen(EXTRA_EMPTY_SCREEN_ID);
         }
     }
 
@@ -1029,12 +1079,11 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return false;
-        /*if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mXDown = ev.getX();
             mYDown = ev.getY();
         }
-        return super.onInterceptTouchEvent(ev);*/
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override
@@ -1365,22 +1414,18 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (!workspaceInModalState() && !mIsSwitchingState && !mDragController.isDragging()) {
             int screenCenter = getScrollX() + getMeasuredWidth() / 2;
             for (int i = 0; i < getChildCount(); i++) {
-                if (getChildAt(i) instanceof CellLayout) {
-                    CellLayout child = (CellLayout) getChildAt(i);
-                    if (child != null) {
-                        float scrollProgress = getScrollProgress(screenCenter, child, i);
-                        float alpha = 1 - Math.abs(scrollProgress);
-                        if (mWorkspaceFadeInAdjacentScreens) {
-                            child.getShortcutsAndWidgets().setAlpha(alpha);
-                        } else {
-                            // Pages that are off-screen aren't important for accessibility.
-                            child.getShortcutsAndWidgets().setImportantForAccessibility(
-                                    alpha > 0 ? IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                            : IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
-                        }
+                CellLayout child = (CellLayout) getChildAt(i);
+                if (child != null) {
+                    float scrollProgress = getScrollProgress(screenCenter, child, i);
+                    float alpha = 1 - Math.abs(scrollProgress);
+                    if (mWorkspaceFadeInAdjacentScreens) {
+                        child.getShortcutsAndWidgets().setAlpha(alpha);
+                    } else {
+                        // Pages that are off-screen aren't important for accessibility.
+                        child.getShortcutsAndWidgets().setImportantForAccessibility(
+                                alpha > 0 ? IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                        : IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
                     }
-                } else {
-                    getChildAt(i).setAlpha(1);
                 }
             }
         }
@@ -1439,10 +1484,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
                 enableHwLayersOnVisiblePages();
             } else {
                 for (int i = 0; i < getPageCount(); i++) {
-                    if (getChildAt(i) instanceof CellLayout) {
-                        final CellLayout cl = (CellLayout) getChildAt(i);
-                        cl.enableHardwareLayer(false);
-                    }
+                    final CellLayout cl = (CellLayout) getChildAt(i);
+                    cl.enableHardwareLayer(false);
                 }
             }
         }
@@ -1472,12 +1515,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             }
 
             for (int i = 0; i < screenCount; i++) {
-                if (getPageAt(i) instanceof CellLayout) {
-                    final CellLayout layout = (CellLayout) getPageAt(i);
-                    // enable layers between left and right screen inclusive.
-                    boolean enableLayer = leftScreen <= i && i <= rightScreen;
-                    layout.enableHardwareLayer(enableLayer);
-                }
+                final CellLayout layout = (CellLayout) getPageAt(i);
+                // enable layers between left and right screen inclusive.
+                boolean enableLayer = leftScreen <= i && i <= rightScreen;
+                layout.enableHardwareLayer(enableLayer);
             }
         }
     }
@@ -1559,9 +1600,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (!mLauncher.getAccessibilityDelegate().isInAccessibleDrag()) {
             int total = getPageCount();
             for (int i = 0; i < total; i++) {
-                if (getPageAt(i) instanceof CellLayout) {
-                    updateAccessibilityFlags(accessibilityFlag, (CellLayout) getPageAt(i));
-                }
+                updateAccessibilityFlags(accessibilityFlag, (CellLayout) getPageAt(i));
             }
             setImportantForAccessibility(accessibilityFlag);
         }
@@ -1572,6 +1611,19 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         page.getShortcutsAndWidgets().setImportantForAccessibility(accessibilityFlag);
         page.setContentDescription(null);
         page.setAccessibilityDelegate(null);
+    }
+
+    public void showPopupContainerWithArrow(CellLayout.CellInfo cellInfo, DragOptions dragOptions) {
+        View child = cellInfo.cell;
+        if (child instanceof BubbleTextView && !dragOptions.isAccessibleDrag) {
+            PopupContainerWithArrow popupContainer = PopupContainerWithArrow
+                    .showForIcon((BubbleTextView) child);
+            if (popupContainer != null) {
+                dragOptions.preDragCondition = popupContainer.createPreDragCondition();
+
+                mLauncher.getUserEventDispatcher().resetElapsedContainerMillis("dragging started");
+            }
+        }
     }
 
     public void startDrag(CellLayout.CellInfo cellInfo, DragOptions options) {
@@ -2433,9 +2485,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
         // Always pick the current page.
         if (layout == null && nextPage >= 0 && nextPage < getPageCount()) {
-            if (getChildAt(nextPage) instanceof CellLayout) {
-                layout = (CellLayout) getChildAt(nextPage);
-            }
+            layout = (CellLayout) getChildAt(nextPage);
         }
         if (layout != mDragTargetLayout) {
             setCurrentDropLayout(layout);
@@ -3006,11 +3056,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     public void restoreInstanceStateForChild(int child) {
         if (mSavedStates != null) {
             mRestoredPages.add(child);
-            if (getChildAt(child) instanceof CellLayout) {
-                CellLayout cl = (CellLayout) getChildAt(child);
-                if (cl != null) {
-                    cl.restoreInstanceState(mSavedStates);
-                }
+            CellLayout cl = (CellLayout) getChildAt(child);
+            if (cl != null) {
+                cl.restoreInstanceState(mSavedStates);
             }
         }
     }
@@ -3072,9 +3120,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         ArrayList<CellLayout> layouts = new ArrayList<>();
         int screenCount = getChildCount();
         for (int screen = 0; screen < screenCount; screen++) {
-            if (getChildAt(screen) instanceof CellLayout) {
-                layouts.add(((CellLayout) getChildAt(screen)));
-            }
+            layouts.add(((CellLayout) getChildAt(screen)));
         }
         if (mLauncher.getHotseat() != null) {
             layouts.add(mLauncher.getHotseat().getLayout());
@@ -3091,10 +3137,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         ArrayList<ShortcutAndWidgetContainer> childrenLayouts = new ArrayList<>();
         int screenCount = getChildCount();
         for (int screen = 0; screen < screenCount; screen++) {
-            if (getChildAt(screen) instanceof CellLayout) {
-
-                childrenLayouts.add(((CellLayout) getChildAt(screen)).getShortcutsAndWidgets());
-            }
+            childrenLayouts.add(((CellLayout) getChildAt(screen)).getShortcutsAndWidgets());
         }
         if (mLauncher.getHotseat() != null) {
             childrenLayouts.add(mLauncher.getHotseat().getLayout().getShortcutsAndWidgets());
@@ -3407,6 +3450,17 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
     }
 
+    void moveToCustomScreen() {
+        int page = 0;
+        if (!workspaceInModalState() && getNextPage() != page) {
+            snapToPage(page);
+        }
+        View child = getChildAt(page);
+        if (child != null) {
+            child.requestFocus();
+        }
+    }
+
     @Override
     public int getExpectedHeight() {
         return getMeasuredHeight() <= 0 || !mIsLayoutValid
@@ -3575,7 +3629,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public void parseAiotData(String json) {
-        if (json != null) {
+        /*if (json != null) {
             JSONObject jsonObject;
             try {
                 jsonObject = new JSONObject(json);
@@ -3586,10 +3640,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
-    public void setDeviceStatusTv(String num, String notifyMsg) {
+    /*public void setDeviceStatusTv(String num, String notifyMsg) {
         if (deviceOpenNumTv != null) {
             if (!TextUtils.isEmpty(notifyMsg)) {
                 deviceOpenNumTv.setText(String.format("%s | %s", String.format("%s%s", num, getResources().getString(R.string.aiot_device_open_num)), notifyMsg));
@@ -3604,5 +3658,5 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (airQualityTv != null) {
             airQualityTv.setText(getResources().getString(R.string.aiot_air_quality) + quality);
         }
-    }
+    }*/
 }

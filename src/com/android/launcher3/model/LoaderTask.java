@@ -454,8 +454,8 @@ public class LoaderTask implements Runnable {
                                 c.markRestored();
                             }
 
-                            boolean useLowResIcon = !c.isOnWorkspaceOrHotseat() &&
-                                    !verifier.isItemInPreview(c.getInt(rankIndex));
+                            boolean useLowResIcon = false/*!c.isOnWorkspaceOrHotseat() &&
+                                    !verifier.isItemInPreview(c.getInt(rankIndex))*/;
 
                             if (c.restoreFlag != 0) {
                                 // Already verified above that user is same as default user

@@ -44,6 +44,9 @@ public class ItemLongClickListener {
     public static OnLongClickListener INSTANCE_WORKSPACE =
             ItemLongClickListener::onWorkspaceItemLongClick;
 
+    public static OnLongClickListener INSTANCE_WORKSPACE_COSTOM =
+            ItemLongClickListener::onWorkspaceCustomItemLongClick;
+
     public static OnLongClickListener INSTANCE_ALL_APPS =
             ItemLongClickListener::onAllAppsItemLongClick;
 
@@ -52,10 +55,24 @@ public class ItemLongClickListener {
         if (!canStartDrag(launcher)) return false;
         if (!launcher.isInState(NORMAL) && !launcher.isInState(OVERVIEW)) return false;
         if (!(v.getTag() instanceof ItemInfo)) return false;
-        if (!FeatureFlags.ENABLE_WORKSPACE_DRAG) return false;
+        //if (!FeatureFlags.ENABLE_WORKSPACE_DRAG) return false;
 
         launcher.setWaitingForResult(null);
         beginDrag(v, launcher, (ItemInfo) v.getTag(), new DragOptions());
+        return true;
+    }
+
+    private static boolean onWorkspaceCustomItemLongClick(View v) {
+        Launcher launcher = Launcher.getLauncher(v.getContext());
+        if (!canStartDrag(launcher)) return false;
+        if (!launcher.isInState(NORMAL) && !launcher.isInState(OVERVIEW)) return false;
+        if (!(v.getTag() instanceof ItemInfo)) return false;
+        //if (!FeatureFlags.ENABLE_WORKSPACE_DRAG) return false;
+
+        launcher.setWaitingForResult(null);
+
+        CellLayout.CellInfo longClickCellInfo = new CellLayout.CellInfo(v, (ItemInfo) v.getTag());
+        launcher.getWorkspace().showPopupContainerWithArrow(longClickCellInfo, new DragOptions());
         return true;
     }
 

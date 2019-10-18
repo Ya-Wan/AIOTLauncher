@@ -130,7 +130,7 @@ public class WorkspacePageIndicator extends View implements Insettable, PageIndi
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mTotalScroll == 0 || mNumPagesFloat == 0) {
+        if (true/*mTotalScroll == 0 || mNumPagesFloat == 0*/) {
             return;
         }
 

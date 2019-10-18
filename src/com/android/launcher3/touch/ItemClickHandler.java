@@ -48,6 +48,8 @@ import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.widget.PendingAppWidgetHostView;
 import com.android.launcher3.widget.WidgetAddFlowHandler;
 
+import java.util.ArrayList;
+
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -199,7 +201,6 @@ public class ItemClickHandler {
                 return;
             }
         }
-
         // Start activities
         startAppShortcutOrInfoActivity(v, shortcut, launcher);
     }

@@ -127,12 +127,10 @@ public class WorkspaceTouchListener implements OnTouchListener, Runnable {
 
         if (action == ACTION_UP || action == ACTION_POINTER_UP) {
             if (!mWorkspace.isTouchActive()) {
-                if (mWorkspace.getChildAt(mWorkspace.getCurrentPage()) instanceof CellLayout) {
-                    final CellLayout currentPage =
-                            (CellLayout) mWorkspace.getChildAt(mWorkspace.getCurrentPage());
-                    if (currentPage != null) {
-                        mWorkspace.onWallpaperTap(ev);
-                    }
+                final CellLayout currentPage =
+                        (CellLayout) mWorkspace.getChildAt(mWorkspace.getCurrentPage());
+                if (currentPage != null) {
+                    mWorkspace.onWallpaperTap(ev);
                 }
             }
         }

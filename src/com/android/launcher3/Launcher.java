@@ -57,6 +57,8 @@ import android.os.Process;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.Log;
@@ -72,6 +74,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.launcher3.DropTarget.DragObject;
@@ -98,6 +101,9 @@ import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.popup.PopupDataProvider;
+import com.android.launcher3.sectionedrecyclerview.CountSectionAdapter;
+import com.android.launcher3.sectionedrecyclerview.RecentAppAdapter;
+import com.android.launcher3.sectionedrecyclerview.SectionedSpanSizeLookup;
 import com.android.launcher3.shortcuts.DeepShortcutManager;
 import com.android.launcher3.states.InternalStateHandler;
 import com.android.launcher3.states.RotationHelper;
@@ -110,6 +116,7 @@ import com.android.launcher3.userevent.nano.LauncherLogProto.Target;
 import com.android.launcher3.util.ActivityResultInfo;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.ItemInfoMatcher;
+import com.android.launcher3.util.LongArrayMap;
 import com.android.launcher3.util.MultiHashMap;
 import com.android.launcher3.util.MultiValueAlpha;
 import com.android.launcher3.util.MultiValueAlpha.AlphaProperty;
@@ -123,6 +130,7 @@ import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.util.UiThreadHelper;
 import com.android.launcher3.util.ViewOnDrawExecutor;
 import com.android.launcher3.views.OptionsPopupView;
+import com.android.launcher3.weather.WeatherManager;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.PendingAddShortcutInfo;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
@@ -256,6 +264,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
     private RotationHelper mRotationHelper;
 
+    private WeatherManager weatherManager;
 
     private final Handler mHandler = new Handler();
     private final Runnable mLogOnDelayedResume = this::logOnDelayedResume;
@@ -271,6 +280,11 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         }
     };
 
+    private CountSectionAdapter adapter;
+    private RecentAppAdapter recentAppAdapter;
+    protected LongArrayMap<FolderInfo> mFolderInfos = new LongArrayMap<>();
+    RecyclerView allAppsRecyclerView;
+    RecyclerView recentAppsRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -370,6 +384,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         AIOTAPI.getInstance().regInfoUpdateListener(l);
 
         TraceHelper.endSection("Launcher-onCreate");
+
+        weatherManager = new WeatherManager(this);
+        registerBroadcast();
     }
 
     @Override
@@ -815,6 +832,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         UiFactory.onLauncherStateOrResumeChanged(this);
 
         TraceHelper.endSection("ON_RESUME");
+
+        mWorkspace.updateWeather(weatherManager);
     }
 
     @Override
@@ -1247,7 +1266,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         boolean internalStateHandled = InternalStateHandler
                 .handleNewIntent(this, intent, isStarted());
 
-        if (isActionMain) {
+        boolean isActionCustom = "android.intent.action.Apps".equals(intent.getAction());
+//Toast.makeText(this, "" + isActionCustom + "   " + isActionMain, 0).show();
+        if (isActionMain || isActionCustom) {
             if (!internalStateHandled) {
                 // Note: There should be at most one log per method call. This is enforced
                 // implicitly by using if-else statements.
@@ -1278,6 +1299,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
                 if (shouldMoveToDefaultScreen && !mWorkspace.isTouchActive()) {
                     mWorkspace.post(mWorkspace::moveToDefaultScreen);
+                }
+
+                if (isActionCustom && !mWorkspace.isTouchActive()) {
+                    mWorkspace.post(mWorkspace::moveToCustomScreen);
                 }
             }
 
@@ -1370,6 +1395,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onDestroy();
         }
+
+        unregisterBroadcast();
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -1694,7 +1721,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             }
         }
     }
-
+    public final ArrayList<ShortcutInfo> clickedItem = new ArrayList<>();
     public boolean startActivitySafely(View v, Intent intent, ItemInfo item) {
         boolean success = super.startActivitySafely(v, intent, item);
         if (success && v instanceof BubbleTextView) {
@@ -1705,6 +1732,16 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             BubbleTextView btv = (BubbleTextView) v;
             btv.setStayPressed(true);
             setOnResumeCallback(btv);
+
+            if (clickedItem.contains((ShortcutInfo)item)) {
+                clickedItem.remove(item);
+            }
+            clickedItem.add(0, (ShortcutInfo)item);
+            /*if (clickedItem.size() > 4) {
+                recentAppAdapter.setInfos((ArrayList<ShortcutInfo>) clickedItem.subList(0, 3));
+            }*/
+            recentAppAdapter.setInfos(clickedItem);
+            recentAppAdapter.notifyDataSetChanged();
         }
         return success;
     }
@@ -1835,6 +1872,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         // then notify to indicate that it can be released and a proper wallpaper offset can be
         // computed before the next layout
         mWorkspace.unlockWallpaperFromDefaultPageOnNextLayout();
+
+        populateCustomContentContainer();
     }
 
     private void bindAddScreens(ArrayList<Long> orderedScreenIds) {
@@ -1898,13 +1937,18 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     ShortcutInfo info = (ShortcutInfo) item;
-                    view = createShortcut(info);
+                    //view = createShortcut(info);
                     break;
                 }
                 case LauncherSettings.Favorites.ITEM_TYPE_FOLDER: {
-                    view = FolderIcon.fromXml(R.layout.folder_icon, this,
+
+                    mFolderInfos.put(item.screenId, (FolderInfo) item);
+                    adapter.setmFolderInfos(mFolderInfos);
+
+
+                    /*view = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
-                            (FolderInfo) item);
+                            (FolderInfo) item);*/
                     break;
                 }
                 case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
@@ -1940,7 +1984,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 }
             }
 
-            if (view != null) {
+            /*if (view != null) {
                 workspace.addInScreenFromBind(view, item);
                 if (animateIcons) {
                     // Animate all the applications up now
@@ -1950,11 +1994,11 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     bounceAnims.add(createNewAppBounceAnimation(view, i));
                     newItemsScreenId = item.screenId;
                 }
-            }
+            }*/
 
         }
 
-        if (animateIcons) {
+        /*if (animateIcons) {
             // Animate to the correct page
             if (newItemsScreenId > -1) {
                 long currentScreenId = mWorkspace.getScreenIdForPageIndex(mWorkspace.getNextPage());
@@ -1983,8 +2027,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     mWorkspace.postDelayed(startBounceAnimRunnable, NEW_APPS_ANIMATION_DELAY);
                 }
             }
-        }
+        }*/
         workspace.requestLayout();
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -2241,7 +2286,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     @Override
     public void bindAppsAddedOrUpdated(ArrayList<AppInfo> apps) {
         mAppsView.getAppsStore().addOrUpdateApps(apps);
-        mHotseat.updateShortcuts(apps);
+        //mHotseat.updateShortcuts(apps);
+        adapter.addOrUpdateApps(apps);
     }
 
     @Override
@@ -2288,6 +2334,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     public void bindWorkspaceComponentsRemoved(final ItemInfoMatcher matcher) {
         mWorkspace.removeItemsByMatcher(matcher);
         mDragController.onAppsRemoved(matcher);
+
+        adapter.removeApps(matcher);
     }
 
     @Override
@@ -2310,6 +2358,32 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
      */
     public void refreshAndBindWidgetsForPackageUser(@Nullable PackageUserKey packageUser) {
         mModel.refreshAndBindWidgetsAndShortcuts(packageUser);
+    }
+
+
+    protected void populateCustomContentContainer() {
+
+        LinearLayout allAppsContainer = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.all_apps_new, null, false);
+        allAppsRecyclerView = allAppsContainer.findViewById(R.id.all_apps_view);
+        recentAppsRecyclerView = allAppsContainer.findViewById(R.id.recent_app_view);
+
+        adapter = new CountSectionAdapter(this, mFolderInfos);
+        allAppsRecyclerView.setAdapter(adapter);
+
+        recentAppAdapter = new RecentAppAdapter(this, clickedItem);
+        recentAppsRecyclerView.setAdapter(recentAppAdapter);
+
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 4);
+        SectionedSpanSizeLookup lookup = new SectionedSpanSizeLookup(adapter, layoutManager);
+        layoutManager.setSpanSizeLookup(lookup);
+        allAppsRecyclerView.setLayoutManager(layoutManager);
+
+        GridLayoutManager recentAppsLayoutManager = new GridLayoutManager(this, 4);
+        recentAppsRecyclerView.setLayoutManager(recentAppsLayoutManager);
+
+        mWorkspace.addToCustomContentPage(allAppsContainer);
+
+
     }
 
     /**
@@ -2457,5 +2531,28 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     public interface OnResumeCallback {
 
         void onLauncherResume();
+    }
+
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d(TAG, "onReceive: " + action);
+            if (TextUtils.equals(action, "com.android.sky.SendHotKey")) {
+                mWorkspace.moveToDefaultScreen();
+            }
+        }
+    };
+
+    private void registerBroadcast() {
+        /*IntentFilter filter =new IntentFilter();
+        filter.addAction("com.android.sky.SendHotKey");
+        registerReceiver(receiver, filter);*/
+    }
+
+    private void unregisterBroadcast() {
+        //unregisterReceiver(receiver);
     }
 }

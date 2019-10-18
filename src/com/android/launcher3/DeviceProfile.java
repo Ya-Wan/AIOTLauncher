@@ -189,8 +189,7 @@ public class DeviceProfile {
                 ? Utilities.pxFromDp(inv.iconSize, dm)
                 : res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_size)
                         + hotseatBarTopPaddingPx + hotseatBarBottomPaddingPx;
-        Log.d("y.wan", "DeviceProfile: " + res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_size)
-        + "     hotseatBarTopPaddingPx: "  + hotseatBarTopPaddingPx  + "  hotseatBarBottomPaddingPx:  " + hotseatBarBottomPaddingPx);
+
         // Determine sizes.
         widthPx = width;
         heightPx = height;
@@ -201,7 +200,7 @@ public class DeviceProfile {
             availableWidthPx = minSize.x;
             availableHeightPx = maxSize.y;
         }
-        Log.d("y.wan", "DeviceProfile availableHeightPx: " + availableHeightPx);
+
         // Calculate all of the remaining variables.
         updateAvailableDimensions(dm, res);
 
@@ -442,7 +441,6 @@ public class DeviceProfile {
             }
         } else {
             int paddingBottom = hotseatBarSizePx + verticalDragHandleSizePx;
-            Log.i("y.wan", "updateWorkspacePadding: " + hotseatBarSizePx + " verticalDragHandleSizePx:   " + verticalDragHandleSizePx);
             if (isTablet) {
                 // Pad the left and right of the workspace to ensure consistent spacing
                 // between all icons
@@ -454,8 +452,6 @@ public class DeviceProfile {
                 int availablePaddingY = Math.max(0, heightPx - topWorkspacePadding - paddingBottom
                         - (2 * inv.numRows * cellHeightPx) - hotseatBarTopPaddingPx
                         - hotseatBarBottomPaddingPx);
-                Log.d("y.wan", "updateWorkspacePadding: " + hotseatBarTopPaddingPx + "    paddingBottom: " + paddingBottom
-                );
                 padding.set(availablePaddingX / 2, topWorkspacePadding + availablePaddingY / 2,
                         availablePaddingX / 2, paddingBottom + availablePaddingY / 2);
             } else {

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--<TextView
+        android:id="@+id/content_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#DEDEDE"
+        android:gravity="center_horizontal"
+        android:textSize="@dimen/title_text_size"
+        android:paddingTop="@dimen/all_app_new_padding_top"
+        android:text="现代人居智控中心"/>-->
+
+    <ImageView
+        android:id="@+id/content_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="@dimen/all_app_new_padding_top"
+        android:src="@drawable/aiot_title"/>
+
+    <include layout="@layout/lock_time_weather" />
+
+    <LinearLayout
+        android:id="@+id/aiot_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:paddingStart="@dimen/aiot_container_padding"
+        android:paddingEnd="@dimen/aiot_container_padding"
+        android:layout_below="@+id/weather_clock_content"
+        android:orientation="vertical" />
+
+</RelativeLayout>

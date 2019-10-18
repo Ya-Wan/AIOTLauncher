@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="649227358658669779">"Launcher3"</string>
     <string name="folder_name" msgid="7371454440695724752"></string>
-    <string name="work_folder_name" msgid="3753320833950115786">"工作"</string>
+    <string name="work_folder_name" msgid="3753320833950115786">"办公"</string>
     <string name="education_folder_name">教育</string>
     <string name="entertainment_folder_name">娱乐</string>
     <string name="life_folder_name">生活</string>

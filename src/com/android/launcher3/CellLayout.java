@@ -2586,6 +2586,11 @@ public class CellLayout extends ViewGroup {
         public boolean isLockedToGrid = true;
 
         /**
+         * Indicates that this item should use the full extents of its parent.
+         */
+        public boolean isFullscreen = false;
+
+        /**
          * Indicates whether this item can be reordered. Always true except in the case of the
          * the AllApps button and QSB place holder.
          */

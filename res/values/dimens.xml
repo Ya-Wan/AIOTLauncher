@@ -253,4 +253,26 @@
     <dimen name="aiot_refrigerator_mode_height">40dp</dimen>
     <dimen name="aiot_refrigerator_mode_padding">18dp</dimen>-->
 
+    <dimen name="header_height">48dp</dimen>
+    <dimen name="header_padding">16dp</dimen>
+    <dimen name="recent_app_height">175dp</dimen>
+
+    <dimen name="header_text_size">23sp</dimen>
+    <dimen name="title_text_size">37sp</dimen>
+    <dimen name="title_text_padding_top">43dp</dimen>
+    <dimen name="all_app_new_header_padding_start">40dp</dimen>
+    <dimen name="all_app_new_item_padding_start">56dp</dimen>
+    <dimen name="recent_app_margin_start">26dp</dimen>
+    <dimen name="recent_app_margin_top">14dp</dimen>
+    <dimen name="all_app_new_padding_top">40dp</dimen>
+    <dimen name="all_app_new_height">900dp</dimen>
+    <dimen name="all_apps_gap">40dp</dimen>
+
+    <dimen name="aiot_container_padding">36dp</dimen>
+    <dimen name="aiot_container_height">920dp</dimen>
+    <dimen name="aiot_container_width">635dp</dimen>
+    <dimen name="weather_clock_padding_start_end">43dp</dimen>
+    <dimen name="time_hm_text_size">48sp</dimen>
+    <dimen name="time_md_text_size">17sp</dimen>
+
 </resources>

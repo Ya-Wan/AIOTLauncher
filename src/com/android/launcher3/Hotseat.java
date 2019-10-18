@@ -33,7 +33,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.launcher3.config.FeatureFlags;
-import com.android.launcher3.entry.HotseatCategory;
+import com.android.launcher3.entry.DefaultCategory;
 import com.android.launcher3.logging.UserEventDispatcher.LogContainerProvider;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
@@ -54,7 +54,7 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHasVerticalHotseat;
 
-    private ArrayList<HotseatCategory> categories = null;
+    private ArrayList<DefaultCategory> categories = null;
     private ArrayList<String> defaultPackages = new ArrayList<>();
 
     private final HashMap<Integer, HashMap<ComponentKey, AppInfo>> mComponentToAppMap = new HashMap<>();
@@ -181,6 +181,9 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
             lp.height = grid.hotseatBarSizePx + insets.bottom;
         }
+
+        //if (!FeatureFlags.SHOW_HOTSEAT) lp.height = 0;
+
         Rect padding = grid.getHotseatLayoutPadding();
         getLayout().setPadding(padding.left, padding.top, padding.right, padding.bottom);
 
@@ -266,7 +269,7 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
         XmlResourceParser parser = mLauncher.getResources().getXml(R.xml.default_hotseat_category);
         final int depth = parser.getDepth();
 
-        HotseatCategory hotseatCategory = null;
+        DefaultCategory hotseatCategory = null;
         try {
             int type = parser.getEventType();
             while (type != XmlResourceParser.END_DOCUMENT) {
@@ -278,7 +281,7 @@ public class Hotseat extends FrameLayout implements LogContainerProvider, Insett
 
                     case XmlResourceParser.START_TAG:
                         if (parser.getName().equals("category")) {
-                            hotseatCategory = new HotseatCategory();
+                            hotseatCategory = new DefaultCategory();
                             hotseatCategory.setCategoryName(parser.getAttributeValue(0));
                         }
 

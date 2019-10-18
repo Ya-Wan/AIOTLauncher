@@ -61,4 +61,5 @@ abstract class BaseFlags {
     public static final boolean REPLACE_FOLDER_WITH_FINAL_ITEM = false;
     public static final boolean ENABLE_DRAG_UNINSTALL = false;
     public static final boolean SHOW_ALL_APPS = false;
+    public static final boolean SHOW_HOTSEAT = false;
 }

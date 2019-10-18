@@ -19,12 +19,15 @@ package com.android.launcher3;
 import android.app.Activity;
 import android.app.Application;
 import android.app.WallpaperManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -44,6 +47,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.TransactionTooLargeException;
+import android.os.UserHandle;
+import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -57,6 +62,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 
+import com.android.launcher3.compat.LauncherAppsCompat;
+import com.android.launcher3.compat.UserManagerCompat;
 import com.android.launcher3.config.FeatureFlags;
 
 import java.io.ByteArrayOutputStream;
@@ -65,9 +72,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -734,5 +746,57 @@ public final class Utilities {
         activityDisplayMetrics.scaledDensity = targetScaleDensity;
         activityDisplayMetrics.densityDpi = targetDensityDpi;
 
+    }
+
+    public static ArrayList<AppInfo> getTopActivityPackageName(@NonNull Context context) {
+
+        ArrayList<AppInfo> infos = new ArrayList<>();
+
+        final UsageStatsManager usageStatsManager = (UsageStatsManager)context.getSystemService(Context.USAGE_STATS_SERVICE);
+        if(usageStatsManager == null) {
+            return infos;
+        }
+
+        String topActivityPackageName = "";
+        long time = System.currentTimeMillis();
+
+        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 1000 * 1000, time);
+
+        if(usageStatsList != null) {
+            SortedMap<Long,UsageStats> sortedMap = new TreeMap<Long,UsageStats>();
+            for (UsageStats usageStats : usageStatsList) {
+                sortedMap.put(usageStats.getLastTimeUsed(),usageStats);
+            }
+
+            Log.d(TAG, "getTopActivityPackageName: " + sortedMap.size());
+            if(sortedMap.size() != 0) {
+                topActivityPackageName =  sortedMap.get(sortedMap.lastKey()).getPackageName();
+                Log.d(TAG,"Top activity package name = " + topActivityPackageName);
+            }
+
+            for(SortedMap.Entry<Long,UsageStats> entry : sortedMap.entrySet()){
+                UsageStats mapValue = entry.getValue();
+
+                final List<UserHandle> profiles = UserManagerCompat.getInstance(context).getUserProfiles();
+
+                if (TextUtils.equals(mapValue.getPackageName(), context.getPackageName())) continue;
+
+                for (UserHandle user : profiles) {
+                    final LauncherAppsCompat launcherApps = LauncherAppsCompat.getInstance(context);
+                    final List<LauncherActivityInfo> matches = launcherApps.getActivityList(mapValue.getPackageName(),
+                            user);
+
+                    for (LauncherActivityInfo info : matches) {
+                        Log.d(TAG, "getTopActivityPackageName: " + info);
+                        if (infos.size() > 4) {
+                            return infos;
+                        }
+                        infos.add(new AppInfo(context, info, user));
+                    }
+                }
+            }
+        }
+
+        return infos;
     }
 }

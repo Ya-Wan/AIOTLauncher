@@ -141,8 +141,8 @@
             launcher:y="2" />
 
         <favorite
-            launcher:packageName="com.jinxin.namibox"
-            launcher:className="com.jinxin.namibox.ui.SplashActivity"
+            launcher:packageName="com.bruce.learning"
+            launcher:className="com.bruce.learning.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -158,8 +158,8 @@
         launcher:title="@string/work_folder_name" >
 
         <favorite
-            launcher:packageName="com.tencent.androidqqmail"
-            launcher:className="com.tencent.qqmail.launcher.desktop.LauncherActivity"
+            launcher:packageName="com.estrongs.android.pop"
+            launcher:className="com.estrongs.android.pop.app.openscreenad.NewSplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
@@ -248,8 +248,8 @@
             launcher:y="0" />
 
         <favorite
-            launcher:packageName="com.liubowang.lauchpad"
-            launcher:className="com.example.denghailong.musicpad.activity.SplashActivity"
+            launcher:packageName="jp.co.psoft.zenbrushfree"
+            launcher:className="jp.co.psoft.zenbrushfree.ZenBrushActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -262,8 +262,8 @@
             launcher:x="0"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.adsk.sketchbook"
-            launcher:className="com.adsk.sketchbook.SketchBook"
+            launcher:packageName="com.Qunar"
+            launcher:className="com.mqunar.splash.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
@@ -296,6 +296,14 @@
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
+            launcher:y="3" />
+
+        <favorite
+            launcher:packageName="com.wedobest.fivechess.mi"
+            launcher:className="com.wedobest.fivechess.mi.StartAct"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
             launcher:y="3" />
 
     </folder>
