@@ -1302,6 +1302,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 }
 
                 if (isActionCustom && !mWorkspace.isTouchActive()) {
+                    AIOTAPI.getInstance().dismissAllDialog();
                     mWorkspace.post(mWorkspace::moveToCustomScreen);
                 }
             }

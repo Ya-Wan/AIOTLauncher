@@ -269,7 +269,7 @@
     <dimen name="all_apps_gap">40dp</dimen>
 
     <dimen name="aiot_container_padding">36dp</dimen>
-    <dimen name="aiot_container_height">920dp</dimen>
+    <dimen name="aiot_container_height">940dp</dimen>
     <dimen name="aiot_container_width">635dp</dimen>
     <dimen name="weather_clock_padding_start_end">43dp</dimen>
     <dimen name="time_hm_text_size">48sp</dimen>

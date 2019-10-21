@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:paddingStart="@dimen/all_app_new_header_padding_start"
-    android:paddingBottom="25px">
+    android:paddingBottom="40px">
 
     <TextView
         android:id="@+id/title"
