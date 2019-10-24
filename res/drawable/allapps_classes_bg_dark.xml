@@ -4,6 +4,6 @@
 
     <corners android:radius="40px" />
 
-    <solid android:color="@color/recent_app_bg_color" />
+    <solid android:color="@color/all_apps_bg_color_dark" />
 
 </shape>

@@ -32,6 +32,8 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.touch.ItemClickHandler;
 
+import okhttp3.internal.Util;
+
 /**
  * A {@link android.widget.FrameLayout} that contains a {@link DeepShortcutView}.
  * This lets us animate the DeepShortcutView (icon and text) separately from the background.
@@ -49,6 +51,8 @@ public class DeepShortcutView extends FrameLayout {
     private ShortcutInfo mInfo;
     private ShortcutInfoCompat mDetail;
 
+    private Context mContext;
+
     public DeepShortcutView(Context context) {
         this(context, null, 0);
     }
@@ -60,6 +64,7 @@ public class DeepShortcutView extends FrameLayout {
     public DeepShortcutView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
+        mContext = context;
         mPillRect = new Rect();
     }
 
@@ -72,6 +77,8 @@ public class DeepShortcutView extends FrameLayout {
     }
 
     public void setDividerVisibility(int visibility) {
+        mDivider.setBackgroundColor(Utilities.isDarkTheme(mContext) ? mContext.getColor(R.color.deep_shortcuts_divider_color_dark) :
+                mContext.getColor(R.color.deep_shortcuts_divider_color));
         mDivider.setVisibility(visibility);
     }
 

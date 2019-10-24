@@ -54,7 +54,12 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             new SystemShortcut.AppInfo(),
             //new SystemShortcut.Widgets(),
             //new SystemShortcut.Install(),
-            new SystemShortcut.UnInstall()
+            new SystemShortcut.UnInstall(),
+            new SystemShortcut.MoveToEdu(),
+            new SystemShortcut.MoveToWork(),
+            new SystemShortcut.MoveToEntertainment(),
+            new SystemShortcut.MoveToLife(),
+            new SystemShortcut.MoveToMore()
     };
 
     private final Launcher mLauncher;
@@ -196,6 +201,11 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         List<SystemShortcut> systemShortcuts = new ArrayList<>();
         for (SystemShortcut systemShortcut : SYSTEM_SHORTCUTS) {
             if (systemShortcut.getOnClickListener(mLauncher, info) != null) {
+                if (info.container == 1 && systemShortcut instanceof SystemShortcut.MoveToEdu) continue;
+                if (info.container == 2 && systemShortcut instanceof SystemShortcut.MoveToWork) continue;
+                if (info.container == 3 && systemShortcut instanceof SystemShortcut.MoveToEntertainment) continue;
+                if (info.container == 4 && systemShortcut instanceof SystemShortcut.MoveToLife) continue;
+                if (info.container == 5 && systemShortcut instanceof SystemShortcut.MoveToMore) continue;
                 systemShortcuts.add(systemShortcut);
             }
         }

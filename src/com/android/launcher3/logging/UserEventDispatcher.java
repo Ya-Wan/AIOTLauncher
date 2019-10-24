@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
@@ -166,6 +167,16 @@ public class UserEventDispatcher {
         ItemInfo itemInfo = (ItemInfo) v.getTag();
         provider.fillInLogContainerData(v, itemInfo, event.srcTarget[0], event.srcTarget[1]);
         return true;
+    }
+
+    public void logAppLaunch(View v, Intent intent, UserHandle user) {
+        LauncherEvent event = newLauncherEvent(newTouchAction(Action.Touch.TAP),
+                newItemTarget(v,mInstantAppResolver), newTarget(Target.Type.CONTAINER));
+
+        if (fillInLogContainerData(event, v)) {
+            fillIntentInfo(event.srcTarget[0], intent);
+        }
+        dispatchUserEvent(event, intent);
     }
 
     public void logAppLaunch(View v, Intent intent) {

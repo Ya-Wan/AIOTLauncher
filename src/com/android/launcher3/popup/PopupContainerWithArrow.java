@@ -52,6 +52,7 @@ import com.android.launcher3.ItemInfoWithIcon;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.accessibility.ShortcutMenuAccessibilityDelegate;
 import com.android.launcher3.badge.BadgeInfo;
@@ -100,6 +101,8 @@ public class PopupContainerWithArrow extends ArrowPopup implements DragSource,
         mStartDragThreshold = getResources().getDimensionPixelSize(
                 R.dimen.deep_shortcuts_start_drag_threshold);
         mAccessibilityDelegate = new ShortcutMenuAccessibilityDelegate(mLauncher);
+        this.setBackgroundColor(Utilities.isDarkTheme(mLauncher) ? mLauncher.getColor(R.color.deep_shortcuts_container_color_dark) :
+                mLauncher.getColor(R.color.deep_shortcuts_container_color));
     }
 
     public PopupContainerWithArrow(Context context, AttributeSet attrs) {

@@ -19,7 +19,7 @@
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
     <!-- Messaging, [All Apps], Dialer -->
 
-    <resolve
+    <!--<resolve
         launcher:container="-101"
         launcher:screen="0"
         launcher:x="0"
@@ -29,11 +29,11 @@
         <favorite launcher:uri="smsto:" />
         <favorite launcher:uri="mms:" />
         <favorite launcher:uri="mmsto:" />
-    </resolve>
+    </resolve>-->
 
     <!-- All Apps -->
 
-    <resolve
+    <!--<resolve
         launcher:container="-101"
         launcher:screen="2"
         launcher:x="2"
@@ -43,7 +43,7 @@
         <favorite launcher:uri="#Intent;action=android.intent.action.CALL_BUTTON;end" />
     </resolve>
 
-    <!-- Bottom row -->
+    &lt;!&ndash; Bottom row &ndash;&gt;
     <resolve
         launcher:screen="0"
         launcher:x="0"
@@ -66,10 +66,10 @@
         launcher:y="-1" >
         <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MARKET;end" />
         <favorite launcher:uri="market://details?id=com.android.launcher" />
-    </resolve>
+    </resolve>-->
 
     <!-- Second last row -->
-    <resolve
+    <!--<resolve
         launcher:screen="0"
         launcher:x="0"
         launcher:y="-2" >
@@ -83,6 +83,6 @@
         launcher:y="-2" >
         <favorite launcher:uri="#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end" />
         <favorite launcher:uri="#Intent;action=android.intent.action.CAMERA_BUTTON;end" />
-    </resolve>
+    </resolve>-->
 
 </favorites>

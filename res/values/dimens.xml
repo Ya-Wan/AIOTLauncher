@@ -275,4 +275,6 @@
     <dimen name="time_hm_text_size">48sp</dimen>
     <dimen name="time_md_text_size">17sp</dimen>
 
+    <dimen name="title_index_margin">14dp</dimen>
+    <dimen name="letter_icon_columnWidth">76dp</dimen>
 </resources>

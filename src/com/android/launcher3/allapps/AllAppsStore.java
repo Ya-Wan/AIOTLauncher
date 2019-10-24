@@ -48,6 +48,10 @@ public class AllAppsStore {
         return mComponentToAppMap.values();
     }
 
+    public HashMap<ComponentKey, AppInfo> getComponentToAppMap() {
+        return mComponentToAppMap;
+    }
+
     /**
      * Sets the current set of apps.
      */

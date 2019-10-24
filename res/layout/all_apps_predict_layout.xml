@@ -1,38 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingTop="@dimen/all_app_new_padding_top">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/all_apps_view"
-        android:layout_width="match_parent"
-        android:layout_marginStart="5dp"
-        android:layout_height="@dimen/all_app_new_height" />
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="最近应用"
+        android:text="常用应用"
         android:textColor="#ffffffff"
         android:layout_marginTop="@dimen/all_apps_gap"
         android:paddingStart="@dimen/all_app_new_header_padding_start"
-        android:textSize="@dimen/header_text_size"/>
+        android:textSize="@dimen/predict_title_text_size"/>
 
     <FrameLayout
+        android:id="@+id/predict_app_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/recent_app_height"
-        android:layout_marginStart="@dimen/recent_app_margin_start"
-        android:layout_marginEnd="@dimen/recent_app_margin_start"
+        android:layout_marginTop="@dimen/recent_app_content_margin_top"
+        android:layout_marginStart="@dimen/custom_all_apps_margin_start_end"
+        android:layout_marginEnd="@dimen/custom_all_apps_margin_start_end"
         android:background="@drawable/allapps_classes_bg">
 
         <android.support.v7.widget.RecyclerView
             android:layout_gravity="center"
-            android:id="@+id/recent_app_view"
+            android:id="@+id/predict_app_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>
-
 
 </LinearLayout>

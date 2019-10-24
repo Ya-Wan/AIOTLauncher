@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/allapps_classes_bg"
+    android:paddingBottom="@dimen/custom_all_apps_padding"
+    android:paddingTop="@dimen/custom_all_apps_padding"
+    android:layout_marginBottom="@dimen/custom_all_apps_gap"
+    android:layout_marginStart="@dimen/custom_all_apps_margin_start_end"
+    android:layout_marginEnd="@dimen/custom_all_apps_margin_start_end">
+    
+    <TextView
+        android:id="@+id/class_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/header_text_size"
+        android:layout_marginStart="@dimen/title_index_margin"
+        android:layout_alignParentStart="true" />
+
+    <com.android.launcher3.widget.AppListGridView
+        android:id="@+id/class_app_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/class_title"
+        android:clipToPadding="false"
+        android:minHeight="200px"
+        android:columnWidth="@dimen/letter_icon_columnWidth"
+        android:gravity="center_horizontal"
+        android:stretchMode="columnWidth"
+        android:numColumns="4"
+        android:focusable="true" />
+   
+</RelativeLayout>

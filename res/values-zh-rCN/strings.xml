@@ -26,6 +26,11 @@
     <string name="entertainment_folder_name">娱乐</string>
     <string name="life_folder_name">生活</string>
     <string name="all_app_folder_name">更多</string>
+    <string name="move_edu_drop_target_label">移动到教育</string>
+    <string name="move_work_drop_target_label">移动到办公</string>
+    <string name="move_entertainment_drop_target_label">移动到娱乐</string>
+    <string name="move_life_drop_target_label">移动到生活</string>
+    <string name="move_more_drop_target_label">移动到更多</string>
     <string name="activity_not_found" msgid="8071924732094499514">"未安装该应用。"</string>
     <string name="activity_not_available" msgid="7456344436509528827">"应用不可用"</string>
     <string name="safemode_shortcut_error" msgid="9160126848219158407">"安全模式下不允许使用下载的此应用"</string>

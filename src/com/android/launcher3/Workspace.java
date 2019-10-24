@@ -16,14 +16,6 @@
 
 package com.android.launcher3;
 
-import static com.android.launcher3.LauncherAnimUtils.OVERVIEW_TRANSITION_MS;
-import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
-import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_TRANSITION_MS;
-import static com.android.launcher3.LauncherState.ALL_APPS;
-import static com.android.launcher3.LauncherState.NORMAL;
-import static com.android.launcher3.LauncherState.SPRING_LOADED;
-import static com.android.launcher3.dragndrop.DragLayer.ALPHA_INDEX_OVERLAY;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -60,6 +52,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,6 +89,7 @@ import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LongArrayMap;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.Thunk;
+import com.android.launcher3.util.WallpaperOffsetInterpolator;
 import com.android.launcher3.weather.WeatherManager;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.PendingAddShortcutInfo;
@@ -106,6 +100,14 @@ import com.skyworth.aiotsdk.api.AIOTAPI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.android.launcher3.LauncherAnimUtils.OVERVIEW_TRANSITION_MS;
+import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
+import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_TRANSITION_MS;
+import static com.android.launcher3.LauncherState.ALL_APPS;
+import static com.android.launcher3.LauncherState.NORMAL;
+import static com.android.launcher3.LauncherState.SPRING_LOADED;
+import static com.android.launcher3.dragndrop.DragLayer.ALPHA_INDEX_OVERLAY;
 
 /**
  * The workspace is a wide area with a wallpaper and a finite number of pages.
@@ -132,7 +134,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     private static final int ADJACENT_SCREEN_DROP_DURATION = 300;
 
-    private static final int DEFAULT_PAGE = 1;
+    public static final int DEFAULT_PAGE = 1;
 
     private static final boolean MAP_NO_RECURSE = false;
     private static final boolean MAP_RECURSE = true;
@@ -198,7 +200,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     private DragPreviewProvider mOutlineProvider = null;
     private boolean mWorkspaceFadeInAdjacentScreens;
 
-    //final WallpaperOffsetInterpolator mWallpaperOffset;
+    final WallpaperOffsetInterpolator mWallpaperOffset;
     private boolean mUnlockWallpaperFromDefaultPageOnLayout;
 
     // Variables relating to the creation of user folders by hovering shortcuts over shortcuts
@@ -257,8 +259,12 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
+    private RelativeLayout weatherClockContainer;
     private ImageView weatherIv;
     private TextView weatherCurrentTem, weatherTemRange;
+    private TextClock timeTextClock;
+
+    private WeatherManager weatherManager;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -284,7 +290,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         mStateTransitionAnimation = new WorkspaceStateTransitionAnimation(mLauncher, this);
         mWallpaperManager = WallpaperManager.getInstance(context);
 
-        //mWallpaperOffset = new WallpaperOffsetInterpolator(this);
+        mWallpaperOffset = new WallpaperOffsetInterpolator(this);
 
         setHapticFeedbackEnabled(false);
         initWorkspace();
@@ -299,7 +305,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         mInsets.set(insets);
 
         DeviceProfile grid = mLauncher.getDeviceProfile();
-        mMaxDistanceForFolderCreation = (0.65f * grid.iconSizePx);
+        mMaxDistanceForFolderCreation = (0.55f * grid.iconSizePx);
         mWorkspaceFadeInAdjacentScreens = grid.shouldFadeAdjacentWorkspaceScreens();
 
         Rect padding = grid.workspacePadding;
@@ -359,7 +365,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     public float getWallpaperOffsetForCenterPage() {
         int pageScroll = getScrollForPage(getPageNearestToCenterOfScreen());
-        return 0/*mWallpaperOffset.wallpaperOffsetForScroll(pageScroll)*/;
+        return mWallpaperOffset.wallpaperOffsetForScroll(pageScroll);
     }
 
     public Rect estimateItemPosition(CellLayout cl, int hCell, int vCell, int hSpan, int vSpan) {
@@ -455,7 +461,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         setupLayoutTransition();
 
         // Set the wallpaper dimensions when Launcher starts up
-        //setWallpaperDimension();
+        setWallpaperDimension();
     }
 
     private void setupLayoutTransition() {
@@ -589,7 +595,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         RelativeLayout container = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
                 R.layout.aiot_content_layout, null, false /* attachToRoot */);
 
+        weatherClockContainer = container.findViewById(R.id.weather_clock_container);
         weatherIv = container.findViewById(R.id.iv_weather_icon);
+        timeTextClock = container.findViewById(R.id.tv_lock_time);
         weatherCurrentTem = container.findViewById(R.id.tv_weather_current_tem);
         weatherTemRange = container.findViewById(R.id.tv_weather_temp_range);
 
@@ -608,9 +616,13 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         newScreen.addViewToCellLayout(container, 0, 0, lp, false);
 
         bindAIoTLayout(container);
+        updateWeather();
     }
 
-    public void updateWeather(WeatherManager weatherManager) {
+    public void updateWeather() {
+        if (weatherManager == null) {
+            weatherManager = new WeatherManager(mLauncher);
+        }
         weatherManager.updateWeather(weatherIv, weatherCurrentTem, weatherTemRange);
     }
 
@@ -636,7 +648,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
         // addFullScreenPage(customScreen);
         addView(customScreen, 0);
-
+        setCurrentPage(DEFAULT_PAGE);
     }
 
     public void removeCustomContentPage() {
@@ -1367,20 +1379,20 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public void lockWallpaperToDefaultPage() {
-        //mWallpaperOffset.setLockToDefaultPage(true);
+        mWallpaperOffset.setLockToDefaultPage(true);
     }
 
     public void unlockWallpaperFromDefaultPageOnNextLayout() {
-        /*if (mWallpaperOffset.isLockedToDefaultPage()) {
+        if (mWallpaperOffset.isLockedToDefaultPage()) {
             mUnlockWallpaperFromDefaultPageOnLayout = true;
             requestLayout();
-        }*/
+        }
     }
 
     @Override
     public void computeScroll() {
         super.computeScroll();
-        //mWallpaperOffset.syncWithScroll();
+        mWallpaperOffset.syncWithScroll();
     }
 
     public void computeScrollWithoutInvalidation() {
@@ -1434,26 +1446,26 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         IBinder windowToken = getWindowToken();
-        //mWallpaperOffset.setWindowToken(windowToken);
+        mWallpaperOffset.setWindowToken(windowToken);
         computeScroll();
         mDragController.setWindowToken(windowToken);
     }
 
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        //mWallpaperOffset.setWindowToken(null);
+        mWallpaperOffset.setWindowToken(null);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        /*if (mUnlockWallpaperFromDefaultPageOnLayout) {
+        if (mUnlockWallpaperFromDefaultPageOnLayout) {
             mWallpaperOffset.setLockToDefaultPage(false);
             mUnlockWallpaperFromDefaultPageOnLayout = false;
         }
         if (mFirstLayout && mCurrentPage >= 0 && mCurrentPage < getChildCount()) {
             mWallpaperOffset.syncWithScroll();
             mWallpaperOffset.jumpToFinal();
-        }*/
+        }
         super.onLayout(changed, left, top, right, bottom);
         updatePageAlphaValues();
     }
@@ -3593,6 +3605,11 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         public void onAnimationEnd(Animator animation) {
             onEndStateTransition();
         }
+    }
+
+    public void updateWeatherContainerTheme() {
+        weatherClockContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark) :
+                mLauncher.getDrawable(R.drawable.allapps_classes_bg));
     }
 
 

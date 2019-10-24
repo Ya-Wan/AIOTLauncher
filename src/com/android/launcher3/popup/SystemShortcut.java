@@ -179,4 +179,89 @@ public static class UnInstall extends SystemShortcut {
             return null;
         }
     }
+
+    public static class MoveToEdu extends SystemShortcut {
+        public MoveToEdu() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_edu_drop_target_label);
+        }
+
+        @Override
+        public View.OnClickListener getOnClickListener(
+                BaseDraggingActivity activity, ItemInfo itemInfo) {
+
+            return view -> {
+                dismissTaskMenuView(activity);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo, 0);
+            };
+        }
+
+    }
+
+    public static class MoveToWork extends SystemShortcut {
+        public MoveToWork() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_work_drop_target_label);
+        }
+
+        @Override
+        public View.OnClickListener getOnClickListener(
+                BaseDraggingActivity activity, ItemInfo itemInfo) {
+
+            return view -> {
+                dismissTaskMenuView(activity);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo,  1);
+            };
+        }
+
+    }
+
+    public static class MoveToEntertainment extends SystemShortcut {
+        public MoveToEntertainment() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_entertainment_drop_target_label);
+        }
+
+        @Override
+        public View.OnClickListener getOnClickListener(
+                BaseDraggingActivity activity, ItemInfo itemInfo) {
+
+            return view -> {
+                dismissTaskMenuView(activity);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo,  2);
+            };
+        }
+
+    }
+
+    public static class MoveToLife extends SystemShortcut {
+        public MoveToLife() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_life_drop_target_label);
+        }
+
+        @Override
+        public View.OnClickListener getOnClickListener(
+                BaseDraggingActivity activity, ItemInfo itemInfo) {
+
+            return view -> {
+                dismissTaskMenuView(activity);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo, 3);
+            };
+        }
+
+    }
+
+    public static class MoveToMore extends SystemShortcut {
+        public MoveToMore() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_more_drop_target_label);
+        }
+
+        @Override
+        public View.OnClickListener getOnClickListener(
+                BaseDraggingActivity activity, ItemInfo itemInfo) {
+
+            return view -> {
+                dismissTaskMenuView(activity);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo, 4);
+            };
+        }
+
+    }
 }

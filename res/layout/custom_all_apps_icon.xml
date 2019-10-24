@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<com.android.launcher3.popup.PopupContainerWithArrow
+<com.android.launcher3.BubbleTextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/deep_shortcuts_container"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@color/deep_shortcuts_container_color"
-    android:clipToPadding="false"
-    android:clipChildren="false"
-    android:elevation="@dimen/deep_shortcuts_elevation"
-    android:orientation="vertical" />
+    xmlns:launcher="http://schemas.android.com/apk/res-auto"
+    style="@style/BaseIcon"
+    android:id="@+id/icon"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/custom_all_apps_item_height"
+    android:stateListAnimator="@animator/all_apps_fastscroll_icon_anim"
+    launcher:iconDisplay="all_apps"
+    launcher:centerVertically="true"
+    android:textSize="@dimen/custom_all_apps_text_size"
+    android:paddingLeft="@dimen/dynamic_grid_cell_padding_x"
+    android:paddingRight="@dimen/dynamic_grid_cell_padding_x" />
+

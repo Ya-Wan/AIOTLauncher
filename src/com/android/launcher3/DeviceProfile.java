@@ -25,7 +25,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -304,7 +303,7 @@ public class DeviceProfile {
         iconSizePx = (int) (Utilities.pxFromDp(invIconSizePx, dm) * scale);
         iconTextSizePx = (int) (Utilities.pxFromSp(inv.iconTextSize, dm) * scale);
         iconDrawablePaddingPx = (int) (iconDrawablePaddingOriginalPx * scale);
-        Log.e("y.wan", "scale:" + scale + "   updateIconSize: " + iconSizePx + "     iconTextSizePx: " + iconTextSizePx + "  iconDrawablePaddingPx: " + iconDrawablePaddingPx);
+
         cellHeightPx = iconSizePx + iconDrawablePaddingPx
                 + Utilities.calculateTextHeight(iconTextSizePx);
         int cellYPadding = (getCellSize().y - cellHeightPx) / 2;

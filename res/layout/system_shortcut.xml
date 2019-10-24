@@ -22,18 +22,18 @@
     android:theme="@style/PopupItem" >
 
     <com.android.launcher3.BubbleTextView
-        style="@style/BaseIcon"
+      android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/bubble_text"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="start|center_vertical"
         android:textAlignment="viewStart"
-        android:paddingStart="@dimen/deep_shortcuts_text_padding_start"
-        android:paddingEnd="@dimen/popup_padding_end"
-        android:textSize="14sp"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="@dimen/system_shortcut_text_size"
+        android:textColor="#ff0da5f3"
         android:fontFamily="sans-serif"
         launcher:iconDisplay="shortcut_popup"
         launcher:layoutHorizontal="true"
+        android:layout_gravity="center"
         android:focusable="false" />
 
     <View
@@ -42,14 +42,15 @@
         android:layout_height="@dimen/system_shortcut_icon_size"
         android:layout_marginStart="@dimen/system_shortcut_margin_start"
         android:layout_gravity="start|center_vertical"
-        android:backgroundTint="?android:attr/textColorTertiary"/>
+        android:backgroundTint="?android:attr/textColorTertiary"
+        android:visibility="gone"/>
 
     <View
         android:id="@+id/divider"
-        android:layout_width="@dimen/deep_shortcuts_divider_width"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/popup_item_divider_height"
         android:layout_gravity="end|bottom"
         android:visibility="gone"
-        android:background="?attr/popupColorTertiary" />
+        android:background="@color/deep_shortcuts_divider_color_dark" />
 
 </com.android.launcher3.shortcuts.DeepShortcutView>

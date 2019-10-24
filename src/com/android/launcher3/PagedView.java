@@ -49,6 +49,8 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.pageindicators.PageIndicator;
 import com.android.launcher3.touch.OverScroll;
 import com.android.launcher3.util.Thunk;
+import com.skyworth.aiotsdk.api.AIOTAPI;
+import com.skyworth.aiotsdk.api.info.ViewPageInfo;
 
 import java.util.ArrayList;
 
@@ -877,7 +879,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                 mLastMotionXRemainder = 0;
                 mTotalMotionX = 0;
                 mActivePointerId = ev.getPointerId(0);
-
+                isScrollToLeft = false;
                 /*
                  * If being flinged and user touches the screen, initiate drag;
                  * otherwise don't.  mScroller.isFinished should be false when
@@ -918,8 +920,21 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
          * The only time we want to intercept motion events is if we are in the
          * drag mode.
          */
-        return mTouchState != TOUCH_STATE_REST;
+        if (isScrollToLeft && AIOTAPI.getInstance().getViewPageInfo().currentIndex == 0 ) {
+            return true;
+        }
+
+        if (mTouchState != TOUCH_STATE_REST && mCurrentPage != Workspace.DEFAULT_PAGE) {
+            return true;
+        } else {
+            //if a scrollable view takes over touch events,set touch state to rest
+            mTouchState = TOUCH_STATE_REST;
+            return false;
+        }
+        //return mTouchState != TOUCH_STATE_REST;
     }
+
+    private boolean isScrollToLeft = false;
 
     public boolean isHandlingTouch() {
         return mTouchState != TOUCH_STATE_REST;
@@ -947,6 +962,10 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
         final int touchSlop = Math.round(touchSlopScale * mTouchSlop);
         boolean xMoved = xDiff > touchSlop;
+
+        if (xMoved) {
+            isScrollToLeft = (x - mLastMotionX) > 0;
+        }
 
         if (xMoved) {
             // Scroll if the user moved far enough along the X axis
@@ -1254,6 +1273,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         releaseVelocityTracker();
         mTouchState = TOUCH_STATE_REST;
         mActivePointerId = INVALID_POINTER;
+        isScrollToLeft = false;
     }
 
     /**

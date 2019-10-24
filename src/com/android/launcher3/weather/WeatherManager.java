@@ -1,55 +1,62 @@
 package com.android.launcher3.weather;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
 import com.skyworth.framework.skysdk.ipc.SkyContext;
 import com.tianci.system.api.TCSystemService;
 import com.tianci.system.data.TCInfoSetData;
 
 import static com.tianci.system.define.TCEnvKey.SKY_SYSTEM_ENV_WEATHER;
 
-public class WeatherManager implements IWeather{
-
+public class WeatherManager implements IWeather {
+    private static final String TAG = "WeatherManager";
+    private static final String WEATHER = "pref_weather";
     private Context mContext;
     private TCSystemService tcSystemService;
+
+    private final SharedPreferences mPrefs;
 
     public WeatherManager(Context mContext) {
         this.mContext = mContext;
         tcSystemService = TCSystemService.getInstance(SkyContext.getListener());
+        mPrefs = Utilities.getPrefs(mContext);
     }
 
     @Override
     public void updateWeather(ImageView weatherIv, TextView weatherCurrentTem, TextView weatherTemRange) {
         TCInfoSetData weatherData = (TCInfoSetData) tcSystemService.getSetData(SKY_SYSTEM_ENV_WEATHER);
 
-        if (weatherData == null) return;
-
-        String weather = weatherData.getCurrent();
+        String weather;
+        if (weatherData == null) {
+            weather = mPrefs.getString(WEATHER, "");
+        } else {
+            weather = weatherData.getCurrent();
+            SharedPreferences.Editor edit = mPrefs.edit();
+            edit.putString(WEATHER, weather);
+            edit.apply();
+        }
 
         if (TextUtils.isEmpty(weather)) return;
 
-        Log.d("y.wan", "updateWeather: " + weather);
+        Log.d(TAG, "updateWeather: " + weather);
 
         String[] split = weather.split(",");
         String weatherIcon = split[0];
-        //String weatherCity = split[1].substring(0, split[1].indexOf("市"));
-        String weatherMinTem = split[2] + "~";
-        String weatherMaxTem = split[3] + "℃";
+        String weatherCity = split[1];
+        String weatherMinTem = split[2];
+        String weatherMaxTem = split[3];
         int weatherIconRes = manageWeatherIcon(weatherIcon);
-        String weatherTem = weatherMinTem + weatherMaxTem;
-
-        Log.d("y.wan", "updateWeather: " + weatherIconRes +
-                "    tem: " + weatherTem);
+        String weatherTem = weatherMinTem + " ~ " + weatherMaxTem + " ℃";
 
         weatherIv.setImageResource(weatherIconRes);
-        weatherCurrentTem.setText((Integer.valueOf(split[2]) + Integer.valueOf(split[3])) / 2  + "℃");
+        weatherCurrentTem.setText((Integer.valueOf(weatherMinTem) + Integer.valueOf(weatherMaxTem)) / 2 + " ℃");
         weatherTemRange.setText(weatherTem);
     }
 

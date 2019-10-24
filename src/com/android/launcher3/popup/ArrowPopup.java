@@ -180,7 +180,9 @@ public abstract class ArrowPopup extends AbstractFloatingView {
             ShapeDrawable arrowDrawable = new ShapeDrawable(TriangleShape.create(
                     arrowLp.width, arrowLp.height, !mIsAboveIcon));
             Paint arrowPaint = arrowDrawable.getPaint();
-            arrowPaint.setColor(Themes.getAttrColor(mLauncher, R.attr.popupColorPrimary));
+            //arrowPaint.setColor(Themes.getAttrColor(mLauncher, R.attr.popupColorPrimary));
+            arrowPaint.setColor(Utilities.isDarkTheme(mLauncher) ? mLauncher.getColor(R.color.deep_shortcuts_container_color_dark) :
+                    mLauncher.getColor(R.color.deep_shortcuts_container_color));
             // The corner path effect won't be reflected in the shadow, but shouldn't be noticeable.
             int radius = getResources().getDimensionPixelSize(R.dimen.popup_arrow_corner_radius);
             arrowPaint.setPathEffect(new CornerPathEffect(radius));
@@ -332,8 +334,8 @@ public abstract class ArrowPopup extends AbstractFloatingView {
         }
 
         if (Gravity.isHorizontal(mGravity)) {
-            setX(dragLayer.getWidth() / 2/* - getMeasuredWidth() / 2*/);
-            //mArrow.setVisibility(INVISIBLE);
+            setX(dragLayer.getWidth() / 2 - getMeasuredWidth() / 2);
+            mArrow.setVisibility(INVISIBLE);
         }
         if (Gravity.isVertical(mGravity)) {
             setY(dragLayer.getHeight() / 2 - getMeasuredHeight() / 2);

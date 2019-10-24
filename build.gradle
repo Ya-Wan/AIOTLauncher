@@ -178,7 +178,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation(name: 'aiotsdk-1.2.0-1910211631', ext: 'aar')
+    implementation(name: 'aiotsdk-1.2.0-1910240952', ext: 'aar')
     implementation(name: 'ccos-ui-release', ext: 'aar')
     implementation(name: 'ccos-framework-release', ext: 'aar')
     implementation(name: 'ccos-appcore-release', ext: 'aar')

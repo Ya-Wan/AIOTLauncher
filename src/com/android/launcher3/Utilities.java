@@ -48,6 +48,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -798,5 +799,15 @@ public final class Utilities {
         }
 
         return infos;
+    }
+
+    public static boolean isDarkTheme(Context context) {
+        String theme = Settings.System.getString(context.getContentResolver(), "theme_type");
+
+        if (TextUtils.equals(theme, "dark_theme")) {
+            return true;
+        }
+
+        return false;
     }
 }
