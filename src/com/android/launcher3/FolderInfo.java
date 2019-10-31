@@ -95,10 +95,11 @@ public class FolderInfo extends ItemInfo {
     public void add(ShortcutInfo item, int rank, boolean animate) {
         rank = Utilities.boundToRange(rank, 0, contents.size());
 
-        for (ShortcutInfo info:
-        contents) {
-            Log.d("FolderInfo", "add: " + info.intent.getComponent().getPackageName() + "      item: " + item.intent.getComponent().getPackageName());
+        item.rank = rank;
+        for (int i = 0; i < contents.size(); i++) {
+            ShortcutInfo info = contents.get(i);
             if (TextUtils.equals(info.intent.getComponent().getPackageName(), item.intent.getComponent().getPackageName())) {
+                contents.set(i, item);
                 return;
             }
         }

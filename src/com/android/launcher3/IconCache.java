@@ -78,7 +78,7 @@ public class IconCache {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_IGNORE_CACHE = false;
 
-    private static final int LOW_RES_SCALE_FACTOR = 5;
+    private static final int LOW_RES_SCALE_FACTOR = 1/*5*/;
 
     @Thunk static final Object ICON_UPDATE_TOKEN = new Object();
 

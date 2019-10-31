@@ -384,14 +384,14 @@
 
     </folder>
 
-    <folder
+    <!--<folder
         launcher:container="-101"
         launcher:screen="4"
         launcher:x="4"
         launcher:y="0"
         launcher:title="@string/all_app_folder_name" >
 
-        <!--<favorite
+        <favorite
             launcher:packageName="com.google.android.googlequicksearchbox"
             launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
             launcher:spanX="1"
@@ -467,8 +467,8 @@
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
-            launcher:y="3" />-->
+            launcher:y="3" />
 
-    </folder>
+    </folder>-->
 
 </favorites>

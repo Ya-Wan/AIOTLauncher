@@ -18,11 +18,12 @@ package com.android.launcher3.model;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.pm.LauncherActivityInfo;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.launcher3.AllAppsList;
 import com.android.launcher3.AppInfo;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Handles updates due to changes in package manager (app installed/updated/removed)
@@ -153,6 +155,9 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
 
         final ArrayList<AppInfo> addedOrModified = new ArrayList<>();
         addedOrModified.addAll(appsList.added);
+
+        updateToWorkSpace(context, app, appsList);
+
         appsList.added.clear();
         addedOrModified.addAll(appsList.modified);
         appsList.modified.clear();
@@ -180,7 +185,7 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
             final ArrayList<ShortcutInfo> updatedShortcuts = new ArrayList<>();
             final ArrayList<LauncherAppWidgetInfo> widgets = new ArrayList<>();
 
-            // For system apps, package manager send OP_UPDATE when an app is enabled.
+// For system apps, package manager send OP_UPDATE when an app is enabled.
             final boolean isNewApkAvailable = mOp == OP_ADD || mOp == OP_UPDATE;
             synchronized (dataModel) {
                 for (ItemInfo info : dataModel.itemsIdMap) {
@@ -305,9 +310,9 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
             // No need to update the removedComponents as
             // removedPackages is a super-set of removedComponents
         } else if (mOp == OP_UPDATE) {
-            // Mark disabled packages in the broadcast to be removed
+// Mark disabled packages in the broadcast to be removed
             final LauncherAppsCompat launcherApps = LauncherAppsCompat.getInstance(context);
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 if (!launcherApps.isPackageEnabledForProfile(packages[i], mUser)) {
                     removedPackages.add(packages[i]);
                 }
@@ -347,5 +352,31 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
             }
             bindUpdatedWidgets(dataModel);
         }
+    }
+
+    public void updateToWorkSpace(Context context, LauncherAppState app, AllAppsList appsList) {
+        if (!FeatureFlags.SHOW_ALL_APPS) {
+            ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
+            final List<UserHandle> profiles = UserManagerCompat.getInstance(context).getUserProfiles();
+            ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<>();
+            for (UserHandle user : profiles) {
+                final List<LauncherActivityInfo> apps = LauncherAppsCompat.getInstance(context).getActivityList(null, user);
+                synchronized (this) {
+                    for (LauncherActivityInfo info : apps) {
+                        for (AppInfo appInfo : appsList.added) {
+                            if (info.getComponentName().equals(appInfo.componentName)) {
+                                InstallShortcutReceiver.PendingInstallShortcutInfo mPendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(info, context);
+                                added.add(mPendingInstallShortcutInfo);
+                                installQueue.add(mPendingInstallShortcutInfo.getItemInfo());
+                            }
+                        }
+                    }
+                }
+            }
+            if (!added.isEmpty()) {
+                app.getModel().addAndBindAddedWorkspaceItems(installQueue);
+            }
+        }
+
     }
 }

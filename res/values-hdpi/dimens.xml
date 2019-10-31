@@ -257,9 +257,12 @@
 
     <dimen name="all_app_new_padding_top">40dp</dimen>
     <dimen name="all_app_new_padding_bottom">43dp</dimen>
+
+
     <dimen name="weather_clock_container_height">113dp</dimen>
     <dimen name="weather_clock_margin_start_end">43dp</dimen>
     <dimen name="weather_clock_padding_start_end">27dp</dimen>
+    <dimen name="weather_clock_bg_radius">13dp</dimen>
     <dimen name="weather_icon_gap">17dp</dimen>
     <dimen name="clock_gap">13dp</dimen>
     <dimen name="time_hm_text_size">56sp</dimen>

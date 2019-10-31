@@ -562,7 +562,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public CellLayout insertNewWorkspaceScreen(long screenId, int insertIndex) {
-        if (mWorkspaceScreens.containsKey(screenId)) {
+        if (mWorkspaceScreens.containsKey(screenId) || mWorkspaceScreens.size() > 2) {
             throw new RuntimeException("Screen id " + screenId + " already exists!");
         }
 

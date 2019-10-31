@@ -6,7 +6,6 @@
     android:layout_below="@+id/content_title"
     android:layout_marginStart="@dimen/weather_clock_margin_start_end"
     android:layout_marginEnd="@dimen/weather_clock_margin_start_end"
-    android:background="@drawable/weather_time_bg"
     android:paddingStart="@dimen/weather_clock_padding_start_end"
     android:paddingEnd="@dimen/weather_clock_padding_start_end">
 
@@ -29,9 +28,9 @@
             android:id="@+id/tv_lock_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/advent_pro_thin"
-            android:format12Hour="hh : mm"
-            android:format24Hour="HH : mm"
+            android:fontFamily="sans-serif-thin"
+            android:format12Hour="hh:mm"
+            android:format24Hour="HH:mm"
             android:textColor="#DEDEDE"
             android:textSize="@dimen/time_hm_text_size" />
 
@@ -41,10 +40,10 @@
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/clock_gap"
             android:fontFamily="@font/advent_pro_thin"
-            android:format12Hour="yyyy / MM / dd\nEE"
-            android:format24Hour="yyyy / MM / dd\nEE"
-            android:lineSpacingExtra="5dp"
+            android:format12Hour="yyyy / MM / dd\nEEEE"
+            android:format24Hour="yyyy / MM / dd\nEEEE"
             android:gravity="center_vertical"
+            android:lineSpacingExtra="5dp"
             android:textColor="#DEDEDE"
             android:textSize="@dimen/time_md_text_size" />
 
@@ -56,26 +55,28 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:gravity="center_vertical"
         android:layout_marginStart="@dimen/weather_icon_gap"
+        android:gravity="center_vertical"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_weather_current_tem"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/advent_pro_thin"
+            android:fontFamily="sans-serif-thin"
+            android:gravity="end"
             android:text="@string/N_A"
             android:textColor="#DEDEDE"
             android:textSize="@dimen/current_temp_text_size" />
 
         <TextView
             android:id="@+id/tv_weather_temp_range"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/advent_pro_thin"
+            android:gravity="end"
             android:text="@string/N_A"
             android:textColor="#DEDEDE"
             android:textSize="@dimen/temp_text_size" />

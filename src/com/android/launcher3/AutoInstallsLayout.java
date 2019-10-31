@@ -604,7 +604,7 @@ public class AutoInstallsLayout {
             long addedId = folderId;
 
             if (TextUtils.equals(title, mContext.getResources().getString(R.string.all_app_folder_name))) {
-                loadAllAppsItem(folderId);
+                //loadAllAppsItem(folderId);
             }
 
             // We can only have folders with >= 2 items, so we need to remove the

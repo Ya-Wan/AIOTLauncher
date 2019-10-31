@@ -152,6 +152,7 @@ import com.android.launcher3.widget.custom.CustomWidgetParser;
 import com.skyworth.aiotsdk.api.AIOTAPI;
 import com.skyworth.aiotsdk.api.AIOTConstant;
 import com.skyworth.aiotsdk.api.IInfoUpdateListener;
+import com.skyworth.aiotsdk.common.skin.SkinConstant;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -872,6 +873,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onPause();
         }
+
+        AIOTAPI.getInstance().dismissAllDialog();
     }
 
     @Override
@@ -1294,7 +1297,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 .handleNewIntent(this, intent, isStarted());
 
         boolean isActionCustom = "android.intent.action.Apps".equals(intent.getAction());
-//Toast.makeText(this, "" + isActionCustom + "   " + isActionMain, 0).show();
+
         if (isActionMain || isActionCustom) {
             if (!internalStateHandled) {
                 // Note: There should be at most one log per method call. This is enforced
@@ -1324,12 +1327,11 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     mAppsView.reset(isStarted() /* animate */);
                 }
 
-                if (shouldMoveToDefaultScreen && !mWorkspace.isTouchActive()) {
+                if (/*shouldMoveToDefaultScreen &&*/isActionMain && !mWorkspace.isTouchActive()) {
                     mWorkspace.post(mWorkspace::moveToDefaultScreen);
                 }
 
                 if (isActionCustom) {
-                    AIOTAPI.getInstance().dismissAllDialog();
                     mWorkspace.post(mWorkspace::moveToCustomScreen);
                 }
             }
@@ -1342,6 +1344,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             if (mLauncherCallbacks != null) {
                 mLauncherCallbacks.onHomeIntent(internalStateHandled);
             }
+
+            AIOTAPI.getInstance().dismissAllDialog();
         }
 
         TraceHelper.endSection("NEW_INTENT");
@@ -1994,7 +1998,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     //mFolderInfos.put(item.screenId, (FolderInfo) item);
                     //adapter.setmFolderInfos(mFolderInfos);
 
-                    mCustomAppsView.onClassesUpdate((int) item.screenId, item.id, ((FolderInfo) item).contents);
+                    mCustomAppsView.setClassesApps((int) item.screenId, item.id, ((FolderInfo) item).contents);
 
                     /*view = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
@@ -2313,7 +2317,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
      */
     public void bindAllApplications(ArrayList<AppInfo> apps) {
         mAppsView.getAppsStore().setApps(apps);
-
+        mCustomAppsView.setApps();
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.bindAllApplications(apps);
         }
@@ -2446,6 +2450,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     public void updateLauncherTheme() {
         mCustomAppsView.updateAllAppsContainerTheme();
         mWorkspace.updateWeatherContainerTheme();
+        AIOTAPI.getInstance().setTheme(Utilities.isDarkTheme(this) ? SkinConstant.SKINTYPE.drak : SkinConstant.SKINTYPE.light);
     }
 
     /**

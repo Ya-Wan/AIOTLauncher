@@ -16,21 +16,11 @@
 
 <favorites xmlns:launcher="http://schemas.android.com/apk/res-auto/com.android.launcher3">
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
-    <!-- Dialer, Messaging, [All Apps], Browser, Camera -->
+    <!-- Messaging, Email, Browser, [All Apps], Music, Gallery, Camera -->
     <!--<resolve
         launcher:container="-101"
         launcher:screen="0"
         launcher:x="0"
-        launcher:y="0" >
-        <favorite launcher:uri="#Intent;action=android.intent.action.DIAL;end" />
-        <favorite launcher:uri="tel:123" />
-        <favorite launcher:uri="#Intent;action=android.intent.action.CALL_BUTTON;end" />
-    </resolve>
-
-    <resolve
-        launcher:container="-101"
-        launcher:screen="1"
-        launcher:x="1"
         launcher:y="0" >
         <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MESSAGING;end" />
         <favorite launcher:uri="sms:" />
@@ -39,22 +29,47 @@
         <favorite launcher:uri="mmsto:" />
     </resolve>
 
-    &lt;!&ndash; All Apps &ndash;&gt;
+    <resolve
+        launcher:container="-101"
+        launcher:screen="1"
+        launcher:x="1"
+        launcher:y="0" >
+        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_EMAIL;end" />
+        <favorite launcher:uri="mailto:" />
+    </resolve>
 
     <resolve
         launcher:container="-101"
-        launcher:screen="3"
-        launcher:x="3"
+        launcher:screen="2"
+        launcher:x="2"
         launcher:y="0" >
         <favorite
             launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end" />
         <favorite launcher:uri="http://www.example.com/" />
     </resolve>
 
-    <resolve
+    &lt;!&ndash; All Apps &ndash;&gt;
+
+    <favorite
         launcher:container="-101"
         launcher:screen="4"
         launcher:x="4"
+        launcher:y="0"
+        launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MUSIC;end" />
+
+    <resolve
+        launcher:container="-101"
+        launcher:screen="5"
+        launcher:x="5"
+        launcher:y="0" >
+        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_GALLERY;end" />
+        <favorite launcher:uri="#Intent;type=images/*;end" />
+    </resolve>
+
+    <resolve
+        launcher:container="-101"
+        launcher:screen="6"
+        launcher:x="6"
         launcher:y="0" >
         <favorite launcher:uri="#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end" />
         <favorite launcher:uri="#Intent;action=android.intent.action.CAMERA_BUTTON;end" />
@@ -103,8 +118,8 @@
             launcher:x="1"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.liulishuo.engzo"
-            launcher:className="com.liulishuo.engzo.app.activity.LauncherActivity"
+            launcher:packageName="org.vv.tang300"
+            launcher:className="org.vv.tang300.StartActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -117,6 +132,22 @@
             launcher:x="0"
             launcher:y="2" />
 
+        <favorite
+            launcher:packageName="com.netease.edu.study"
+            launcher:className="com.netease.edu.study.activity.ActivityWelcome"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
+
+        <favorite
+            launcher:packageName="com.bruce.learning"
+            launcher:className="com.bruce.learning.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="2" />
+
     </folder>
 
     <folder
@@ -127,8 +158,8 @@
         launcher:title="@string/work_folder_name" >
 
         <favorite
-            launcher:packageName="com.tencent.androidqqmail"
-            launcher:className="com.tencent.qqmail.launcher.desktop.LauncherActivity"
+            launcher:packageName="com.estrongs.android.pop"
+            launcher:className="com.estrongs.android.pop.app.openscreenad.NewSplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
@@ -142,8 +173,8 @@
             launcher:x="1"
             launcher:y="0" />
         <favorite
-            launcher:packageName="net.xmind.doughnut"
-            launcher:className="net.xmind.doughnut.MainActivity"
+            launcher:packageName="cn.wps.note"
+            launcher:className="cn.wps.note.StartActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -170,8 +201,8 @@
             launcher:x="2"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.ifeimo.audiorecord"
-            launcher:className="com.ifeimo.audiorecord.mvp.ui.activity.SplahActivity"
+            launcher:packageName="com.hudun.androidrecorder"
+            launcher:className="com.hudun.androidrecorder.tony.activity.WelcomeNewActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
@@ -217,8 +248,8 @@
             launcher:y="0" />
 
         <favorite
-            launcher:packageName="com.liubowang.lauchpad"
-            launcher:className="com.example.denghailong.musicpad.activity.SplashActivity"
+            launcher:packageName="jp.co.psoft.zenbrushfree"
+            launcher:className="jp.co.psoft.zenbrushfree.ZenBrushActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -231,8 +262,8 @@
             launcher:x="0"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.adsk.sketchbook"
-            launcher:className="com.adsk.sketchbook.SketchBook"
+            launcher:packageName="com.Qunar"
+            launcher:className="com.mqunar.splash.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
@@ -252,12 +283,12 @@
             launcher:x="0"
             launcher:y="2" />
         <favorite
-        launcher:packageName="com.cnvcs.go"
-        launcher:className="com.cnvcs.App"
-        launcher:spanX="1"
-        launcher:spanY="1"
-        launcher:x="1"
-        launcher:y="2" />
+            launcher:packageName="com.cnvcs.go"
+            launcher:className="com.cnvcs.App"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="2" />
 
         <favorite
             launcher:packageName="com.cnvcs.xiangqi"
@@ -265,6 +296,14 @@
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
+            launcher:y="3" />
+
+        <favorite
+            launcher:packageName="com.wedobest.fivechess.mi"
+            launcher:className="com.wedobest.fivechess.mi.StartAct"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
             launcher:y="3" />
 
     </folder>
@@ -314,8 +353,8 @@
             launcher:x="1"
             launcher:y="1" />
         <favorite
-            launcher:packageName="com.moji.mjweather"
-            launcher:className="com.moji.mjweather.LauncherActivity"
+            launcher:packageName="com.netease.newsreader.activity"
+            launcher:className="com.netease.nr.biz.ad.newAd.AdActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
@@ -328,23 +367,31 @@
             launcher:x="0"
             launcher:y="2" />
         <favorite
-            launcher:packageName="com.boe.mhealth"
-            launcher:className="com.boe.mhealth.advertise.SplashActivity"
+            launcher:packageName="cn.xuexi.android"
+            launcher:className="com.alibaba.android.rimet.biz.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
             launcher:y="2" />
 
+        <favorite
+            launcher:packageName="com.baidu.searchbox"
+            launcher:className="com.baidu.searchbox.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="2" />
+
     </folder>
 
-    <folder
+    <!--<folder
         launcher:container="-101"
         launcher:screen="4"
         launcher:x="4"
         launcher:y="0"
         launcher:title="@string/all_app_folder_name" >
 
-        <!--<favorite
+        <favorite
             launcher:packageName="com.google.android.googlequicksearchbox"
             launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
             launcher:spanX="1"
@@ -420,8 +467,8 @@
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
-            launcher:y="3" />-->
+            launcher:y="3" />
 
-    </folder>
+    </folder>-->
 
 </favorites>

@@ -7,22 +7,30 @@ import com.android.launcher3.AppInfo;
 import com.android.launcher3.FolderInfo;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.ShortcutInfo;
 import com.android.launcher3.allapps.AllAppsStore;
+import com.android.launcher3.allapps.AppInfoComparator;
+import com.android.launcher3.compat.AlphabeticIndexCompat;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.ComponentKeyMapper;
+import com.android.launcher3.util.LabelComparator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
-public class ClassesCustomAppsList implements AllAppsStore.OnUpdateListener {
+public class ClassesCustomAppsList {
     public static final String TAG = "ClassesCustomAppsList";
 
     private Launcher mLauncher;
 
-    private final List<AppInfo> mApps = new ArrayList<>();
+    private final ArrayList<ShortcutInfo> mApps = new ArrayList<>();
     //
     private final List<FolderInfo> classesInfos = new ArrayList<>();
     // The set of predicted app component names
@@ -30,6 +38,25 @@ public class ClassesCustomAppsList implements AllAppsStore.OnUpdateListener {
     // The set of predicted apps resolved from the component names and the current set of apps
     private final List<AppInfo> mPredictedApps = new ArrayList<>();
     private final HashMap<ComponentKey, AppInfo> mComponentToAppMap = new HashMap<>();
+    private ShortcutInfoComparator mAppNameComparator;
+    private HashMap<CharSequence, String> mCachedSectionNames = new HashMap<>();
+    private AlphabeticIndexCompat mIndexer;
+
+/*    private final List<ShortcutInfo> mEduContents = new ArrayList<>();
+    private final List<ShortcutInfo> mWorkContents = new ArrayList<>();
+    private final List<ShortcutInfo> mEntertainmentContents = new ArrayList<>();
+    private final List<ShortcutInfo> mLifeContents = new ArrayList<>();*/
+
+    String[] filterPkgNames = new String[] {
+            "com.coocaa.app_browser",
+            "com.tianci.user",
+            "com.skyworth.skywebviewapp.webview",
+            "com.baidu.duer.tv.video"
+    };
+
+    final HashMap<Integer, List<ShortcutInfo>> mClassesContents = new HashMap<>();
+
+    private ArrayList<String> intentList = new ArrayList<>();
 
     private AllAppsCustomGridAdapter mAdapter;
     private PredictorAppAdapter mPredictorAppAdapter;
@@ -46,17 +73,57 @@ public class ClassesCustomAppsList implements AllAppsStore.OnUpdateListener {
                 mLauncher.getResources().getString(R.string.all_app_folder_name),
         };
 
+        mAppNameComparator = new ShortcutInfoComparator(context);
+        mIndexer = new AlphabeticIndexCompat(context);
         initClassesInfos();
     }
 
     private void initClassesInfos() {
         classesInfos.clear();
+        mClassesContents.clear();
+
         for (int i = 0; i < titles.length; i++) {
             FolderInfo folderInfo = new FolderInfo();
             folderInfo.title = titles[i];
-            folderInfo.id = i+1;
             classesInfos.add(folderInfo);
+            mClassesContents.put(i, folderInfo.contents);
         }
+    }
+
+    public void setClassesApps(int index,long id, ArrayList<ShortcutInfo> infos) {
+        FolderInfo folderInfo = classesInfos.get(index);
+        folderInfo.id = id;
+
+        for (ShortcutInfo info : infos) {
+            info.screenId = index;
+            folderInfo.add(info, false);
+            intentList.add(info.getIntent().toUri(0));
+        }
+
+    }
+
+    public long onContentsAdd(int index, ShortcutInfo info) {
+        FolderInfo folderInfo = classesInfos.get(index);
+
+        info.screenId = index;
+        folderInfo.add(info, false);
+
+        intentList.add(info.getIntent().toUri(0));
+
+        return index;
+
+    }
+
+    public void onContentsRemove(int index, ShortcutInfo info) {
+        FolderInfo folderInfo = classesInfos.get(index);
+
+        if (folderInfo != null) {
+            folderInfo.remove(info, false);
+
+            intentList.remove(info.getIntent().toUri(0));
+
+        }
+
     }
 
     public List<FolderInfo> getClassesInfos() {
@@ -152,8 +219,79 @@ public class ClassesCustomAppsList implements AllAppsStore.OnUpdateListener {
         return predictedApps;
     }
 
-    @Override
-    public void onAppsUpdated() {
+    /**
+     * Returns all the apps.
+     */
+    public ArrayList<ShortcutInfo> getApps() {
+        return mApps;
+    }
 
+    private boolean filterApp(String pkgName) {
+
+        List<String> packagesNames = Arrays.asList(filterPkgNames);
+        if (packagesNames.contains(pkgName)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void onAppsUpdated() {
+        mApps.clear();
+
+        for (AppInfo app : mLauncher.getAppsView().getAppsStore().getApps()) {
+            if (!filterApp(app.getTargetComponent().getPackageName())) {
+                mApps.add(app.makeShortcut());
+            }
+        }
+
+        Collections.sort(mApps, mAppNameComparator);
+
+        // As a special case for some languages (currently only Simplified Chinese), we may need to
+        // coalesce sections
+        Locale curLocale = mLauncher.getResources().getConfiguration().locale;
+        boolean localeRequiresSectionSorting = curLocale.equals(Locale.SIMPLIFIED_CHINESE);
+        if (localeRequiresSectionSorting) {
+            // Compute the section headers. We use a TreeMap with the section name comparator to
+            // ensure that the sections are ordered when we iterate over it later
+            TreeMap<String, ArrayList<ShortcutInfo>> sectionMap = new TreeMap<>(new LabelComparator());
+            for (ShortcutInfo info : mApps) {
+                // Add the section to the cache
+                String sectionName = getAndUpdateCachedSectionName(info.title);
+
+                // Add it to the mapping
+                ArrayList<ShortcutInfo> sectionApps = sectionMap.get(sectionName);
+                if (sectionApps == null) {
+                    sectionApps = new ArrayList<>();
+                    sectionMap.put(sectionName, sectionApps);
+                }
+                sectionApps.add(info);
+            }
+
+            // Add each of the section apps to the list in order
+            mApps.clear();
+            for (Map.Entry<String, ArrayList<ShortcutInfo>> entry : sectionMap.entrySet()) {
+                mApps.addAll(entry.getValue());
+            }
+        } else {
+            // Just compute the section headers for use below
+            for (ShortcutInfo info : mApps) {
+                // Add the section to the cache
+                getAndUpdateCachedSectionName(info.title);
+            }
+        }
+    }
+
+    /**
+     * Returns the cached section name for the given title, recomputing and updating the cache if
+     * the title has no cached section name.
+     */
+    private String getAndUpdateCachedSectionName(CharSequence title) {
+        String sectionName = mCachedSectionNames.get(title);
+        if (sectionName == null) {
+            sectionName = mIndexer.computeSectionName(title);
+            mCachedSectionNames.put(title, sectionName);
+        }
+        return sectionName;
     }
 }

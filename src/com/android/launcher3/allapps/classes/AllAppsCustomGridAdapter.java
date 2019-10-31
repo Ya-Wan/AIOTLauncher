@@ -35,14 +35,15 @@ public class AllAppsCustomGridAdapter extends RecyclerView.Adapter<AllAppsCustom
     @Override
     public AllAppsCustomGridAdapter.GridViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = mLayoutInflater.inflate(R.layout.custom_all_apps_gridview_item, parent, false);
-        Log.d("y.wan", "onCreateViewHolder: ####################");
-        view.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark)
-                : mLauncher.getDrawable(R.drawable.allapps_classes_bg));
+
         return new GridViewHolder(view, mLauncher);
     }
 
     @Override
     public void onBindViewHolder(AllAppsCustomGridAdapter.GridViewHolder holder, int position) {
+        holder.itemView.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark)
+                : mLauncher.getDrawable(R.drawable.allapps_classes_bg));
+
         FolderInfo folderInfo = mApps.getClassesInfos().get(position);
         holder.title.setText(folderInfo.title);
 

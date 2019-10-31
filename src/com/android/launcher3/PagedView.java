@@ -1162,7 +1162,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                     boolean returnToOriginalPage = false;
                     if (Math.abs(deltaX) > pageWidth * RETURN_TO_ORIGINAL_PAGE_THRESHOLD &&
                             Math.signum(velocityX) != Math.signum(deltaX) && isFling) {
-                        returnToOriginalPage = true;
+                        //returnToOriginalPage = true;
                     }
 
                     int finalPage;
@@ -1470,6 +1470,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
     protected boolean snapToPage(int whichPage, int delta, int duration, boolean immediate,
             TimeInterpolator interpolator) {
+        Log.d("y.wan", "snapToPage: " + whichPage + "  delta: " + delta + Log.getStackTraceString(new Throwable()));
         if (mFirstLayout) {
             setCurrentPage(whichPage);
             return false;

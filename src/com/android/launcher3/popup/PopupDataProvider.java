@@ -173,7 +173,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         }
 
         List<String> ids = mDeepShortcutMap.get(new ComponentKey(component, info.user));
-        return ids == null ? Collections.EMPTY_LIST : ids;
+        return true/*ids == null*/ ? Collections.EMPTY_LIST : ids;
     }
 
     public BadgeInfo getBadgeInfoForItem(ItemInfo info) {
@@ -201,11 +201,11 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         List<SystemShortcut> systemShortcuts = new ArrayList<>();
         for (SystemShortcut systemShortcut : SYSTEM_SHORTCUTS) {
             if (systemShortcut.getOnClickListener(mLauncher, info) != null) {
-                if (info.container == 1 && systemShortcut instanceof SystemShortcut.MoveToEdu) continue;
-                if (info.container == 2 && systemShortcut instanceof SystemShortcut.MoveToWork) continue;
-                if (info.container == 3 && systemShortcut instanceof SystemShortcut.MoveToEntertainment) continue;
-                if (info.container == 4 && systemShortcut instanceof SystemShortcut.MoveToLife) continue;
-                if (info.container == 5 && systemShortcut instanceof SystemShortcut.MoveToMore) continue;
+                if (info.screenId == 0 && systemShortcut instanceof SystemShortcut.MoveToEdu) continue;
+                if (info.screenId == 1 && systemShortcut instanceof SystemShortcut.MoveToWork) continue;
+                if (info.screenId == 2 && systemShortcut instanceof SystemShortcut.MoveToEntertainment) continue;
+                if (info.screenId == 3 && systemShortcut instanceof SystemShortcut.MoveToLife) continue;
+                if ((info.screenId == -1 || info.screenId == 4) && systemShortcut instanceof SystemShortcut.MoveToMore) continue;
                 systemShortcuts.add(systemShortcut);
             }
         }
