@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <categories>
     <category name = "education">
-        <packageName>com.netease.edu.study</packageName>
+        <!--<packageName>com.netease.edu.study</packageName>
         <packageName>com.civitas.quantumphysics</packageName>
         <packageName>com.xiaobanlong.main</packageName>
         <packageName>com.xiaohaizi.ui</packageName>
@@ -10,11 +10,11 @@
         <packageName>com.youdao.dict</packageName>
         <packageName>org.vv.tang300</packageName>
         <packageName>com.netease.edu.study</packageName>
-        <packageName>com.jinxin.namibox</packageName>
+        <packageName>com.jinxin.namibox</packageName>-->
     </category>
 
     <category name = "work">
-        <packageName>com.tencent.androidqqmail</packageName>
+        <!--<packageName>com.tencent.androidqqmail</packageName>
         <packageName>cn.wps.moffice_eng</packageName>
         <packageName>net.xmind.doughnut</packageName>
         <packageName>cn.readpad.whiteboard</packageName>
@@ -25,11 +25,11 @@
         <packageName>com.yinxiang</packageName>
         <packageName>cn.wps.note</packageName>
         <packageName>com.hudun.androidrecorder</packageName>
-        <packageName>net.xmind.doughnut</packageName>
+        <packageName>net.xmind.doughnut</packageName>-->
     </category>
 
     <category name = "entertainment">
-        <packageName>com.xs.pooltd.dbzq.m</packageName>
+        <!--<packageName>com.xs.pooltd.dbzq.m</packageName>
         <packageName>com.tencent.qqmusic</packageName>
         <packageName>com.liubowang.lauchpad</packageName>
         <packageName>com.ss.android.ugc.aweme</packageName>
@@ -38,10 +38,11 @@
         <packageName>com.gamestar.perfectpiano</packageName>
         <packageName>com.cnvcs.go</packageName>
         <packageName>com.cnvcs.xiangqi</packageName>
+        <packageName>jp.co.psoft.zenbrushfree</packageName>-->
     </category>
 
     <category name = "life">
-        <packageName>com.tencent.mm</packageName>
+        <!--<packageName>com.tencent.mm</packageName>
         <packageName>com.tencent.mobileqq</packageName>
         <packageName>com.taobao.taobao</packageName>
         <packageName>com.UCMobile</packageName>
@@ -50,7 +51,7 @@
         <packageName>com.peopledailychina.activity</packageName>
         <packageName>com.boe.mhealth</packageName>
         <packageName>com.netease.newsreader.activity</packageName>
-        <packageName>cn.xuexi.android</packageName>
+        <packageName>cn.xuexi.android</packageName>-->
     </category>
 
 </categories>

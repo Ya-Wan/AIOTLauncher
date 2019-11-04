@@ -455,7 +455,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
      * Initializes various states for this workspace.
      */
     protected void initWorkspace() {
-        mCurrentPage = DEFAULT_PAGE;
+        //mCurrentPage = DEFAULT_PAGE;
         setClipToPadding(false);
 
         setupLayoutTransition();
@@ -501,13 +501,13 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
      * @param qsb an existing qsb to recycle or null.
      */
     public void bindAndInitFirstWorkspaceScreen(View qsb) {
-        insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, 0);
-        createCustomContentContainer();
-        /*if (!FeatureFlags.QSB_ON_FIRST_SCREEN) {
-            return;
-        }
         // Add the first page
         CellLayout firstPage = insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, 0);
+        addAIoTContentToFirstPage(firstPage);
+
+        if (!FeatureFlags.QSB_ON_FIRST_SCREEN) {
+            return;
+        }
         // Always add a QSB on the first screen.
         if (qsb == null) {
             // In transposed layout, we add the QSB in the Grid. As workspace does not touch the
@@ -520,7 +520,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         lp.canReorder = false;
         if (!firstPage.addViewToCellLayout(qsb, 0, R.id.search_container_workspace, lp, true)) {
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
-        }*/
+        }
     }
 
     public void removeAllWorkspaceScreens() {
@@ -558,11 +558,13 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public void insertNewWorkspaceScreen(long screenId) {
-        insertNewWorkspaceScreen(screenId, getChildCount());
+        if (FeatureFlags.ENABLE_ADD_EXTRA_SCREEN) {
+            insertNewWorkspaceScreen(screenId, getChildCount());
+        }
     }
 
     public CellLayout insertNewWorkspaceScreen(long screenId, int insertIndex) {
-        if (mWorkspaceScreens.containsKey(screenId) || mWorkspaceScreens.size() > 2) {
+        if (mWorkspaceScreens.containsKey(screenId)) {
             throw new RuntimeException("Screen id " + screenId + " already exists!");
         }
 
@@ -581,8 +583,6 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         addView(newScreen, insertIndex);
         mStateTransitionAnimation.applyChildState(
                 mLauncher.getStateManager().getState(), newScreen, insertIndex);
-
-        addAIoTContentToFirstPage(newScreen);
 
         if (mLauncher.getAccessibilityDelegate().isInAccessibleDrag()) {
             newScreen.enableAccessibleDrag(true, CellLayout.WORKSPACE_ACCESSIBILITY_DRAG);
@@ -641,7 +641,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
                 mLauncher.getLayoutInflater().inflate(R.layout.workspace_screen, this, false);
 
         mWorkspaceScreens.put(CUSTOM_CONTENT_SCREEN_ID, customScreen);
-        mScreenOrder.add(1, CUSTOM_CONTENT_SCREEN_ID);
+        mScreenOrder.add(0, CUSTOM_CONTENT_SCREEN_ID);
 
         // We want no padding on the custom content
         customScreen.setPadding(0, 0, 0, 0);
@@ -3608,8 +3608,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public void updateWeatherContainerTheme() {
-        weatherClockContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark) :
-                mLauncher.getDrawable(R.drawable.allapps_classes_bg));
+        if (weatherClockContainer != null) {
+            weatherClockContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark) :
+                    mLauncher.getDrawable(R.drawable.allapps_classes_bg));
+        }
     }
 
 

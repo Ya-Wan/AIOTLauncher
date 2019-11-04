@@ -35,9 +35,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.ShortcutInfo;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.allapps.AllAppsStore;
-import com.android.launcher3.allapps.AlphabeticalAppsList;
 import com.android.launcher3.entry.DefaultCategory;
-import com.android.launcher3.folder.Folder;
 import com.android.launcher3.util.ComponentKeyMapper;
 import com.android.launcher3.util.ItemInfoMatcher;
 
@@ -91,10 +89,13 @@ public class AllAppsCustomContainerView extends LinearLayout {
         mPredictorAppAdapter = new PredictorAppAdapter(mLauncher, mApps);
         mApps.setPredictorAppAdapter(mPredictorAppAdapter);
         mPredictLayoutManager = new GridLayoutManager(mLauncher, 4);
-
+        mLauncher.getAppsView().getAppsStore().addUpdateListener(this::onAppsUpdated);
         parseDefaultCategories();
     }
 
+    /**
+     * bind item to category
+     */
     public void setClassesApps(int index, long id, ArrayList<ShortcutInfo> shortcutInfos) {
         mApps.setClassesApps(index, id, shortcutInfos);
 
@@ -102,27 +103,55 @@ public class AllAppsCustomContainerView extends LinearLayout {
     }
 
     public void addOrUpdateApps(List<AppInfo> apps) {
-        mApps.onAppsUpdated();
         for (AppInfo app : apps) {
             addToIndex(app, getIndex(app));
         }
     }
 
-    private void addToIndex(AppInfo appInfo, int index) {
+    public void updateShortcuts(ArrayList<ShortcutInfo> shortcuts) {
+        for (ShortcutInfo shortcutInfo : shortcuts) {
+            updateShortcuts(shortcutInfo);
+        }
+    }
 
-        long folderInfoId = mApps.onContentsAdd(index, appInfo.makeShortcut());
+    public void updateShortcuts(ShortcutInfo shortcut) {
+        addToIndex(shortcut, getIndex(shortcut));
+    }
+
+    /**
+     * add item to specify category
+     */
+    private void addToIndex(ItemInfo item, int index) {
+        int count = mAdapter.getItemCount();
+        long folderInfoId = count - 1;
+
+        if (index == count - 1) {
+            notifyUpdateAllApps();
+            return;
+        }
+
+        if (item instanceof AppInfo) {
+            folderInfoId = mApps.onContentsAdd(index, ((AppInfo) item).makeShortcut());
+        } else if (item instanceof ShortcutInfo) {
+            folderInfoId = mApps.onContentsAdd(index, (ShortcutInfo) item);
+        }
 
         Log.d(TAG, "addToIndex: " + folderInfoId);
 
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemChanged(index);
 
         mLauncher.getModelWriter().addOrMoveItemInDatabase(
-                appInfo, folderInfoId, 0, appInfo.cellX, appInfo.cellY);
+                item, folderInfoId, 0, item.cellX, item.cellY);
     }
 
-    private int getIndex(AppInfo app) {
+    /**
+     * get item position by pkgName
+     *
+     * @return index
+     */
+    private int getIndex(ItemInfo item) {
 
-        String targetPackageName = app.getTargetComponent().getPackageName();
+        String targetPackageName = item.getTargetComponent().getPackageName();
 
         for (Map.Entry<Integer, List<ShortcutInfo>> entry : mApps.mClassesContents.entrySet()) {
             List<ShortcutInfo> shortcutInfos = entry.getValue();
@@ -144,19 +173,11 @@ public class AllAppsCustomContainerView extends LinearLayout {
         return mApps.mClassesContents.size() - 1;
     }
 
-    public void removeApps(List<AppInfo> apps) {
-        List<FolderInfo> mFolderInfos = mApps.getClassesInfos();
-
-        for (AppInfo app : apps) {
-            FolderInfo folderInfo = mFolderInfos.get((int) app.container);
-            if (folderInfo != null) {
-                folderInfo.remove(app.makeShortcut(), false);
-            }
-        }
-
-        mAdapter.notifyDataSetChanged();
-    }
-
+    /**
+     * Removes items that match the {@param matcher}. When applications are removed
+     * as a part of an update, this is called to ensure application
+     * shortcuts are not removed.
+     **/
     public void removeApps(final ItemInfoMatcher matcher) {
         ArrayList<ItemInfo> items = new ArrayList<>();
         List<FolderInfo> mFolderInfos = mApps.getClassesInfos();
@@ -175,13 +196,25 @@ public class AllAppsCustomContainerView extends LinearLayout {
 
     }
 
+    /**
+     * move item to specify category
+     *
+     * @param info    item
+     * @param toIndex category position
+     */
     public void moveInfoToIndex(ShortcutInfo info, int toIndex) {
 
         FolderInfo toFolderInfo = mApps.getClassesInfos().get(toIndex);
 
         mApps.onContentsRemove((int) info.screenId, info);
+        mAdapter.notifyItemChanged((int) info.screenId);
 
         mApps.onContentsAdd(toIndex, info);
+        if (toIndex == mAdapter.getItemCount() - 1) {
+            notifyUpdateAllApps();
+        } else {
+            mAdapter.notifyItemChanged(toIndex);
+        }
 
         if (toIndex == mApps.getClassesInfos().size()) {
             mLauncher.getModelWriter().deleteItemFromDatabase(info);
@@ -190,42 +223,30 @@ public class AllAppsCustomContainerView extends LinearLayout {
         mLauncher.getModelWriter().addOrMoveItemInDatabase(
                 info, toFolderInfo.id, toIndex, info.cellX, info.cellY);
 
-        mAdapter.notifyDataSetChanged();
     }
 
-    private void removeFromIndex(AppInfo appInfo, int index) {
-        FolderInfo folderInfo = mApps.getClassesInfos().get(index);
-        if (folderInfo != null) {
-            folderInfo.remove(appInfo.makeShortcut(), false);
-        }
-
-        notifyUpdate();
-
-        mLauncher.getModelWriter().addOrMoveItemInDatabase(
-                appInfo, folderInfo.id, 0, appInfo.cellX, appInfo.cellY);
-    }
-
-    public void setApps() {
+    public void onAppsUpdated() {
         mApps.onAppsUpdated();
-        notifyUpdate();
+        notifyUpdateAllApps();
     }
 
-    private void notifyUpdate() {
+    /**
+     * update all apps category,items do not contains other category items
+     */
+    private void notifyUpdateAllApps() {
         int itemCount = mAdapter.getItemCount();
-        ArrayList<ShortcutInfo> shortcutInfos = (ArrayList<ShortcutInfo>) mApps.getApps().clone();
+        ArrayList<ShortcutInfo> apps = mApps.getApps();
+        ArrayList<ShortcutInfo> shortcutInfos = new ArrayList<>(apps);
         List<FolderInfo> infos = mApps.getClassesInfos();
-        for (ShortcutInfo appInfo : mApps.getApps()) {
-            Log.d("ClassesCustomAppsList", "onAppsUpdated: " + appInfo.getTargetComponent().getPackageName());
-        }
-        for (int i = 0; i < mApps.getApps().size(); i++) {
-            ShortcutInfo info = mApps.getApps().get(i);
+
+        for (int i = 0; i < apps.size(); i++) {
+            ShortcutInfo info = apps.get(i);
             String targetPackageName = info.getTargetComponent().getPackageName();
             Log.d(TAG, "notifyUpdate: " + targetPackageName);
             for (int j = 0; j < itemCount - 1; j++) {
                 FolderInfo folderInfo = infos.get(j);
                 for (int k = 0; k < folderInfo.contents.size(); k++) {
                     ShortcutInfo shortcutInfo = folderInfo.contents.get(k);
-                    //Log.i(TAG, "notifyUpdate folder content: " + shortcutInfo.getTargetComponent().getPackageName());
                     if (TextUtils.equals(targetPackageName,
                             shortcutInfo.getTargetComponent().getPackageName())) {
                         shortcutInfos.remove(info);
@@ -235,11 +256,12 @@ public class AllAppsCustomContainerView extends LinearLayout {
         }
 
         FolderInfo folderInfo = infos.get(itemCount - 1);
+        folderInfo.contents.clear();
         for (ShortcutInfo shortcutInfo : shortcutInfos) {
             shortcutInfo.screenId = itemCount - 1;
-            folderInfo.contents.add(shortcutInfo);
+            folderInfo.add(shortcutInfo, false);
         }
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemChanged(itemCount - 1);
     }
 
     /**
@@ -268,7 +290,7 @@ public class AllAppsCustomContainerView extends LinearLayout {
     public void updateAllAppsContainerTheme() {
         predictAppContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark) :
                 mLauncher.getDrawable(R.drawable.allapps_classes_bg));
-        for (int i = 0; i < mAdapter.getItemCount(); i ++) {
+        for (int i = 0; i < mAdapter.getItemCount(); i++) {
             mAdapter.notifyItemChanged(i);
         }
     }
@@ -277,7 +299,7 @@ public class AllAppsCustomContainerView extends LinearLayout {
         XmlResourceParser parser = mLauncher.getResources().getXml(R.xml.default_hotseat_category);
         final int depth = parser.getDepth();
 
-        DefaultCategory defaultCategory= null;
+        DefaultCategory defaultCategory = null;
         try {
             int type = parser.getEventType();
             while (type != XmlResourceParser.END_DOCUMENT) {

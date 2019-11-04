@@ -135,8 +135,8 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                             }
                         }
                     }
-//                    callbacks.bindAppsAdded(addedWorkspaceScreensFinal,
-//                            addNotAnimated, addAnimated);
+                    callbacks.bindAppsAdded(addedWorkspaceScreensFinal,
+                            addNotAnimated, addAnimated);
                 }
             });
         }

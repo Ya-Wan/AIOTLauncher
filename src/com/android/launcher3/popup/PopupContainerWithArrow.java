@@ -298,8 +298,6 @@ public class PopupContainerWithArrow extends ArrowPopup implements DragSource,
     @Override
     protected void getTargetObjectLocation(Rect outPos) {
         mLauncher.getDragLayer().getDescendantRectRelativeToSelf(mOriginalIcon, outPos);
-        Log.d("y.wan", "getTargetObjectLocation: " + outPos.top +
-                "    left: " + outPos.left + "    right: " + outPos.right);
         outPos.top += mOriginalIcon.getPaddingTop();
         outPos.left += mOriginalIcon.getPaddingLeft();
         outPos.right -= mOriginalIcon.getPaddingRight();

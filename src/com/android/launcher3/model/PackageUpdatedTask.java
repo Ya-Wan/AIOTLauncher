@@ -156,7 +156,9 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
         final ArrayList<AppInfo> addedOrModified = new ArrayList<>();
         addedOrModified.addAll(appsList.added);
 
-        updateToWorkSpace(context, app, appsList);
+        if (FeatureFlags.DISABLE_ALL_APPS) {
+            updateToWorkSpace(context, app, appsList);
+        }
 
         appsList.added.clear();
         addedOrModified.addAll(appsList.modified);
@@ -355,27 +357,25 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
     }
 
     public void updateToWorkSpace(Context context, LauncherAppState app, AllAppsList appsList) {
-        if (!FeatureFlags.SHOW_ALL_APPS) {
-            ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
-            final List<UserHandle> profiles = UserManagerCompat.getInstance(context).getUserProfiles();
-            ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<>();
-            for (UserHandle user : profiles) {
-                final List<LauncherActivityInfo> apps = LauncherAppsCompat.getInstance(context).getActivityList(null, user);
-                synchronized (this) {
-                    for (LauncherActivityInfo info : apps) {
-                        for (AppInfo appInfo : appsList.added) {
-                            if (info.getComponentName().equals(appInfo.componentName)) {
-                                InstallShortcutReceiver.PendingInstallShortcutInfo mPendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(info, context);
-                                added.add(mPendingInstallShortcutInfo);
-                                installQueue.add(mPendingInstallShortcutInfo.getItemInfo());
-                            }
+        ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
+        final List<UserHandle> profiles = UserManagerCompat.getInstance(context).getUserProfiles();
+        ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<>();
+        for (UserHandle user : profiles) {
+            final List<LauncherActivityInfo> apps = LauncherAppsCompat.getInstance(context).getActivityList(null, user);
+            synchronized (this) {
+                for (LauncherActivityInfo info : apps) {
+                    for (AppInfo appInfo : appsList.added) {
+                        if (info.getComponentName().equals(appInfo.componentName)) {
+                            InstallShortcutReceiver.PendingInstallShortcutInfo mPendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(info, context);
+                            added.add(mPendingInstallShortcutInfo);
+                            installQueue.add(mPendingInstallShortcutInfo.getItemInfo());
                         }
                     }
                 }
             }
-            if (!added.isEmpty()) {
-                app.getModel().addAndBindAddedWorkspaceItems(installQueue);
-            }
+        }
+        if (!added.isEmpty()) {
+            app.getModel().addAndBindAddedWorkspaceItems(installQueue);
         }
 
     }

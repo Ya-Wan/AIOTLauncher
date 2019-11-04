@@ -67,10 +67,12 @@ public class CustomAppPredictor implements SharedPreferences.OnSharedPreferenceC
             "com.google.android.keep",
             "com.google.android.apps.plus",
             "com.google.android.talk",
+            "com.skyworth.bluetoothtelephone",
+            "com.coocaa.tvpi",
             "com.skyworth.smartsystem.vhome",
+            "com.skyworth.lafite.srtnj.speechserver",
             "com.tencent.qqmusic",
             "com.ss.android.ugc.aweme",
-            "com.coocaa.tvpi",
     };
 
     public CustomAppPredictor(Context context) {

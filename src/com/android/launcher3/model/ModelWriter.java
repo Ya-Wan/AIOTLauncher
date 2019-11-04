@@ -242,7 +242,6 @@ public class ModelWriter {
      * Removes the specified item from the database
      */
     public void deleteItemFromDatabase(ItemInfo item) {
-        Log.d("y.wan", "deleteItemFromDatabase: ");
         deleteItemsFromDatabase(Arrays.asList(item));
     }
 

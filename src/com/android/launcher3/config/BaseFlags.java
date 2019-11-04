@@ -39,7 +39,7 @@ abstract class BaseFlags {
     public static final boolean LAUNCHER3_SPRING_ICONS = true;
 
     // Feature flag to enable moving the QSB on the 0th screen of the workspace.
-    public static final boolean QSB_ON_FIRST_SCREEN = true;
+    public static final boolean QSB_ON_FIRST_SCREEN = false;
     // When enabled the all-apps icon is not added to the hotseat.
     public static final boolean NO_ALL_APPS_ICON = true;
 
@@ -52,6 +52,12 @@ abstract class BaseFlags {
     // When enabled shows a work profile tab in all apps
     public static final boolean ALL_APPS_TABS_ENABLED = true;
 
+    //disabled shows all apps in allAppsView
+    public static final boolean DISABLE_ALL_APPS = true;
+
+    //only add screen for aiot view in first screen
+    public static final boolean ENABLE_ADD_EXTRA_SCREEN = false;
+
     // When true, overview shows screenshots in the orientation they were taken rather than
     // trying to make them fit the orientation the device is in.
     public static final boolean OVERVIEW_USE_SCREENSHOT_ORIENTATION = true;
@@ -60,6 +66,5 @@ abstract class BaseFlags {
     public static final boolean ENABLE_WORKSPACE_OVER_SCROLL = false;
     public static final boolean REPLACE_FOLDER_WITH_FINAL_ITEM = false;
     public static final boolean ENABLE_DRAG_UNINSTALL = false;
-    public static final boolean SHOW_ALL_APPS = false;
     public static final boolean SHOW_HOTSEAT = false;
 }

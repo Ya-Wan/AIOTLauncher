@@ -1470,7 +1470,6 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
     protected boolean snapToPage(int whichPage, int delta, int duration, boolean immediate,
             TimeInterpolator interpolator) {
-        Log.d("y.wan", "snapToPage: " + whichPage + "  delta: " + delta + Log.getStackTraceString(new Throwable()));
         if (mFirstLayout) {
             setCurrentPage(whichPage);
             return false;

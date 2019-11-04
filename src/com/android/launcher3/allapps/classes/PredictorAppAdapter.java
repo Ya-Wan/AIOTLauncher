@@ -1,10 +1,8 @@
 package com.android.launcher3.allapps.classes;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import com.android.launcher3.AppInfo;
@@ -12,7 +10,6 @@ import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.touch.ItemClickHandler;
-import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.util.Thunk;
 
 import butterknife.BindView;
@@ -61,7 +58,6 @@ public class PredictorAppAdapter extends RecyclerView.Adapter<PredictorAppAdapte
 
         public void render(AppInfo info) {
             if (info != null) {
-                Log.d("y.wan", "render: " + info.toString());
                 textView.applyFromShortcutInfo(info.makeShortcut());
                 textView.setOnClickListener(ItemClickHandler.INSTANCE);
                 //textView.setOnLongClickListener(ItemLongClickListener.INSTANCE_WORKSPACE_COSTOM);

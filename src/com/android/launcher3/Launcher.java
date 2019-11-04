@@ -347,7 +347,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
         mAppWidgetManager = AppWidgetManagerCompat.getInstance(this);
 
-        //mAppWidgetHost = new LauncherAppWidgetHost(this);
+        mAppWidgetHost = new LauncherAppWidgetHost(this);
         //mAppWidgetHost.startListening();
 
         mLauncherView = LayoutInflater.from(this).inflate(R.layout.launcher, null);
@@ -383,9 +383,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             }
         } else {
             // Pages bound synchronously.
-            mWorkspace.setCurrentPage(currentScreen);
+            // TODO: 2019/10/31 oncreate again when press home button, but only first time return from other app ??? 
+            //mWorkspace.setCurrentPage(currentScreen);
 
-            setWorkspaceLoading(true);
+            //setWorkspaceLoading(true);
         }
 
         // For handling default keys
@@ -850,7 +851,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         // Refresh shortcuts if the permission changed.
         mModel.refreshShortcutsIfRequired();
 
-        //DiscoveryBounce.showForHomeIfNeeded(this);
+        if (!FeatureFlags.DISABLE_ALL_APPS) {
+            DiscoveryBounce.showForHomeIfNeeded(this);
+        }
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onResume();
         }
@@ -1787,9 +1790,6 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 clickedItem.remove(item);
             }
             clickedItem.add(0, (ShortcutInfo) item);
-            /*if (clickedItem.size() > 4) {
-                recentAppAdapter.setInfos((ArrayList<ShortcutInfo>) clickedItem.subList(0, 3));
-            }*/
             //recentAppAdapter.setInfos(clickedItem);
             //recentAppAdapter.notifyDataSetChanged();
         }
@@ -1915,7 +1915,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             orderedScreenIds.remove(Workspace.FIRST_SCREEN_ID);
             orderedScreenIds.add(0, Workspace.FIRST_SCREEN_ID);
             LauncherModel.updateWorkspaceScreenOrder(this, orderedScreenIds);
-        } else if (!FeatureFlags.QSB_ON_FIRST_SCREEN && orderedScreenIds.isEmpty()) {
+        } else if ((!FeatureFlags.QSB_ON_FIRST_SCREEN && orderedScreenIds.isEmpty())) {
             // If there are no screens, we need to have an empty screen
             mWorkspace.addExtraEmptyScreen();
         }
@@ -1926,6 +1926,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         // computed before the next layout
         mWorkspace.unlockWallpaperFromDefaultPageOnNextLayout();
 
+        mWorkspace.createCustomContentContainer();
         populateCustomContentContainer();
     }
 
@@ -1933,7 +1934,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         int count = orderedScreenIds.size();
         for (int i = 0; i < count; i++) {
             long screenId = orderedScreenIds.get(i);
-            if (!FeatureFlags.QSB_ON_FIRST_SCREEN || screenId != Workspace.FIRST_SCREEN_ID) {
+            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN || screenId != Workspace.FIRST_SCREEN_ID) &&
+                    FeatureFlags.ENABLE_ADD_EXTRA_SCREEN) {
                 // No need to bind the first screen, as its always bound.
                 mWorkspace.insertNewWorkspaceScreenBeforeEmptyScreen(screenId);
             }
@@ -1990,7 +1992,11 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     ShortcutInfo info = (ShortcutInfo) item;
-                    //view = createShortcut(info);
+                    view = createShortcut(info);
+
+                    if (FeatureFlags.DISABLE_ALL_APPS) {
+                        mCustomAppsView.updateShortcuts(info);
+                    }
                     break;
                 }
                 case LauncherSettings.Favorites.ITEM_TYPE_FOLDER: {
@@ -2000,18 +2006,17 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
                     mCustomAppsView.setClassesApps((int) item.screenId, item.id, ((FolderInfo) item).contents);
 
-                    /*view = FolderIcon.fromXml(R.layout.folder_icon, this,
+                    view = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
-                            (FolderInfo) item);*/
+                            (FolderInfo) item);
                     break;
                 }
                 case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
                 case LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET: {
-                    /*view = inflateAppWidget((LauncherAppWidgetInfo) item);
+                    view = inflateAppWidget((LauncherAppWidgetInfo) item);
                     if (view == null) {
                         continue;
-                    }*/
-                    view = null;
+                    }
                     break;
                 }
                 default:
@@ -2038,7 +2043,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 }
             }
 
-            /*if (view != null) {
+            if (view != null && FeatureFlags.ENABLE_ADD_EXTRA_SCREEN) {
                 workspace.addInScreenFromBind(view, item);
                 if (animateIcons) {
                     // Animate all the applications up now
@@ -2048,11 +2053,11 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     bounceAnims.add(createNewAppBounceAnimation(view, i));
                     newItemsScreenId = item.screenId;
                 }
-            }*/
+            }
 
         }
 
-        /*if (animateIcons) {
+        if (animateIcons) {
             // Animate to the correct page
             if (newItemsScreenId > -1) {
                 long currentScreenId = mWorkspace.getScreenIdForPageIndex(mWorkspace.getNextPage());
@@ -2081,7 +2086,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     mWorkspace.postDelayed(startBounceAnimRunnable, NEW_APPS_ANIMATION_DELAY);
                 }
             }
-        }*/
+        }
         workspace.requestLayout();
         //adapter.notifyDataSetChanged();
     }
@@ -2317,7 +2322,6 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
      */
     public void bindAllApplications(ArrayList<AppInfo> apps) {
         mAppsView.getAppsStore().setApps(apps);
-        mCustomAppsView.setApps();
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.bindAllApplications(apps);
         }
@@ -2344,7 +2348,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         mAppsView.getAppsStore().addOrUpdateApps(apps);
         //mHotseat.updateShortcuts(apps);
         //adapter.addOrUpdateApps(apps);
-        mCustomAppsView.addOrUpdateApps(apps);
+        if (!FeatureFlags.DISABLE_ALL_APPS) {
+            mCustomAppsView.addOrUpdateApps(apps);
+        }
     }
 
     @Override
@@ -2367,6 +2373,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
     public void bindShortcutsChanged(ArrayList<ShortcutInfo> updated, final UserHandle user) {
         if (!updated.isEmpty()) {
             mWorkspace.updateShortcuts(updated);
+
+            if (FeatureFlags.DISABLE_ALL_APPS) {
+                mCustomAppsView.updateShortcuts(updated);
+            }
         }
     }
 

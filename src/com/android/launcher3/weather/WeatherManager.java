@@ -31,6 +31,9 @@ public class WeatherManager implements IWeather {
 
     @Override
     public void updateWeather(ImageView weatherIv, TextView weatherCurrentTem, TextView weatherTemRange) {
+
+        if (weatherIv == null || weatherCurrentTem == null || weatherTemRange == null) return;
+
         TCInfoSetData weatherData = (TCInfoSetData) tcSystemService.getSetData(SKY_SYSTEM_ENV_WEATHER);
 
         String weather;

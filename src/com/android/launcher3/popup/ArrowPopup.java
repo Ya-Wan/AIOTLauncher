@@ -302,7 +302,6 @@ public abstract class ArrowPopup extends AbstractFloatingView {
             }
             mIsAboveIcon = true;
         }
-        Log.d("y.wan", "orientAboutObject: " + x);
         setX(x);
         if (Gravity.isVertical(mGravity)) {
             return;

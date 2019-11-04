@@ -81,7 +81,6 @@ public class RecentAppAdapter extends RecyclerView.Adapter<RecentAppAdapter.View
 
         public void render(ShortcutInfo info) {
             if (info != null) {
-                Log.d("y.wan", "render: " + info.toString());
                 textView.applyFromShortcutInfo(info);
                 textView.setOnClickListener(ItemClickHandler.INSTANCE);
                 textView.setOnLongClickListener(ItemLongClickListener.INSTANCE_WORKSPACE_COSTOM);

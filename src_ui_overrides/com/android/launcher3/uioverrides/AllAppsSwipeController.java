@@ -44,7 +44,7 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
         if (mLauncher.isInState(ALL_APPS) && !mLauncher.getAppsView().shouldContainerScroll(ev)) {
             return false;
         }
-        return FeatureFlags.SHOW_ALL_APPS;
+        return !FeatureFlags.DISABLE_ALL_APPS;
     }
 
     @Override

@@ -42,11 +42,6 @@ public class ClassesCustomAppsList {
     private HashMap<CharSequence, String> mCachedSectionNames = new HashMap<>();
     private AlphabeticIndexCompat mIndexer;
 
-/*    private final List<ShortcutInfo> mEduContents = new ArrayList<>();
-    private final List<ShortcutInfo> mWorkContents = new ArrayList<>();
-    private final List<ShortcutInfo> mEntertainmentContents = new ArrayList<>();
-    private final List<ShortcutInfo> mLifeContents = new ArrayList<>();*/
-
     String[] filterPkgNames = new String[] {
             "com.coocaa.app_browser",
             "com.tianci.user",
