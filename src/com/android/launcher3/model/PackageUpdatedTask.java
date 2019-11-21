@@ -157,7 +157,7 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
         addedOrModified.addAll(appsList.added);
 
         if (FeatureFlags.DISABLE_ALL_APPS) {
-            updateToWorkSpace(context, app, appsList);
+            //updateToWorkSpace(context, app, appsList);
         }
 
         appsList.added.clear();

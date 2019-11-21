@@ -56,9 +56,9 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             //new SystemShortcut.Install(),
             new SystemShortcut.UnInstall(),
             new SystemShortcut.MoveToEdu(),
-            new SystemShortcut.MoveToWork(),
+            new SystemShortcut.MoveToNews(),
             new SystemShortcut.MoveToEntertainment(),
-            new SystemShortcut.MoveToLife(),
+            new SystemShortcut.MoveToShopping(),
             new SystemShortcut.MoveToMore()
     };
 
@@ -201,10 +201,10 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         List<SystemShortcut> systemShortcuts = new ArrayList<>();
         for (SystemShortcut systemShortcut : SYSTEM_SHORTCUTS) {
             if (systemShortcut.getOnClickListener(mLauncher, info) != null) {
-                if (info.screenId == 0 && systemShortcut instanceof SystemShortcut.MoveToEdu) continue;
-                if (info.screenId == 1 && systemShortcut instanceof SystemShortcut.MoveToWork) continue;
-                if (info.screenId == 2 && systemShortcut instanceof SystemShortcut.MoveToEntertainment) continue;
-                if (info.screenId == 3 && systemShortcut instanceof SystemShortcut.MoveToLife) continue;
+                if (info.screenId == 0 && systemShortcut instanceof SystemShortcut.MoveToEntertainment) continue;
+                if (info.screenId == 1 && systemShortcut instanceof SystemShortcut.MoveToEdu) continue;
+                if (info.screenId == 2 && systemShortcut instanceof SystemShortcut.MoveToShopping) continue;
+                if (info.screenId == 3 && systemShortcut instanceof SystemShortcut.MoveToNews) continue;
                 if ((info.screenId == -1 || info.screenId == 4) && systemShortcut instanceof SystemShortcut.MoveToMore) continue;
                 systemShortcuts.add(systemShortcut);
             }

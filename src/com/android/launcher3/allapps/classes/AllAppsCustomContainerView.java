@@ -152,8 +152,9 @@ public class AllAppsCustomContainerView extends LinearLayout {
     private int getIndex(ItemInfo item) {
 
         String targetPackageName = item.getTargetComponent().getPackageName();
+        Log.d(TAG, "getIndex targetPackageName: " + targetPackageName);
 
-        for (Map.Entry<Integer, List<ShortcutInfo>> entry : mApps.mClassesContents.entrySet()) {
+        /*for (Map.Entry<Integer, List<ShortcutInfo>> entry : mApps.mClassesContents.entrySet()) {
             List<ShortcutInfo> shortcutInfos = entry.getValue();
             for (ShortcutInfo shortcutInfo : shortcutInfos) {
                 if (TextUtils.equals(targetPackageName,
@@ -161,7 +162,7 @@ public class AllAppsCustomContainerView extends LinearLayout {
                     return entry.getKey();
                 }
             }
-        }
+        }*/
 
         for (int j = 0; j < categories.size(); j++) {
             DefaultCategory defaultCategory = categories.get(j);
@@ -288,8 +289,8 @@ public class AllAppsCustomContainerView extends LinearLayout {
     }
 
     public void updateAllAppsContainerTheme() {
-        predictAppContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark) :
-                mLauncher.getDrawable(R.drawable.allapps_classes_bg));
+        predictAppContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.predict_app_container_bg_dark) :
+                mLauncher.getDrawable(R.drawable.predict_app_container_bg));
         for (int i = 0; i < mAdapter.getItemCount(); i++) {
             mAdapter.notifyItemChanged(i);
         }

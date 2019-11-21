@@ -61,10 +61,10 @@ public class ClassesCustomAppsList {
     public ClassesCustomAppsList(Context context) {
         mLauncher = (Launcher) context;
         titles = new String[]{
-                mLauncher.getResources().getString(R.string.education_folder_name),
-                mLauncher.getResources().getString(R.string.work_folder_name),
                 mLauncher.getResources().getString(R.string.entertainment_folder_name),
-                mLauncher.getResources().getString(R.string.life_folder_name),
+                mLauncher.getResources().getString(R.string.education_folder_name),
+                mLauncher.getResources().getString(R.string.shopping_folder_name),
+                mLauncher.getResources().getString(R.string.news_folder_name),
                 mLauncher.getResources().getString(R.string.all_app_folder_name),
         };
 
@@ -75,7 +75,7 @@ public class ClassesCustomAppsList {
 
     private void initClassesInfos() {
         classesInfos.clear();
-        mClassesContents.clear();
+        //mClassesContents.clear();
 
         for (int i = 0; i < titles.length; i++) {
             FolderInfo folderInfo = new FolderInfo();

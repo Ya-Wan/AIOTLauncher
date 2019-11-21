@@ -3,7 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
+    <include layout="@layout/aiot_title_layout"/>
+
+    <!--<ImageView
         android:id="@+id/content_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,17 +14,18 @@
         android:paddingBottom="@dimen/all_app_new_padding_bottom"
         android:src="@drawable/aiot_title"/>
 
-    <include layout="@layout/lock_time_weather" />
+    <include layout="@layout/lock_time_weather"/>-->
 
     <LinearLayout
         android:id="@+id/aiot_view_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:gravity="center_horizontal"
         android:layout_alignParentBottom="true"
-        android:paddingStart="@dimen/aiot_container_padding"
-        android:paddingEnd="@dimen/aiot_container_padding"
-        android:layout_below="@+id/weather_clock_container"
-        android:orientation="vertical" />
+        android:layout_marginTop="@dimen/aiot_container_margin_top"
+        android:layout_below="@id/aiot_title"
+        android:orientation="horizontal" >
+    </LinearLayout>
 
 </RelativeLayout>

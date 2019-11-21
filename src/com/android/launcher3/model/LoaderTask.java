@@ -186,7 +186,7 @@ public class LoaderTask implements Runnable {
             loadAllApps();
 
             if (FeatureFlags.DISABLE_ALL_APPS) {
-                verifyApplications();
+                //verifyApplications();
             }
 
             TraceHelper.partitionSection(TAG, "step 2.2: Binding all apps");

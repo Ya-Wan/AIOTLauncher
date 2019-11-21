@@ -191,15 +191,15 @@ public static class UnInstall extends SystemShortcut {
 
             return view -> {
                 dismissTaskMenuView(activity);
-                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo, 0);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo, 1);
             };
         }
 
     }
 
-    public static class MoveToWork extends SystemShortcut {
-        public MoveToWork() {
-            super(R.drawable.ic_uninstall_no_shadow, R.string.move_work_drop_target_label);
+    public static class MoveToShopping extends SystemShortcut {
+        public MoveToShopping() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_shopping_drop_target_label);
         }
 
         @Override
@@ -208,7 +208,7 @@ public static class UnInstall extends SystemShortcut {
 
             return view -> {
                 dismissTaskMenuView(activity);
-                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo,  1);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo,  2);
             };
         }
 
@@ -225,15 +225,15 @@ public static class UnInstall extends SystemShortcut {
 
             return view -> {
                 dismissTaskMenuView(activity);
-                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo,  2);
+                ((Launcher)activity).notifyUpdate((com.android.launcher3.ShortcutInfo) itemInfo,  0);
             };
         }
 
     }
 
-    public static class MoveToLife extends SystemShortcut {
-        public MoveToLife() {
-            super(R.drawable.ic_uninstall_no_shadow, R.string.move_life_drop_target_label);
+    public static class MoveToNews extends SystemShortcut {
+        public MoveToNews() {
+            super(R.drawable.ic_uninstall_no_shadow, R.string.move_news_drop_target_label);
         }
 
         @Override

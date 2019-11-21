@@ -352,8 +352,8 @@ public class LauncherIcons implements AutoCloseable {
         mCanvas.setBitmap(null);
 
         //changed by y.wan for add gradient mask for icon start 2019/9/25
-        return bitmap;
-        //return addBorderToImage(bitmap, mIconBitmapSize);
+        //return bitmap;
+        return addBorderToImage(bitmap, mIconBitmapSize);
         //changed by y.wan for gradient mask for icon end 2019/9/25
     }
 
@@ -453,12 +453,17 @@ public class LauncherIcons implements AutoCloseable {
         int width = iconSize;//getBorderWidth();
         int height = iconSize;//getBorderHeight();
 
+        float rx = width / mRoundedRate;
+        float ry = height / mRoundedRate;
+
+        float clip = 0.7f;
+
         Bitmap output = Bitmap.createBitmap(width, height,
                 Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(output);
 
-        RectF outerRect = new RectF(0, 0, width, height);
+        RectF outerRect = new RectF( rx * clip, ry * clip, width -  rx * clip, height - ry * clip);
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
@@ -466,7 +471,7 @@ public class LauncherIcons implements AutoCloseable {
 
         paint.setShader(mLinearGradientClamp);
 
-        canvas.drawRoundRect(outerRect, width / mRoundedRate, height / mRoundedRate, paint);
+        canvas.drawRoundRect(outerRect, rx, ry, paint);
 
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
         int sw = src.getWidth();
@@ -502,7 +507,8 @@ public class LauncherIcons implements AutoCloseable {
                 c = pixel;
             }
         }
-        return softColor(c);
+        //return softColor(c);
+        return c;
     }
 
     /**

@@ -6,4 +6,5 @@ import android.widget.TextView;
 public interface IWeather {
 
     void updateWeather(ImageView weatherIv, TextView weatherCurrentTem, TextView weatherTemRange);
+    void updateWeather(TextView weatherTem);
 }

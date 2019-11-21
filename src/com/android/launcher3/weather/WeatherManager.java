@@ -13,6 +13,8 @@ import com.skyworth.framework.skysdk.ipc.SkyContext;
 import com.tianci.system.api.TCSystemService;
 import com.tianci.system.data.TCInfoSetData;
 
+import java.util.HashMap;
+
 import static com.tianci.system.define.TCEnvKey.SKY_SYSTEM_ENV_WEATHER;
 
 public class WeatherManager implements IWeather {
@@ -63,11 +65,47 @@ public class WeatherManager implements IWeather {
         weatherTemRange.setText(weatherTem);
     }
 
+    @Override
+    public void updateWeather(TextView weatherTem) {
+        if (weatherTem == null) return;
+
+        TCInfoSetData weatherData = (TCInfoSetData) tcSystemService.getSetData(SKY_SYSTEM_ENV_WEATHER);
+        Log.d(TAG, "updateWeather00000: " + weatherData);
+        String weather;
+
+        if (weatherData != null && !TextUtils.isEmpty(weatherData.getCurrent())) {
+            weather = weatherData.getCurrent();
+            Log.d(TAG, "updateWeather22222: " + weather);
+            SharedPreferences.Editor edit = mPrefs.edit();
+            edit.putString(WEATHER, weather);
+            edit.apply();
+        } else {
+            weather = mPrefs.getString(WEATHER, "");
+        }
+
+        Log.d(TAG, "updateWeather11111: " + weather);
+
+        if (TextUtils.isEmpty(weather)) return;
+
+        Log.d(TAG, "updateWeather: " + weather);
+
+        String[] split = weather.split(",");
+        String weatherInfo = split[0];
+        String weatherCity = split[1];
+        String weatherMinTem = split[2];
+        String weatherMaxTem = split[3];
+        //String tem = "  " + WeatherEnum.valueOf(weatherInfo).weather + weatherMinTem + " ~ " + weatherMaxTem + " ℃";
+        String tem = "  " + WeatherEnum.valueOf(weatherInfo).weather +
+                (Integer.valueOf(weatherMinTem) + Integer.valueOf(weatherMaxTem)) / 2 + " ℃";
+
+        weatherTem.setText(tem);
+    }
+
     private int manageWeatherIcon(String weatherIcon) {
 
         int weatherIconRes = R.drawable.weather_sunny;
 
-        switch (WeatherEnum.valueOf(weatherIcon)) {
+        switch (WeatherIconEnum.valueOf(weatherIcon)) {
             case CLOUDY:
                 weatherIconRes = R.drawable.weather_cloudy;
                 break;

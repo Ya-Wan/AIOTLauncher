@@ -31,6 +31,8 @@
     <string name="entertainment_folder_name">Entertainment</string>
     <string name="life_folder_name">Life</string>
     <string name="all_app_folder_name">More</string>
+    <string name="shopping_folder_name">Shopping</string>
+    <string name="news_folder_name">News</string>
     <!-- Displayed when user selects a shortcut for an app that was uninstalled [CHAR_LIMIT=none]-->
     <string name="activity_not_found">App isn\'t installed.</string>
     <!-- Displayed when user selects a shortcut for an app that is current not available [CHAR_LIMIT=none]-->
@@ -110,6 +112,8 @@
     <string name="move_entertainment_drop_target_label">Move To Entertainment</string>
     <string name="move_life_drop_target_label">Move To Life</string>
     <string name="move_more_drop_target_label">Move To More</string>
+    <string name="move_shopping_drop_target_label">Move To Shopping</string>
+    <string name="move_news_drop_target_label">Move To News</string>
 
     <!-- Permissions: -->
     <skip />
@@ -357,6 +361,9 @@
 
     <string name="aiot_device_open_num">"个开机"</string>
     <string name="aiot_air_quality">"空气质量 "</string>
+    <string name="aiot_title_text">"Intelligent habitat control center"</string>
+    <string name="aiot_tem_text">"Temperature"</string>
+    <string name="n_a">   N/A</string>
     
     <string-array name="edu_category">
         <item>com.netease.edu.study</item>

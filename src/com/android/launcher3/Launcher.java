@@ -151,7 +151,8 @@ import com.android.launcher3.widget.WidgetsFullSheet;
 import com.android.launcher3.widget.custom.CustomWidgetParser;
 import com.skyworth.aiotsdk.api.AIOTAPI;
 import com.skyworth.aiotsdk.api.AIOTConstant;
-import com.skyworth.aiotsdk.api.IInfoUpdateListener;
+import com.skyworth.aiotsdk.api.info.IInfoUpdateListener;
+import com.skyworth.aiotsdk.api.sdkevent.ISDKEventListener;
 import com.skyworth.aiotsdk.common.skin.SkinConstant;
 
 import org.json.JSONException;
@@ -163,6 +164,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -288,6 +290,16 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
     private WeatherManager weatherManager;
 
+    /**
+     * 房间弹框显示
+     */
+    public static final String SDK_EVENT_ROOM_DIALOG_SHOW = "SDK_EVENT_ROOM_DIALOG_SHOW";
+
+    /**
+     * 房间弹框不显示
+     */
+    public static final String SDK_EVENT_ROOM_DIALOG_DISMISS = "SDK_EVENT_ROOM_DIALOG_DISMISS";
+
     private final Handler mHandler = new Handler();
     private final Runnable mLogOnDelayedResume = this::logOnDelayedResume;
 
@@ -298,6 +310,18 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 mWorkspace.parseAiotData((String) o);
             } else if (TextUtils.equals(s, "MESSAGE_HOME_STATUS_CHANGE")) {
                 mWorkspace.parseAiotData((String) o);
+            }
+        }
+    };
+
+    private ISDKEventListener eventListener = new ISDKEventListener() {
+
+        @Override
+        public void onEvent(String s, Map<String, Object> map) {
+            if (TextUtils.equals(s, SDK_EVENT_ROOM_DIALOG_SHOW)) {
+                mWorkspace.showOrHideWeatherContainer(false);
+            } else if (TextUtils.equals(s, SDK_EVENT_ROOM_DIALOG_DISMISS)) {
+                mWorkspace.showOrHideWeatherContainer(true);
             }
         }
     };
@@ -407,6 +431,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         mRotationHelper.initialize();
 
         AIOTAPI.getInstance().regInfoUpdateListener(l);
+        AIOTAPI.getInstance().regSDKEventListener(eventListener);
 
         TraceHelper.endSection("Launcher-onCreate");
 
@@ -1405,6 +1430,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         getContentResolver().unregisterContentObserver(themeUpdateContentObserver);
         mWorkspace.removeFolderListeners();
         AIOTAPI.getInstance().unRegInfoUpdateListener(l);
+        AIOTAPI.getInstance().unRegSDKEventListener(eventListener);
         UiFactory.setOnTouchControllersChangedListener(this, null);
 
         // Stop callbacks from LauncherModel
@@ -2298,6 +2324,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
         InstallShortcutReceiver.disableAndFlushInstallQueue(
                 InstallShortcutReceiver.FLAG_LOADER_RUNNING, this);
+
+        mWorkspace.addAIoTContentToFirstPage();
 
         TraceHelper.endSection("finishBindingItems");
     }

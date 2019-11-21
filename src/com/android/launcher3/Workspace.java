@@ -34,11 +34,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -259,10 +261,15 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
+    /*private ImageView contentTitle;
     private RelativeLayout weatherClockContainer;
     private ImageView weatherIv;
     private TextView weatherCurrentTem, weatherTemRange;
-    private TextClock timeTextClock;
+    private TextClock timeTextClock;*/
+
+    private LinearLayout aiotTitle;
+    private TextView weatherTem;
+    private TextClock timeTC, dateTC;
 
     private WeatherManager weatherManager;
 
@@ -503,7 +510,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     public void bindAndInitFirstWorkspaceScreen(View qsb) {
         // Add the first page
         CellLayout firstPage = insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, 0);
-        addAIoTContentToFirstPage(firstPage);
+        //addAIoTContentToFirstPage(firstPage);
 
         if (!FeatureFlags.QSB_ON_FIRST_SCREEN) {
             return;
@@ -591,15 +598,30 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         return newScreen;
     }
 
-    private void addAIoTContentToFirstPage(CellLayout newScreen) {
+    public void addAIoTContentToFirstPage() {
+        CellLayout newScreen = mWorkspaceScreens.get(Workspace.FIRST_SCREEN_ID);
+        if (newScreen == null) return;
+
         RelativeLayout container = (RelativeLayout) mLauncher.getLayoutInflater().inflate(
                 R.layout.aiot_content_layout, null, false /* attachToRoot */);
 
+        /*contentTitle = container.findViewById(R.id.content_title);
         weatherClockContainer = container.findViewById(R.id.weather_clock_container);
         weatherIv = container.findViewById(R.id.iv_weather_icon);
         timeTextClock = container.findViewById(R.id.tv_lock_time);
         weatherCurrentTem = container.findViewById(R.id.tv_weather_current_tem);
-        weatherTemRange = container.findViewById(R.id.tv_weather_temp_range);
+        weatherTemRange = container.findViewById(R.id.tv_weather_temp_range);*/
+
+        aiotTitle = container.findViewById(R.id.aiot_title);
+        weatherTem = container.findViewById(R.id.weather_info_text);
+        timeTC = container.findViewById(R.id.time_tc);
+        dateTC = container.findViewById(R.id.date_tc);
+
+        //Typeface typeface = Typeface.createFromAsset(mLauncher.getAssets(), "fonts/avant_garde_book_th.ttf");
+
+       /* weatherTem.setTypeface(typeface);
+        timeTC.setTypeface(typeface);
+        dateTC.setTypeface(typeface);*/
 
         if (container.getParent() instanceof ViewGroup) {
             ViewGroup parent = (ViewGroup) container.getParent();
@@ -623,7 +645,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         if (weatherManager == null) {
             weatherManager = new WeatherManager(mLauncher);
         }
-        weatherManager.updateWeather(weatherIv, weatherCurrentTem, weatherTemRange);
+        //weatherManager.updateWeather(weatherIv, weatherCurrentTem, weatherTemRange);
+        weatherManager.updateWeather(weatherTem);
     }
 
     private void bindAIoTLayout(View container) {
@@ -632,7 +655,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         View aiotView = AIOTAPI.getInstance().getView(getResources().getDimensionPixelSize(R.dimen.aiot_container_width),
                 getResources().getDimensionPixelSize(R.dimen.aiot_container_height),
                 Utilities.getScreenWidth(mLauncher), Utilities.getScreenHeight(mLauncher), (float) Utilities.getScreenInch(mLauncher));
-
+        Log.d("bindAIoTLayout", "bindAIoTLayout: " + Log.getStackTraceString(new Throwable()));
         aiotContainer.addView(aiotView);
     }
 
@@ -3608,9 +3631,23 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     }
 
     public void updateWeatherContainerTheme() {
+        /*if (weatherClockContainer != null) {
+            weatherClockContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.weather_time_bg_dark) :
+                    mLauncher.getDrawable(R.drawable.weather_time_bg));
+        }*/
+    }
+
+    public void showOrHideWeatherContainer(boolean show) {
+        /*if (contentTitle != null) {
+            contentTitle.setVisibility(show ? VISIBLE : INVISIBLE);
+        }
+
         if (weatherClockContainer != null) {
-            weatherClockContainer.setBackground(Utilities.isDarkTheme(mLauncher) ? mLauncher.getDrawable(R.drawable.allapps_classes_bg_dark) :
-                    mLauncher.getDrawable(R.drawable.allapps_classes_bg));
+            weatherClockContainer.setVisibility(show ? VISIBLE : INVISIBLE);
+        }*/
+
+        if (aiotTitle != null) {
+            aiotTitle.setVisibility(show ? VISIBLE : INVISIBLE);
         }
     }
 

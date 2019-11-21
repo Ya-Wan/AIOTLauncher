@@ -24,13 +24,16 @@
     <string name="work_folder_name" msgid="3753320833950115786">"办公"</string>
     <string name="education_folder_name">教育</string>
     <string name="entertainment_folder_name">娱乐</string>
-    <string name="life_folder_name">生活</string>
+    <string name="shopping_folder_name">购物</string>
+    <string name="news_folder_name">新闻</string>
     <string name="all_app_folder_name">更多</string>
-    <string name="move_edu_drop_target_label">移动到教育</string>
-    <string name="move_work_drop_target_label">移动到办公</string>
     <string name="move_entertainment_drop_target_label">移动到娱乐</string>
     <string name="move_life_drop_target_label">移动到生活</string>
+    <string name="move_shopping_drop_target_label">移动到购物</string>
+    <string name="move_news_drop_target_label">移动到新闻</string>
     <string name="move_more_drop_target_label">移动到更多</string>
+    <string name="move_edu_drop_target_label">移动到教育</string>
+    <string name="move_work_drop_target_label">移动到办公</string>
     <string name="activity_not_found" msgid="8071924732094499514">"未安装该应用。"</string>
     <string name="activity_not_available" msgid="7456344436509528827">"应用不可用"</string>
     <string name="safemode_shortcut_error" msgid="9160126848219158407">"安全模式下不允许使用下载的此应用"</string>
@@ -156,6 +159,8 @@
 
     <string name="aiot_device_open_num">"个开机"</string>
     <string name="aiot_air_quality">"空气质量 "</string>
+    <string name="aiot_title_text">"智能人居控制中心"</string>
+    <string name="aiot_tem_text">"温度"</string>
 
 
 </resources>

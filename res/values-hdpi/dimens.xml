@@ -242,8 +242,8 @@
     <dimen name="aiot_layout_status_padding_top">60dp</dimen>
     <dimen name="aiot_layout_status_icon_padding_start">14dp</dimen>
     <dimen name="aiot_layout_status_padding">16dp</dimen>
-    <!--<dimen name="aiot_container_width">633dp</dimen>
-    <dimen name="aiot_container_height">750dp</dimen>-->
+    <dimen name="aiot_container_width">633dp</dimen>
+    <dimen name="aiot_container_height">966dp</dimen>
     <dimen name="aiot_refrigerator_layout_height">166dp</dimen>
     <dimen name="aiot_refrigerator_temp_seekbar_width">400dp</dimen>
     <dimen name="aiot_refrigerator_text_padding">35dp</dimen>
@@ -258,7 +258,7 @@
     <dimen name="all_app_new_padding_top">40dp</dimen>
     <dimen name="all_app_new_padding_bottom">43dp</dimen>
 
-
+    <dimen name="weather_clock_container_padding_top">53dp</dimen>
     <dimen name="weather_clock_container_height">113dp</dimen>
     <dimen name="weather_clock_margin_start_end">43dp</dimen>
     <dimen name="weather_clock_padding_start_end">27dp</dimen>
@@ -270,18 +270,21 @@
     <dimen name="current_temp_text_size">29sp</dimen>
     <dimen name="temp_text_size">16sp</dimen>
 
-
+    <dimen name="time_weather_info_text">24sp</dimen>
+    <dimen name="time_weather_info_margin">8dp</dimen>
+    <dimen name="aiot_container_margin_top">15dp</dimen>
+    <dimen name="aiot_title_text_size">47sp</dimen>
     <dimen name="header_text_size">19sp</dimen>
     <dimen name="predict_title_text_size">24sp</dimen>
-    <dimen name="custom_all_apps_text_size">20sp</dimen>
+    <dimen name="custom_all_apps_text_size">18sp</dimen>
     <dimen name="recent_app_margin_start">43dp</dimen>
     <dimen name="recent_app_margin_top">14dp</dimen>
     <dimen name="recent_app_content_margin_top">15dp</dimen>
     <dimen name="custom_all_apps_padding_top">43dp</dimen>
     <dimen name="custom_all_apps_margin_start_end">26dp</dimen>
     <dimen name="title_index_margin">38dp</dimen>
-    <dimen name="custom_all_apps_padding">12dp</dimen>
-    <dimen name="custom_all_apps_gap">29dp</dimen>
-    <dimen name="custom_all_apps_item_height">160dp</dimen>
+    <dimen name="custom_all_apps_padding">20dp</dimen>
+    <dimen name="custom_all_apps_gap">23dp</dimen>
+    <dimen name="custom_all_apps_item_height">163dp</dimen>
     <dimen name="recent_app_height">198dp</dimen>
 </resources>

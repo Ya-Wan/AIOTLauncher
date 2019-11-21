@@ -78,83 +78,6 @@
     <folder
         launcher:container="-101"
         launcher:screen="0"
-        launcher:x="0"
-        launcher:y="0"
-        launcher:title="@string/education_folder_name" >
-
-        <favorite
-            launcher:packageName="com.xiaobanlong.main"
-            launcher:className="com.xiaobanlong.main.SplashActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="0"
-            launcher:y="0" />
-        <favorite
-            launcher:packageName="com.bruce.learning"
-            launcher:className="com.bruce.learning.SplashActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="1"
-            launcher:y="0" />
-        <favorite
-            launcher:packageName="com.shandong.english.xqd.threegradeenup"
-            launcher:className="com.shandong.english.threegradeenup.ym.SplashActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="2"
-            launcher:y="0" />
-        <favorite
-            launcher:packageName="org.vv.tang300"
-            launcher:className="org.vv.tang300.StartActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="0"
-            launcher:y="1" />
-
-    </folder>
-
-    <folder
-        launcher:container="-101"
-        launcher:screen="1"
-        launcher:x="1"
-        launcher:y="0"
-        launcher:title="@string/work_folder_name" >
-
-        <favorite
-            launcher:packageName="com.estrongs.android.pop"
-            launcher:className="com.estrongs.android.pop.app.openscreenad.NewSplashActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="0"
-            launcher:y="0" />
-
-        <favorite
-            launcher:packageName="cn.wps.note"
-            launcher:className="cn.wps.note.StartActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="1"
-            launcher:y="0" />
-        <favorite
-            launcher:packageName="cn.readpad.whiteboard"
-            launcher:className="cn.readpad.whiteboard.WelcomeActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="2"
-            launcher:y="0" />
-        <favorite
-            launcher:packageName="com.iflyrec.tjapp"
-            launcher:className="com.iflyrec.tjapp.bl.welcome.view.WelcomeActivity"
-            launcher:spanX="1"
-            launcher:spanY="1"
-            launcher:x="0"
-            launcher:y="1" />
-
-    </folder>
-
-    <folder
-        launcher:container="-101"
-        launcher:screen="2"
         launcher:x="2"
         launcher:y="0"
         launcher:title="@string/entertainment_folder_name" >
@@ -222,37 +145,114 @@
 
     <folder
         launcher:container="-101"
-        launcher:screen="3"
-        launcher:x="3"
+        launcher:screen="1"
+        launcher:x="0"
         launcher:y="0"
-        launcher:title="@string/life_folder_name" >
+        launcher:title="@string/education_folder_name" >
 
         <favorite
-            launcher:packageName="com.skyworth.bluetoothtelephone"
-            launcher:className="com.skyworth.bluetoothtelephone.ui.activity.MainActivity"
+            launcher:packageName="com.xiaobanlong.main"
+            launcher:className="com.xiaobanlong.main.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.bruce.learning"
+            launcher:className="com.bruce.learning.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.shandong.english.fivegradeenup"
+            launcher:className="com.shandong.english.threegradeenup.ym.SplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="org.vv.tang300"
+            launcher:className="org.vv.tang300.StartActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="1" />
+
+    </folder>
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="2"
+        launcher:x="1"
+        launcher:y="0"
+        launcher:title="@string/shopping_folder_name" >
+
+        <favorite
+            launcher:packageName="com.taobao.taobao"
+            launcher:className="com.taobao.tao.welcome.Welcome"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"
             launcher:y="0" />
 
         <favorite
+            launcher:packageName="cn.amazon.mShop.android"
+            launcher:className="com.amazon.mShop.home.HomeActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="1"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="com.suning.mobile.ebuy"
+            launcher:className="com.suning.mobile.ebuy.host.InitialActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="2"
+            launcher:y="0" />
+        <favorite
+            launcher:packageName="ctrip.android.view"
+            launcher:className="ctrip.business.splash.CtripSplashActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="1" />
+
+    </folder>
+
+    <folder
+        launcher:container="-101"
+        launcher:screen="3"
+        launcher:x="2"
+        launcher:y="0"
+        launcher:title="@string/news_folder_name" >
+
+        <favorite
             launcher:packageName="com.netease.newsreader.activity"
             launcher:className="com.netease.nr.biz.ad.newAd.AdActivity"
+            launcher:spanX="1"
+            launcher:spanY="1"
+            launcher:x="0"
+            launcher:y="0" />
+
+        <favorite
+            launcher:packageName="com.tencent.news"
+            launcher:className="com.tencent.news.activity.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="1"
             launcher:y="0" />
 
         <favorite
-            launcher:packageName="com.videogo"
-            launcher:className="com.videogo.login.LoadingActivity"
+            launcher:packageName="com.peopledailychina.activity"
+            launcher:className="com.peopledailychina.activity.activity.WelcomeActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="2"
             launcher:y="0" />
         <favorite
-            launcher:packageName="com.Qunar"
-            launcher:className="com.mqunar.splash.SplashActivity"
+            launcher:packageName="cn.xuexi.android"
+            launcher:className="com.alibaba.android.rimet.biz.SplashActivity"
             launcher:spanX="1"
             launcher:spanY="1"
             launcher:x="0"

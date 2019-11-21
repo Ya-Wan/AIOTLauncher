@@ -44,10 +44,13 @@
     <color name="refrigerator_mode_primary_color">#FF0DA5F3</color>
     <color name="launcher_primary_color">#FF282828</color>
 
-    <color name="all_apps_bg_color">#33FFFFFF</color>
+    <color name="all_apps_bg_color">#0DFFFFFF</color>
     <color name="weather_time_bg_color">#1AFFFFFF</color>
 
-    <color name="all_apps_bg_color_dark">#1A000000</color>
+    <color name="predict_app_container_bg_color">#33FFFFFF</color>
+    <color name="predict_app_container_bg_color_dark">#33000000</color>
+
+    <color name="all_apps_bg_color_dark">#0D000000</color>
     <color name="weather_time_bg_color_dark">#1A000000</color>
 
     <color name="deep_shortcuts_container_color">#E6FFFFFF</color>

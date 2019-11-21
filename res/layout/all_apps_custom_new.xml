@@ -10,18 +10,32 @@
     android:paddingTop="@dimen/custom_all_apps_padding_top"
     android:saveEnabled="false">
 
-    <android.support.v7.widget.RecyclerView
+    <!--<android.support.v7.widget.RecyclerView
         android:id="@+id/all_apps_classes_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="5dp"
-        android:layout_weight="8" />
+        android:layout_weight="9" />
 
 
     <include
         layout="@layout/all_apps_predict_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3" />
+        android:layout_weight="3" />-->
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/all_apps_classes_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_weight="1" />
+
+
+    <include
+        layout="@layout/all_apps_predict_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0" />
 
 </com.android.launcher3.allapps.classes.AllAppsCustomContainerView>
